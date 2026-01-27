@@ -1,6 +1,6 @@
 ---
 meta_doctrine: AAOS_META_DOCTRINE
-version: v0.1.6
+version: v0.1.11
 type: doctrine-rule
 status: canonical
 description: >
@@ -13,41 +13,44 @@ Agentic AI OS – Meta, Doctrine, Swarm(군체), Blueprint Hierarchy
 
 ## AAOS Canon Declaration
 
-AAOS_META_CANON/README.md 는 AAOS의 Canonical Text(성문)이다.
+`04_Agentic_AI_OS/README.md` 는 AAOS의 Canonical Text(성문)이다.
 모든 META Doctrine(METADoctrine.md), Blueprint, Skill, 군체(Swarm) 구조는 본 Canon에 종속되며,
 Canon을 위반한 구조는 Non-Canonical로 분류된다.
 
 ## Institutional Order (정정된 최상위 기관 순서)
 
 1. Canon (`04_Agentic_AI_OS/README.md`)
-2. Record Archive (`04_Agentic_AI_OS/01_AAOS-Record_Archive/`)
-3. Immune System + Deliberation Chamber (`04_Agentic_AI_OS/02_AAOS-Immune_system/`, `04_Agentic_AI_OS/03_AAOS-Deliberation_Chamber/`)
-4. Swarm(군체) 계층 (`04_Agentic_AI_OS/04_AAOS-Swarm/`)
+2. Record Archive (`04_Agentic_AI_OS/01_Nucleus/Record_Archive/`)
+3. Immune System + Deliberation Chamber (`04_Agentic_AI_OS/01_Nucleus/Immune_system/`, `04_Agentic_AI_OS/01_Nucleus/Deliberation_Chamber/`)
+4. Swarm(군체) 계층 (`04_Agentic_AI_OS/02_Swarm/`)
+5. Manifestation(현현/접속) 계층 (`04_Agentic_AI_OS/03_Manifestation/`)
 
 ### Upper-Institution Change Gate (군체(Swarm) 이상 + META)
 
 다음 대상은 “상위기관(군체(Swarm) 이상)”으로 취급하며, 변경은 더 강한 정통성 게이트를 통과해야 한다.
 
 - `04_Agentic_AI_OS/METADoctrine.md` (META Doctrine; formerly RULE.md)
-  - `01_AAOS-Record_Archive/` (기관 DNA)
-  - `02_AAOS-Immune_system/` (기관 DNA)
-  - `03_AAOS-Deliberation_Chamber/` (기관 DNA)
-  - `04_AAOS-Swarm/` 루트 컨테이너 DNA (`04_AAOS-Swarm/DNA.md` 또는 `DNA_BLUEPRINT.md`)
+  - `01_Nucleus/Record_Archive/` (기관 DNA)
+  - `01_Nucleus/Immune_system/` (기관 DNA)
+  - `01_Nucleus/Deliberation_Chamber/` (기관 DNA)
+  - `02_Swarm/` 루트 컨테이너 DNA (`02_Swarm/DNA.md` 또는 `DNA_BLUEPRINT.md`)
+  - `03_Manifestation/` 루트 컨테이너 DNA (`03_Manifestation/DNA.md` 또는 `DNA_BLUEPRINT.md`)
 
 상위기관 변경은 아래를 모두 만족할 때만 “정식(승격/공표)”로 인정된다.
 
 1. **Deliberation Chamber 산출물**: `multi-agent-consensus`(플래그십 Agent 2종 이상 verdict/rationale 포함)
 2. **Record Archive 증빙 고정**: 합의/근거/스냅샷/해시/인덱스가 재현 가능하게 보존됨
-3. **META_AUDIT_LOG 기록**: 변경 사유/버전 변경/증빙 참조를 `02_AAOS-Immune_system/META_AUDIT_LOG.md`에 기록
+3. **META_AUDIT_LOG 기록**: 변경 사유/버전 변경/증빙 참조를 `01_Nucleus/Immune_system/META_AUDIT_LOG.md`에 기록
 4. **Canon Guardian 서명(정통성 기록)**: 상시 운영 개입이 아니라 “정식 승격 서명자”로서의 승인
+5. **Inquisitor verdict + AUDIT_LOG 기록**: 승인/거부/보류 결과와 근거가 `01_Nucleus/Immune_system/AUDIT_LOG.md`(해시 체인)에 고정됨
 
 서명이 없는 경우, 변경안은 `DNA_BLUEPRINT.md`(또는 draft 상태)로만 존재할 수 있으며 정식 텍스트로 승격될 수 없다.
 
 ---
 ## 0. AAOS META Doctrine (Derived from AAOS Canon)
 
-AAOS_META_DNA/METADoctrine.md  ← META Doctrine (Interpretation of the Canon)
-**META Doctrine Version: v0.1.6**
+`04_Agentic_AI_OS/METADoctrine.md`  ← META Doctrine (Interpretation of the Canon)
+**META Doctrine Version: v0.1.11**
 
 > Canon을 현실 시스템에서 집행 가능하도록 번역하는 최상위 교리 규칙
 
@@ -70,49 +73,77 @@ AAOS META Doctrine은 AAOS Canon에 선언된 원리를
 - **Audit Log 무결성 보장** [v0.1.0]
 - **Multi-Agent Consensus 요건 정의** [v0.1.0]
 
+### Draft/Planning Workspace Protocol [v0.1.7]
+
+AAOS는 Canonical 텍스트를 직접 흔들지 않고도 설계/실험을 진행하기 위해, “Draft/Planning 레이어”를 허용한다.  
+단, Draft는 정통 텍스트가 아니며 Canonical 변경의 “입력 후보”로만 취급된다.
+
+Draft는 **집행 권한을 갖지 않는다**. Draft의 내용은 승인/승격 전까지 어떠한 Rule/DNA/Doctrine의 근거로 강제되지 않으며, 집행/차단/승인 판단은 Immune System/Inquisitor 및 상위 변경 게이트를 따른다.
+
+#### Draft Types
+
+- **Planning Notes**: 의도/경계/대안/질문/리스크를 다루는 초안 문서
+- **DNA Blueprint (`DNA_BLUEPRINT.md`)**: 구조의 생성/성장/해체 규칙을 포함하는 승격 대기 문서
+
+#### Normative Reference Rule
+
+- Canonical 문서는 Draft/Planning 문서를 **규범 참조(normative reference)** 로 삼지 않는다.
+- Draft/Planning 문서는 Canonical 문서를 링크로 고정하여 기준점을 명확히 한다.
+- Canonical 문서에서 Draft를 링크해야 한다면, **informative reference(참고 링크)** 로만 허용하며 “비정통/비집행”임을 명시한다.
+
+#### Change Packet (Minimum)
+
+Canonical 변경(특히 상위기관/Swarm DNA)은 최소 다음을 포함하는 Change Packet으로 제출한다.
+
+1. 변경 제안 본문(Draft/Blueprint)
+2. 승인 요청 패킷(`permission-request` 또는 `blueprint-judgment`)
+3. 필요 시 `multi-agent-consensus` 산출물(Deliberation)
+4. Record Archive 증빙(스냅샷/해시/인덱스)
+5. Inquisitor verdict 및 `AUDIT_LOG.md` 기록(해시 체인; 승인/거부/보류 결과와 근거)
+6. META 수준 변경일 경우 `META_AUDIT_LOG.md` 기록(버전/사유/증빙 링크)
+7. `time_bound.expires` 및 Natural Dissolution 절차
+
+#### Change Packet (Where / Templates)
+
+- Draft change packets (planning): `00_Planning/change_packets/`
+- Deliberation packet template (Record Archive): `01_Nucleus/Record_Archive/templates/DELIBERATION_PACKET_TEMPLATE.md`
+- Immune templates:
+  - `01_Nucleus/Immune_system/templates/DNA-BLUEPRINT-TEMPLATE.md`
+  - `01_Nucleus/Immune_system/templates/PERMISSION-REQUEST-TEMPLATE.md`
+
+#### Draft Natural Dissolution
+
+Draft는 무기한 유지되지 않는다. 만료 시 요약을 남기고(필요 시 Record Archive로 이관), 잔여 초안은 자연소멸 절차로 정리한다.
+
+기본 만료(권장): Planning Notes/DNA Blueprint 초안은 생성 시점 기준 **30일**을 기본 TTL로 두며, `time_bound.expires`로 연장할 수 있다.
+
 ### 계층 구조
 
 ```
 04_Agentic_AI_OS/
+├── 00_Planning/                   # Draft/Planning workspace (non-canonical; 실행/집행 권한 없음)
 ├── README.md                      # AAOS Canon (성문)
 ├── METADoctrine.md               # META Doctrine (본 문서; formerly RULE.md)
-├── 01_AAOS-Record_Archive/         # 기록 보존 기관 (Archive)
-│   ├── DNA_BLUEPRINT.md
-│   └── README.md
-├── 02_AAOS-Immune_system/          # 면역 체계 계층 (심판/집행)
-│   ├── DNA.md                      # Immune System 정식 DNA (승격된 DNA)
-│   ├── AAOS_DNA_DOCTRINE_RULE.md   # 핵심 교리 규칙 (v0.3.1)
-│   ├── AUDIT_LOG.md                # 판정 감사 로그 (해시 체인)
-│   ├── META_AUDIT_LOG.md           # META 수준 변경 로그
-│   ├── templates/
-│   │   ├── DNA-BLUEPRINT-TEMPLATE.md
-│   │   └── PERMISSION-REQUEST-TEMPLATE.md
-│   └── SWARM_INQUISITOR_SKILL/
-│       ├── blueprint-judgment/
-│       ├── permission-judgment/
-│       └── _shared/
-│           ├── yaml_validator.py
-│           ├── auto_inquisitor.py
-│           ├── dissolution_monitor.py
-│           └── audit.py
-├── 03_AAOS-Deliberation_Chamber/   # 숙의/합의 기관 (심판 입력 정리)
-│   ├── DNA_BLUEPRINT.md
-│   └── README.md
-└── 04_AAOS-Swarm/                  # 실행/협업 계층
+├── 01_Nucleus/                   # 기관 레이어 (Validation Engine; Non-Execution)
+│   ├── Record_Archive/            # 기록 보존 기관 (Archive)
+│   ├── Immune_system/             # 면역 체계 (심판/집행)
+│   └── Deliberation_Chamber/      # 숙의/합의 기관 (심판 입력 정리)
+├── 02_Swarm/                      # 군체(Swarm) 계층 (사고/행동양식; Non-Execution)
+└── 03_Manifestation/         # 현현/접속 계층 (실행 바인딩; Non-Cognition)
 ```
 
 ---
 
 ## 1. AAOS Immune System
 
-`02_AAOS-Immune_system/`
+`01_Nucleus/Immune_system/`
 
 AAOS 구조 전체의 자기보존·정화·안정성 계층이다.
 과증식, 컨텍스트 오염, 비정상 구조를 감지하고 정리한다.
 
 ### 1.1. AAOS DNA Doctrine – RULE (v0.3.1)
 
-`02_AAOS-Immune_system/AAOS_DNA_DOCTRINE_RULE.md`
+`01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md`
 
 AAOS에서 모든 DNA Blueprint와 군체(Swarm) 구조가 반드시 따라야 하는 교리 규칙을 정의한다.
 
@@ -146,7 +177,7 @@ AAOS에서 모든 DNA Blueprint와 군체(Swarm) 구조가 반드시 따라야 �
 - 해당 시점에서 가장 발전된 능력을 갖춘 AI Agent
 - 서로 다른 조직/모델 계열에서 2종 이상
 
-플래그십 Agent의 “명단”은 고정하지 않으며, 선정/갱신 기록은 `02_AAOS-Immune_system/META_AUDIT_LOG.md`에 남긴다.
+플래그십 Agent의 “명단”은 고정하지 않으며, 선정/갱신 기록은 `01_Nucleus/Immune_system/META_AUDIT_LOG.md`에 남긴다.
 
 #### 합의 절차
 
@@ -175,13 +206,13 @@ META_AUDIT_LOG.md에 기록
 
 #### 조항 1) Immune System DNA 업데이트 승인 요건
 
-**면역체계의 DNA(`02_AAOS-Immune_system/DNA.md`)는 아래 요건을 모두 만족할 때만 업데이트 가능하다.**
+**면역체계의 DNA(`01_Nucleus/Immune_system/DNA.md`)는 아래 요건을 모두 만족할 때만 업데이트 가능하다.**
 
 1. **플래그십 에이전트 2종 이상 동의** (서로 다른 조직/모델 계열)
 2. **Canon Guardian(인간)의 최종 승인**
-3. 위 1~2의 근거/증빙을 `02_AAOS-Immune_system/META_AUDIT_LOG.md`에 기록 (버전 변경 포함)
+3. 위 1~2의 근거/증빙을 `01_Nucleus/Immune_system/META_AUDIT_LOG.md`에 기록 (버전 변경 포함)
 
-증빙 형식(권장): `02_AAOS-Immune_system/AAOS_DNA_DOCTRINE_RULE.md`의 `multi-agent-consensus` 기록 스키마를 사용한다.
+증빙 형식(권장): `01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md`의 `multi-agent-consensus` 기록 스키마를 사용한다.
 
 > Canon §4(자기보존)의 “상시 외부 관리” 원칙과의 긴장을 줄이기 위해, 인간 승인 요건은 **운영의 상시 개입**이 아니라 **정식 DNA 승격/버전 업데이트의 서명(정통성 기록)** 으로 취급한다.
 > 인간 승인이 없으면 변경안은 `DNA_BLUEPRINT.md` 상태로만 존재할 수 있으며, 정식 DNA로 승격될 수 없다.
@@ -197,7 +228,7 @@ META_AUDIT_LOG.md에 기록
 
 ### 1.3. AAOS Swarm Inquisitor – SKILL
 
-`02_AAOS-Immune_system/SWARM_INQUISITOR_SKILL/`
+`01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/`
 
 AAOS 내부에서 정통성·권한·Blueprint 적합성을 심판하는 Skill 집합이다.
 
@@ -236,18 +267,26 @@ Agent Preflight Checklist:
 
 ### 1.4. Auto-Enforcement 도구 [신규 v0.2.0]
 
-| 스크립트 | 용도 |
-|----------|------|
-| `yaml_validator.py` | 실제 YAML 파싱, 빈 값 검증 |
-| `auto_inquisitor.py` | Git pre-commit hook, Agent wrapper, 자동 스캔 |
-| `dissolution_monitor.py` | 자원 상한 감시, Natural Dissolution 실행 |
-| `audit.py` | 해시 체인 무결성 검증 |
+다음 도구는 AAOS Immune System의 Inquisitor Core에 포함되며, 실제 파일 위치는 아래와 같다.
+
+| 도구 | 파일 | 용도 |
+|------|------|------|
+| `yaml_validator.py` | `01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/yaml_validator.py` | YAML 파싱/스키마 검증(빈 값 불허 등) |
+| `auto_inquisitor.py` | `01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py` | Git hook 생성/디렉토리 스캔/프리플라이트 |
+| `dissolution_monitor.py` | `01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/dissolution_monitor.py` | TTL/자원 상한 감시 + Natural Dissolution |
+| `audit.py` | `01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/audit.py` | 해시 체인 무결성 검증/append |
+
+주요 CLI(현행):
+- `python3 01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --gen-hook 04_Agentic_AI_OS`
+- `python3 01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --scan 04_Agentic_AI_OS --format md`
+- `python3 01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --preflight 04_Agentic_AI_OS`
+- `python3 01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/audit.py verify 01_Nucleus/Immune_system/AUDIT_LOG.md`
 
 ---
 
 ## 2. AAOS 군체(Swarm)
 
-`04_AAOS-Swarm/`
+`02_Swarm/`
 
 AAOS 상에서 실제 Agent 협업 구조와 실행 환경이 발생하는 계층이다.
 모든 군체(Swarm) 구조는 상위 Immune System과 Inquisitor의 감시를 받는다.
@@ -256,33 +295,35 @@ AAOS 상에서 실제 Agent 협업 구조와 실행 환경이 발생하는 계�
 
 ### 조항 2) 군체(Swarm) DNA 업데이트 승인 요건
 
-**군체(Swarm)의 DNA(`04_AAOS-Swarm/**/DNA.md`)는 면역체계의 심판자(Inquisitor: `02_AAOS-Immune_system/SWARM_INQUISITOR_SKILL/`)에게 승인 요청을 제출하고, 승인(심판 결과)이 떨어졌을 때만 업데이트 가능하다.**
+**군체(Swarm)의 DNA(`02_Swarm/**/DNA.md`)는 면역체계의 심판자(Inquisitor: `01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/`)에게 승인 요청을 제출하고, 승인(심판 결과)이 떨어졌을 때만 업데이트 가능하다.**
 
-- 승인 요청은 `02_AAOS-Immune_system/SWARM_INQUISITOR_SKILL/`의 `blueprint-judgment` 또는 `permission-judgment` 절차로 수행한다.
-- 승인/거부 결과 및 근거는 `02_AAOS-Immune_system/AUDIT_LOG.md`(해시 체인)에 기록한다.
+- 승인 요청은 `01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/`의 `blueprint-judgment` 또는 `permission-judgment` 절차로 수행한다.
+- 승인/거부 결과 및 근거는 `01_Nucleus/Immune_system/AUDIT_LOG.md`(해시 체인)에 기록한다.
 - 거부/보류 시 기본 프로토콜:
   - `DNA.md`는 변경 전 상태를 유지한다
   - 변경안은 `DNA_BLUEPRINT.md`로 격리한다
   - `time_bound.expires` 내에 재심이 없으면 변경안은 자연소멸 절차로 정리한다
 
 추가 규칙(상위기관):
-- `04_AAOS-Swarm/DNA.md`(루트 컨테이너) 변경은 “Upper-Institution Change Gate”를 추가로 적용한다.
+- `02_Swarm/DNA.md`(루트 컨테이너) 변경은 “Upper-Institution Change Gate”를 추가로 적용한다.
 
 ### 2.1. AAOS-COF
 
 (Context Orchestrated Filesystem)
 
-AAOS_SWARM/AAOS_COF/
 파일 기반 Context 작업공간을 표준화하는 군체(Swarm) 구조이다.
 
-#### 2.1.1-0. COF DNA Blueprint - pre-RULE
-AAOS_SWARM/AAOS_COF/DNA_BLUEPRINT.md
+#### 2.1.1-0. COF 컨테이너(Blueprint)
+
+- 컨테이너(버전 보관): `02_Swarm/01_context-orchestrated-filesystem/`
+  - 컨테이너 Blueprint: `02_Swarm/01_context-orchestrated-filesystem/DNA_BLUEPRINT.md`
 
 COF 구조의
 생성 조건, 성장 규칙, 종료 조건, 자원 상한, Natural Dissolution 절차를 정의한다.
 
-#### 2.1.1-1. COF DNA - RULE
-AAOS_SWARM/AAOS_COF/DNA.md
+#### 2.1.1-1. COF 최신 정식 DNA (예시)
+
+- `02_Swarm/01_context-orchestrated-filesystem/COF v0.1.3/DNA.md`
 
 COF 내부 실제 노드 구조, Rule Genome, Skill Genome, Lifecycle Genome을 기술한다.
 
@@ -292,38 +333,36 @@ COF 내부 실제 노드 구조, Rule Genome, Skill Genome, Lifecycle Genome을 
 
 (Context Orchestrated Ontology)
 
-AAOS_SWARM/AAOS_COO/
 온톨로지 기반 Context·Knowledge Graph 구조를 표준화하는 군체(Swarm) 계층이다.
 
 #### 2.2.1-0. COO DNA Blueprint - pre-RULE
-AAOS_SWARM/AAOS_COO/DNA_BLUEPRINT.md
+- 스캐폴드(draft): `02_Swarm/02_context-orchestrated-ontology/DNA_BLUEPRINT.md`
 
 COO 구조의
 개념 스키마 생성, 관계 확장 규칙, 메모리 보존 정책, 자연소멸 조건을 정의한다.
 
-#### 2.2.1-1. COO DNA - RULE
-AAOS_SWARM/AAOS_COO/DNA.md
+#### 2.2.1-1. COO 정식 DNA
 
-COO 내부
-Ontology Schema, Semantic Index, Context Query Rule, Lifecycle Genome을 기술한다.
+- `DNA.md`는 아직 미존재(승격 전).
+- 승격 시 Inquisitor 승인 + Audit Log 고정 후 `DNA.md`로 승격한다.
 
 ---
 
 ## 3. Deliberation Chamber
 
-`03_AAOS-Deliberation_Chamber/`
+`01_Nucleus/Deliberation_Chamber/`
 
 Deliberation Chamber는 Multi-Agent 합의의 논점/근거/증빙을 구조화하는 기관이다.
 집행/차단 권한은 없으며, Immune System/Inquisitor의 판정 입력을 정리하고 Record Archive로 증빙을 이관한다.
 
 참조:
-- `03_AAOS-Deliberation_Chamber/DNA_BLUEPRINT.md`
+- `01_Nucleus/Deliberation_Chamber/DNA_BLUEPRINT.md`
 
 ---
 
 ## 4. Record Archive System
 
-`01_AAOS-Record_Archive/`
+`01_Nucleus/Record_Archive/`
 
 AAOS에서 감사/합의/승인/해체 기록을 장기 보존하는 아카이빙 기관이다.
 
@@ -331,11 +370,46 @@ AAOS에서 감사/합의/승인/해체 기록을 장기 보존하는 아카이�
 - Record Archive는 원칙적으로 Append-only이며, 충돌/불명확/권한 경계 감지 시 Immune System으로 귀속한다(homing_instinct).
 
 참조:
-- `01_AAOS-Record_Archive/DNA_BLUEPRINT.md`
+- `01_Nucleus/Record_Archive/DNA_BLUEPRINT.md`
 
 ---
 
-## 5. 전체 계층 요약 트리
+## 5. Manifestation Layer (현현/접속 계층)
+
+`03_Manifestation/`
+
+Swarm의 사고/행동양식을 외부 시스템에 실행 가능하게 바인딩하는 계층이다.
+Manifestation은 인지(Cognition) 권한 없이 순수 실행만 수행한다(Non-Cognition).
+
+참조(현행 draft):
+- `03_Manifestation/DNA_BLUEPRINT.md` (Execution Contract의 최소 형태)
+
+### 5.1. Manifestation Binding Types
+
+| 유형 | 설명 | 예시 |
+|------|------|------|
+| **Tool Binding** | 외부 도구/API 호출 인터페이스 | MCP Server, REST API |
+| **Environment Binding** | 실행 환경 연결 | Docker, Shell, IDE |
+| **Storage Binding** | 영속성 계층 연결 | DB, File System |
+| **Communication Binding** | 외부 채널 연결 | Webhook, Message Queue |
+
+### 5.2. Manifestation 최소 계약(권장 스키마)
+
+```yaml
+manifestation:
+  binding_type: [tool|environment|storage|communication]
+  target_system: string
+  permission_scope:
+    read: boolean
+    write: boolean
+    execute: boolean
+  audit_trail: required
+  fallback_behavior: [fail-safe|fail-open|escalate]
+```
+
+---
+
+## 6. 전체 계층 요약 트리
 
 본 META Doctrine(METADoctrine.md) 문서는 Canon에 선언된 원리를
 Doctrine 형태로 집행 가능하게 정의하는 교리 규칙이다.
@@ -351,7 +425,12 @@ Doctrine 형태로 집행 가능하게 정의하는 교리 규칙이다.
 | v0.1.0 | 2025-01-22 | Auto-Enforcement, Audit Integrity, Multi-Agent Consensus 반영. Immune System v0.3.0 연동. |
 | v0.1.1 | 2026-01-22 | Immune System DNA 업데이트 승인 요건(플래그십 2종 + Canon Guardian) 및 Swarm DNA 업데이트 승인 요건(Inquisitor 승인) 조항 추가. Immune Doctrine v0.3.1 연동. |
 | v0.1.2 | 2026-01-22 | 다른 Agent Critic 반영: (1) 플래그십 선정은 고정 명단 금지, (2) 동의 증빙 스키마 참조, (3) 인간 승인=정식 승격 서명으로 한정, (4) Swarm 거부/보류 시 롤백/격리/만료 프로토콜 추가. |
-| v0.1.3 | 2026-01-22 | Record Archive System(기록 보존 기관) 추가: `01_AAOS-Record_Archive/`를 META 계층에 편입하고 상속 규범을 명시. |
-| v0.1.4 | 2026-01-22 | 최상위 기관 순서 정정(Canon → Record Archive → Immune+Deliberation → Swarms), 디렉토리 리네이밍(01/02/03/04) 및 `03_AAOS-Deliberation_Chamber/` 추가. |
+| v0.1.3 | 2026-01-22 | Record Archive System(기록 보존 기관) 추가: `01_Nucleus/Record_Archive/`를 META 계층에 편입하고 상속 규범을 명시. |
+| v0.1.4 | 2026-01-22 | 최상위 기관 순서 정정(Canon → Record Archive → Immune+Deliberation → Swarms), 디렉토리 리네이밍(01/02/03/04) 및 `01_Nucleus/Deliberation_Chamber/` 추가. |
 | v0.1.5 | 2026-01-23 | “상위기관(군체(Swarm) 이상) + META” 변경 게이트를 명문화하고, Canon의 군체/군락 귀속 원칙과 정렬. |
 | v0.1.6 | 2026-01-23 | 용어 정렬: Swarm=군체, Group=군락. Canon/Identity/게이트 문구를 정합화. |
+| v0.1.7 | 2026-01-27 | Draft/Planning Workspace Protocol 명문화: Draft Types, Normative vs Informative Reference, Change Packet Minimum(AUDIT_LOG 포함), Draft Natural Dissolution(기본 TTL) 추가. |
+| v0.1.8 | 2026-01-27 | AIVarium 3-Layer 적용: Manifestation 계층(현현/접속) 추가 및 상위 변경 게이트 대상에 포함. |
+| v0.1.9 | 2026-01-27 | 디렉토리 구조를 Nucleus/Swarm/Manifestation으로 재편: `01_Nucleus/{Record_Archive,Immune_system,Deliberation_Chamber}`, `02_Swarm`, `03_Manifestation`. Inquisitor 도구의 루트 탐색 경로 정합화. |
+| v0.1.10 | 2026-01-27 | 명칭 통일: `03_AAOS-Manifestation` → `03_Manifestation` (디렉토리/참조 경로 정합화). |
+| v0.1.11 | 2026-01-27 | 레거시(개념) 경로 제거/정합화(실경로만), COF/COO 레지스트리 정렬, Auto-Enforcement 실제 경로/CLI 고정, Change Packet 템플릿/동선 추가, Manifestation 최소 계약 명문화. |
