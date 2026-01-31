@@ -1,7 +1,7 @@
 ---
-name: "AAOS-Manifestation-AI-Collaborator"
+name: "AAOS-Manifestation-Call-CLI-Agents"
 version: "0.1.0"
-scope: "04_Agentic_AI_OS/03_Manifestation/ai-collaborator"
+scope: "04_Agentic_AI_OS/03_Manifestation/Summon-Agents/skill/call-cli-agents"
 owner: "AAOS Swarm"
 created: "2026-01-31"
 status: draft
@@ -41,13 +41,13 @@ inquisitor:
   required: true
   audit_log: "../../01_Nucleus/Immune_system/AUDIT_LOG.md"
 ---
-# DNA BLUEPRINT: AI Collaborator (Manifestation Component)
+# DNA BLUEPRINT: Call CLI Agents (Manifestation Component)
 
 ## Overview
 
-AI Collaborator는 여러 AI CLI(Codex/Claude/Gemini 등)를 병렬 실행하고 결과를 정규화하는 Manifestation 컴포넌트이다.
+Call CLI Agents는 여러 AI CLI(Codex/Claude/Gemini 등)를 병렬 실행하고 결과를 정규화하는 Manifestation 컴포넌트이다.
 
-- Canonical payload: `ai-collaborator_v0.3/`
+- Canonical payload: `call-cli-agents_v0.3/`
 
 ## Hard Prohibitions
 
@@ -60,4 +60,3 @@ AI Collaborator는 여러 AI CLI(Codex/Claude/Gemini 등)를 병렬 실행하고
 - Input: Swarm가 제공하는 `tasks/prompts/context file path`
 - Output: 실행 결과(원문/정규화), 실패 사유, 재시도/중단 신호
 - Reporting: 필요 시 상위 워크플로우가 Record Archive/Immune System에 증빙을 남긴다
-

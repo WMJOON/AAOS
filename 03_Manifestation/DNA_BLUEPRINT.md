@@ -58,4 +58,4 @@ Manifestation은 Swarm의 의도를 **실행 가능한 인터페이스/런타임
 
 ## Components (Draft)
 
-- AI Collaborator: `ai-collaborator/DNA_BLUEPRINT.md`
+- Call CLI Agents: `Summon-Agents/skill/call-cli-agents/DNA_BLUEPRINT.md`
