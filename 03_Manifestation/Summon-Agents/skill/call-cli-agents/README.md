@@ -8,11 +8,10 @@ description: Manifestation component that binds Swarm intent to external AI CLIs
 
 ## Canonical
 
-- Current: `call-cli-agents_v0.3/`
-  - Skill: `call-cli-agents_v0.3/SKILL.md`
-  - Reference: `call-cli-agents_v0.3/REFERENCE.md`
-  - Patterns: `call-cli-agents_v0.3/PATTERNS.md`
-  - Scripts: `call-cli-agents_v0.3/scripts/`
+- Skill: `SKILL.md`
+- Reference: `REFERENCE.md`
+- Patterns: `PATTERNS.md`
+- Scripts: `scripts/`
 
 ## Non-Cognition / Hard Boundary
 

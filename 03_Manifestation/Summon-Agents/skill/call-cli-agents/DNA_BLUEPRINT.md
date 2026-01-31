@@ -47,7 +47,7 @@ inquisitor:
 
 Call CLI Agents는 여러 AI CLI(Codex/Claude/Gemini 등)를 병렬 실행하고 결과를 정규화하는 Manifestation 컴포넌트이다.
 
-- Canonical payload: `call-cli-agents_v0.3/`
+- Canonical payload: this directory
 
 ## Hard Prohibitions
 
