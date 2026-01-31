@@ -112,7 +112,7 @@ Manifestation은 스스로 판단하거나 목적을 정하지 않는다. Swarm�
 │   └── Deliberation_Chamber/                 # 제도화 정책 · 숙의/합의 산출
 │
 ├── 02_Swarm/                                 # 의식 · 사고 · 행동양식 계층 (Skill Set)
-│   ├── Cortex_Agora/                          # 토론 · 아이데이션 · 개선 Argument Swarm
+│   ├── Cortex_Agora/                          # Swarm 행동(Behavior Trace) 관찰·요약·제안 (Record_Archive 직접 조회 금지)
 │   └── Context-Orchestrated-Filesystem/   # 파일 기반 컨텍스트 표준(예: COF)
 │
 └── 03_Manifestation/                         # 실행체 · Agent 현현 계층 (Interface)
