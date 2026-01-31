@@ -27,8 +27,8 @@
 
 ### Swarm Registry
 
-- COF: `02_Swarm/01_context-orchestrated-filesystem/` 기반으로 링크 교정
-- COO: `02_Swarm/02_context-orchestrated-ontology/DNA_BLUEPRINT.md`만 존재(draft)임을 반영 (`DNA.md` 서술 제거)
+- COF: `02_Swarm/Context-Orchestrated-Filesystem/` 기반으로 링크 교정
+- COO: `02_Swarm/Context-Orchestrated-Ontology/DNA_BLUEPRINT.md`만 존재(draft)임을 반영 (`DNA.md` 서술 제거)
 
 ### Change Packet Where/Templates
 

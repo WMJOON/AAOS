@@ -315,15 +315,15 @@ AAOS 상에서 실제 Agent 협업 구조와 실행 환경이 발생하는 계�
 
 #### 2.1.1-0. COF 컨테이너(Blueprint)
 
-- 컨테이너(버전 보관): `02_Swarm/01_context-orchestrated-filesystem/`
-  - 컨테이너 Blueprint: `02_Swarm/01_context-orchestrated-filesystem/DNA_BLUEPRINT.md`
+- 컨테이너(버전 보관): `02_Swarm/Context-Orchestrated-Filesystem/`
+  - 컨테이너 Blueprint: `02_Swarm/Context-Orchestrated-Filesystem/DNA_BLUEPRINT.md`
 
 COF 구조의
 생성 조건, 성장 규칙, 종료 조건, 자원 상한, Natural Dissolution 절차를 정의한다.
 
 #### 2.1.1-1. COF 최신 정식 DNA (예시)
 
-- `02_Swarm/01_context-orchestrated-filesystem/DNA.md`
+- `02_Swarm/Context-Orchestrated-Filesystem/DNA.md`
 
 COF 내부 실제 노드 구조, Rule Genome, Skill Genome, Lifecycle Genome을 기술한다.
 
@@ -336,7 +336,7 @@ COF 내부 실제 노드 구조, Rule Genome, Skill Genome, Lifecycle Genome을 
 온톨로지 기반 Context·Knowledge Graph 구조를 표준화하는 군체(Swarm) 계층이다.
 
 #### 2.2.1-0. COO DNA Blueprint - pre-RULE
-- 스캐폴드(draft): `02_Swarm/02_context-orchestrated-ontology/DNA_BLUEPRINT.md`
+- 스캐폴드(draft): `02_Swarm/Context-Orchestrated-Ontology/DNA_BLUEPRINT.md`
 
 COO 구조의
 개념 스키마 생성, 관계 확장 규칙, 메모리 보존 정책, 자연소멸 조건을 정의한다.

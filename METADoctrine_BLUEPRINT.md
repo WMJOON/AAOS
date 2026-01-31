@@ -116,7 +116,7 @@ references:
 - Role: planning/cognition/pattern/skill (직접 하드웨어 실행은 하지 않음)
 - Examples:
   - `Cortex_Agora/` (Swarm 행동(Behavior Trace) 관찰·요약·제안; Record_Archive 직접 조회 금지)
-  - `01_context-orchestrated-filesystem/` (COF)
+  - `Context-Orchestrated-Filesystem/` (COF)
 
 ### Manifestation (`03_Manifestation/`)
 
@@ -338,13 +338,13 @@ def append_entry(log_path: str, entry: AuditEntry) -> str:
 ```markdown
 ### 2.1. AAOS-COF (Context Orchestrated Filesystem)
 
-- 컨테이너(버전 보관): `02_Swarm/01_context-orchestrated-filesystem/`
-  - 컨테이너 Blueprint: `02_Swarm/01_context-orchestrated-filesystem/DNA_BLUEPRINT.md`
-- 최신 정식 DNA(예시): `02_Swarm/01_context-orchestrated-filesystem/DNA.md`
+- 컨테이너(버전 보관): `02_Swarm/Context-Orchestrated-Filesystem/`
+  - 컨테이너 Blueprint: `02_Swarm/Context-Orchestrated-Filesystem/DNA_BLUEPRINT.md`
+- 최신 정식 DNA(예시): `02_Swarm/Context-Orchestrated-Filesystem/DNA.md`
 
 ### 2.2. AAOS-COO (Context Orchestrated Ontology)
 
-- 스캐폴드(draft): `02_Swarm/02_context-orchestrated-ontology/DNA_BLUEPRINT.md`
+- 스캐폴드(draft): `02_Swarm/Context-Orchestrated-Ontology/DNA_BLUEPRINT.md`
 - `DNA.md`는 아직 미존재(승격 전). 승격 시 Inquisitor 승인 + Audit Log 고정 후 `DNA.md`로 승격한다.
 ```
 
@@ -385,7 +385,7 @@ def append_entry(log_path: str, entry: AuditEntry) -> str:
 
 ### P1: COF/COO 참조 정합화
 
-- `AAOS_SWARM/AAOS_COF/` → `04_Agentic_AI_OS/02_Swarm/01_context-orchestrated-filesystem/`
+- `AAOS_SWARM/AAOS_COF/` → `04_Agentic_AI_OS/02_Swarm/Context-Orchestrated-Filesystem/`
 - COO는 `DNA_BLUEPRINT.md`만 존재(draft)임을 명시하고, `DNA.md` 존재 서술은 제거
 
 ### P1: Change Packet “Where/Templates” 추가

@@ -1,0 +1,61 @@
+---
+name: "AAOS-COF"
+version: "0.1.3"
+scope: "04_Agentic_AI_OS/02_Swarm/Context-Orchestrated-Filesystem"
+owner: "AAOS Swarm"
+created: "2026-01-22"
+status: canonical
+
+# Normative References (inherit Immune System)
+canon_reference: "04_Agentic_AI_OS/README.md"
+meta_doctrine_reference: "04_Agentic_AI_OS/METADoctrine.md"
+immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md"
+inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/"
+audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AUDIT_LOG.md"
+
+natural_dissolution:
+  purpose: "트리 기반 파일 워크스페이스에서 노드 구조/맥락/기록 규칙을 표준화하여 작업 연속성을 유지한다"
+  termination_conditions:
+    - "COF가 군체(Swarm) 표준에서 폐기/대체될 때"
+    - "해당 COF 버전(v0.1.3)이 상위 버전으로 승계되어 더 이상 사용되지 않을 때"
+  dissolution_steps:
+    - "상위 버전/대체 군체(Swarm)로 마이그레이션 가이드 작성"
+    - "필수 규칙/템플릿 요약을 `README.md`에 남기고 `_archive/`로 아카이브"
+    - "구버전 스킬/스크립트는 `_archive/`로 이동 후 삭제"
+  retention:
+    summary_required: true
+    max_days: 180
+
+resource_limits:
+  max_files: 800
+  max_folders: 120
+  max_log_kb: 512
+
+inquisitor:
+  required: true
+  audit_log: "../../01_Nucleus/Immune_system/AUDIT_LOG.md"
+---
+
+# AAOS-COF DNA (v0.1.3)
+
+본 DNA는 `COF v0.1.3` 군체(Swarm) 구조를 정의하는 핵심 유전체(Genome)이다.
+META Doctrine(METADoctrine.md) 및 **COF Doctrine**에 의거하여 작성되었다.
+
+## 0. Doctrine Genome
+- **Pointer**: `COF_DOCTRINE.md`
+- **Desc**: 4 Pillars of COF Philosophy (Locality, Self-Desc, Agent-First, Lifecycle)
+
+## 1. Rule Genome
+- **Pointer**: `RULE.md`
+- **Desc**: Skill-Mediated Creation Mandate
+
+## 2. Skill Genome
+- **Pointer**: `skills/`
+- **Desc**: `cof-task-manager-node` (creation, ticket, archive, validate)
+
+## 3. Lifecycle Genome
+- **Pointer**: `DNA_BLUEPRINT.md`
+- **Desc**: Natural Dissolution & Resource Limits
+
+---
+> "See referenced files for full definitions."
