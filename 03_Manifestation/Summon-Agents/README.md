@@ -9,4 +9,5 @@ description: Manifestation group for agent instantiation/execution bindings that
 ## Contents
 
 - `skill/`: 실행 바인딩 스킬 컴포넌트들
+- `mcp/`: MCP 서버 바인딩 컴포넌트들
 

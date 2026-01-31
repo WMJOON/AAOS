@@ -52,6 +52,7 @@ inherits_skill: cof-pointerical-tool-creator
 | 파라미터 | 타입 | 필수 | 설명 |
 |---------|------|------|------|
 | `parsed_params` | `object` | Y | Validator가 검증한 파라미터 |
+| `execution_mode` | `enum` | Y | `cof` \| `standalone` (Orchestrator에서 전달) |
 
 ### Outputs
 
@@ -59,12 +60,15 @@ inherits_skill: cof-pointerical-tool-creator
 |--------|------|------|
 | `rendered_content` | `string` | 완성된 문서 콘텐츠 (Markdown) |
 | `template_used` | `string` | 사용된 템플릿 이름 |
+| `mode` | `string` | 적용된 실행 모드 |
 
 ---
 
 ## 3. Template Resolution
 
-### 3.1 Template Mapping
+### 3.1 Template Mapping (Mode-Based)
+
+#### COF Mode
 
 | doc_type | Template |
 |----------|----------|
@@ -73,16 +77,28 @@ inherits_skill: cof-pointerical-tool-creator
 | `workflow` | `WORKFLOW_TEMPLATE.md` |
 | `sub-agent` | `SUB_AGENT_TEMPLATE.md` |
 
+#### Standalone Mode
+
+| doc_type | Template |
+|----------|----------|
+| `skill` | `SKILL_STANDALONE.md` (없으면 `SKILL_TEMPLATE.md` fallback) |
+| `rule` | `RULE_STANDALONE.md` (없으면 `RULE_TEMPLATE.md` fallback) |
+| `workflow` | `WORKFLOW_STANDALONE.md` (없으면 `WORKFLOW_TEMPLATE.md` fallback) |
+| `sub-agent` | `SUB_AGENT_STANDALONE.md` (없으면 `SUB_AGENT_TEMPLATE.md` fallback) |
+
 ### 3.2 Resolution Order
 
 1. Agent 로컬 templates (오버라이드)
 2. 상위 Skill templates (`cof-pointerical-tool-creator`)
+3. **Standalone Mode**: `*_STANDALONE.md` 우선 → `*_TEMPLATE.md` fallback
 
 ---
 
 ## 4. Rendering Protocol
 
-### Step 1: Frontmatter Generation
+### Step 1: Frontmatter Generation (Mode-Based)
+
+#### COF Mode (전체 필드)
 
 ```yaml
 ---
@@ -97,6 +113,19 @@ created: "{created}"
 
 - `sub-agent`인 경우 `agent_kind: sub-agent` 추가
 
+#### Standalone Mode (최소 필드)
+
+```yaml
+---
+context_id: {context_id}
+role: {role}
+created: "{created}"
+---
+```
+
+- `state`, `scope`, `lifetime` 생략 (선택적 포함 가능)
+- COF 전용 필드 제외
+
 ### Step 2: Body Rendering
 
 | Placeholder | 치환값 |
@@ -108,6 +137,14 @@ created: "{created}"
 ### Step 3: References Injection
 
 - `references` 배열이 있으면 References 섹션에 추가
+
+### Step 4: Mode Indicator (Optional)
+
+Standalone Mode에서 생성된 문서에는 다음 표시 추가 가능:
+
+```markdown
+> Generated in Standalone Mode (COF-independent)
+```
 
 ---
 

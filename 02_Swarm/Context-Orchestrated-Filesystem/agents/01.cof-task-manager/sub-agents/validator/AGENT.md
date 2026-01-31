@@ -12,7 +12,7 @@ inherits_skill: cof-task-manager-node
 
 # Validator Sub-Agent
 
-task-manager/ 노드의 구조 검증 및 티켓 의존성 검증을 담당하는 Sub-Agent.
+NN.agents-task-context/ 노드의 구조 검증 및 티켓 의존성 검증을 담당하는 Sub-Agent. (legacy: task-manager/)
 
 ---
 
@@ -50,7 +50,7 @@ task-manager/ 노드의 구조 검증 및 티켓 의존성 검증을 담당하�
 
 | 파라미터 | 타입 | 필수 | 설명 |
 |---------|------|------|------|
-| `node_path` | `string` | Y | task-manager/ 경로 |
+| `node_path` | `string` | Y | NN.agents-task-context/ 경로 (legacy: task-manager/) |
 | `mode` | `enum` | N | `verify` \| `validate` \| `full` (default: `full`) |
 
 ### Outputs
@@ -84,6 +84,49 @@ task-manager/ 노드의 구조 검증 및 티켓 의존성 검증을 담당하�
 | 순환 의존성 없음 | A→B→...→A 형태의 순환 없음 | SEV-2 | `CIRCULAR_DEP` |
 | 경로 형식 금지 | dependencies에 `/`, `\` 포함 금지 | SEV-1 | `INVALID_DEP_FORMAT` |
 | 확장자 형식 금지 | dependencies에 `.md` 포함 금지 | SEV-3 | `DEP_HAS_EXTENSION` |
+
+### 3.3 Execution Steps (도구 기반)
+
+**Mode: verify (구조 검증)**
+```
+1. Glob: node_path/RULE.md 존재 확인
+2. Glob: node_path/tickets/ 존재 확인
+3. Glob: node_path/troubleshooting.md 존재 확인
+4. Glob: node_path/issue_notes/ 존재 시 → RULE.md 확인
+5. Glob: node_path/release_notes/ 존재 시 → RULE.md 확인
+6. 결과 집계 → structure 객체 반환
+```
+
+**Mode: validate (의존성 검증)**
+```
+1. Glob: tickets/*.md 목록 수집
+
+2. 각 티켓에 대해:
+   Read: 티켓 파일 → YAML frontmatter 파싱
+   dependencies[] 추출
+
+3. 의존성 그래프 구축:
+   - 각 dependency stem이 tickets/에 존재하는지 Glob 확인
+   - 순환 의존성 탐지 (DFS)
+
+4. 결과 집계 → dependencies 객체 반환
+```
+
+**Mode: full (병렬)**
+```
+Orchestrator에서 호출 시:
+┌─ Task 1: mode=verify
+└─ Task 2: mode=validate
+
+두 결과를 Orchestrator가 병합
+```
+
+### 3.4 Required Tools
+
+| 도구 | 용도 |
+|------|------|
+| `Glob` | 파일/디렉토리 존재 확인, 티켓 목록 수집 |
+| `Read` | 티켓 파일 읽기, YAML frontmatter 파싱 |
 
 ---
 
@@ -165,5 +208,3 @@ task-manager/ 노드의 구조 검증 및 티켓 의존성 검증을 담당하�
 | 문서 | 설명 |
 |------|------|
 | `../../AGENT.md` | Parent Agent |
-| `scripts/verify_node.py` | 구조 검증 스크립트 |
-| `scripts/validate_node.py` | 의존성 검증 스크립트 |

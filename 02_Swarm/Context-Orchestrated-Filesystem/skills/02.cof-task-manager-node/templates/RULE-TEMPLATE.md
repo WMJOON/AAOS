@@ -1,11 +1,11 @@
 # RULE.md Template
 
-task-manager/ 노드의 RULE.md 생성 시 이 템플릿 사용.
+NN.agents-task-context/ 노드의 RULE.md 생성 시 이 템플릿 사용.
 
 ## Template
 
 ```markdown
-# task-manager/ Node Rule
+# NN.agents-task-context/ Node Rule
 
 ## Object
 에이전트가 sibling 및 descendants 노드의 맥락을 참조하며 작업을 이어갈 수 있도록 지원.

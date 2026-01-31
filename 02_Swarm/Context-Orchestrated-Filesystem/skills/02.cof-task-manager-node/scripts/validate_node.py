@@ -69,7 +69,7 @@ def validate_node(node_path: str) -> bool:
 
 def main():
     parser = argparse.ArgumentParser(description="Validate COF node health.")
-    parser.add_argument("path", help="Path to task-manager node")
+    parser.add_argument("path", help="Path to NN.agents-task-context node (or legacy: task-manager)")
     args = parser.parse_args()
     
     success = validate_node(args.path)

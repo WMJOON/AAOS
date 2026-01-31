@@ -88,9 +88,14 @@ Context-Orchestrated-Filesystem/
     │   ├── SKILL.md
     │   └── scripts/
     │
-    └── 02.cof-task-manager-node/          ← 작업 관리 스킬
+    ├── 02.cof-task-manager-node/          ← 작업 관리 스킬
+    │   ├── SKILL.md
+    │   └── templates/
+    │
+    └── 03.cof-task-solver-agent-group/    ← 티켓 해결(에이전트 디스패치)
+        ├── SPEC.md
         ├── SKILL.md
-        └── templates/
+        └── scripts/
 ```
 
 ---
@@ -104,6 +109,7 @@ Context-Orchestrated-Filesystem/
 | 00 | `cof-pointerical-tool-creator` | 포인터 안전한 SKILL/RULE/WORKFLOW/SUB-AGENT 문서 생성 | - |
 | 01 | `cof-glob-indexing` | 가장 가까운 `[n].index/` 탐색 및 인덱싱 산출물 생성 | 00 (references) |
 | 02 | `cof-task-manager-node` | 작업 맥락 생성, 티켓 발행, 아카이브 | 00, 01 |
+| 03 | `solving-tickets` | 티켓 → 에이전트 그룹 디스패치 및 결과 통합 | 01, 02 |
 
 ### Skill Usage Mandate
 
@@ -111,7 +117,7 @@ Context-Orchestrated-Filesystem/
 
 | Intent | Target Node | Required Skill |
 |--------|-------------|----------------|
-| 작업 맥락 생성/초기화 | `task-manager/` | `cof-task-manager-node` |
+| 작업 맥락 생성/초기화 | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-manager-node` |
 | 작업 티켓 발행 | `tickets/` | `cof-task-manager-node` |
 | 완료 작업 정리 | `archive/` | `cof-task-manager-node` |
 

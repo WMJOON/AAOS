@@ -97,7 +97,7 @@ Agent Responsibility:
 
 ## 3. Execution Protocol
 
-### 3.1 State Machine
+### 3.1 State Machine (Single Mode)
 
 ```
 [IDLE] ──request──> [PARSING] ──valid──> [VALIDATING]
@@ -121,6 +121,20 @@ Agent Responsibility:
                                                ▼
                                            [IDLE]
 ```
+
+### 3.1.1 State Machine (Batch Mode)
+
+| State | 설명 |
+|-------|------|
+| DISPATCHING | `batch_requests`를 개별 Pipeline으로 분배 |
+| PARALLEL_EXEC | 최대 `parallel_limit`개 Pipeline 동시 실행 |
+| MERGING | 모든 Pipeline 결과 수집 및 병합 |
+| BATCH_REPORTING | 통합 결과 보고서 생성 |
+
+**Pipeline 격리 원칙:**
+- 각 Pipeline: 독립적 V→R→W 순차 실행
+- Pipeline 간: 상태 공유 없음 (`context_id` 유일성 검사 제외)
+- `fail_strategy: continue` → 실패해도 다른 Pipeline 영향 없음
 
 ### 3.2 Phase Definitions
 

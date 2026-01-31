@@ -9,6 +9,8 @@ import sys
 import subprocess
 from pathlib import Path
 
+NODE_DIRNAME = "01.agents-task-context"
+
 def bootstrap_node(target_path: str) -> bool:
     path = Path(target_path).resolve()
     script_dir = Path(__file__).parent.resolve()
@@ -30,7 +32,7 @@ def bootstrap_node(target_path: str) -> bool:
 
     # 2. Verify Node
     print("\n[Step 2/2] Verifying Structure...")
-    tm_path = path / "task-manager"
+    tm_path = path / NODE_DIRNAME
     try:
         subprocess.run(
             [sys.executable, str(verify_script), str(tm_path)],
@@ -45,7 +47,7 @@ def bootstrap_node(target_path: str) -> bool:
 
 def main():
     parser = argparse.ArgumentParser(description="Bootstrap COF Node (Create + Verify)")
-    parser.add_argument("path", help="Target directory for task-manager")
+    parser.add_argument("path", help=f"Target directory for {NODE_DIRNAME}/")
     args = parser.parse_args()
     
     if bootstrap_node(args.path):

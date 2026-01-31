@@ -16,7 +16,7 @@ references:
     - cof-pointerical-tool-creator
     - cof-glob-indexing
     - cof-task-manager-node
-    - solving-tickets
+    - cof-task-solver-agent-group
   agents:
     - cof-pointerical-tool-creator-agent
     - cof-task-manager-agent
@@ -38,8 +38,8 @@ references:
 |-------|---------|------------|
 | `cof-pointerical-tool-creator` | Skill/Rule/Workflow 문서 생성 | `@skill(cof-pointerical-tool-creator)` |
 | `cof-glob-indexing` | Node 경계 탐색, 인덱싱 | `@skill(cof-glob-indexing)` |
-| `cof-task-manager-node` | task-manager/ 노드 관리 | `@skill(cof-task-manager-node)` |
-| `solving-tickets` | 티켓 → 에이전트 할당 | `@skill(solving-tickets)` |
+| `cof-task-manager-node` | `NN.agents-task-context/` 노드 관리 (legacy: `task-manager/`) | `@skill(cof-task-manager-node)` |
+| `solving-tickets` | 티켓 → 에이전트 할당 | `@skill(cof-task-solver-agent-group)` |
 
 ### Available Agents
 
@@ -102,9 +102,9 @@ lifetime: ticket | persistent | archived
 
 | Intent | Node | Required Skill |
 |--------|------|----------------|
-| 작업 맥락 생성 | `task-manager/` | `cof-task-manager-node` |
+| 작업 맥락 생성 | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-manager-node` |
 | 티켓 발행 | `tickets/` | `cof-task-manager-node` |
-| 티켓 해결 | ticket → agent | `solving-tickets` |
+| 티켓 해결 | ticket → agent | `cof-task-solver-agent-group` |
 | 완료 작업 정리 | `archive/` | `cof-task-manager-node` |
 | 문서 생성 | Skill/Rule/Workflow | `cof-pointerical-tool-creator` |
 | 컨텍스트 탐색 | Node boundary | `cof-glob-indexing` |
@@ -118,13 +118,13 @@ lifetime: ticket | persistent | archived
 ### 3.1 작업 시작 시
 
 ```
-1. Check: task-manager/ 존재?
+1. Check: NN.agents-task-context/ 존재?
    ├─ No  → cof-task-manager-node로 생성 (사용자 승인)
    └─ Yes → tickets/ 확인
 
 2. Check: 할당된 티켓 존재?
    ├─ No  → 새 티켓 발행
-   └─ Yes → solving-tickets로 처리
+   └─ Yes → solving-tickets(`@skill(cof-task-solver-agent-group)`)로 처리
 ```
 
 ### 3.2 티켓 처리 흐름
@@ -203,6 +203,6 @@ context_map:
 
 - **Doctrine**: `@ref(cof-doctrine)`
 - **Blueprint**: `@ref(cof-dna-blueprint)`
-- **Skills**: `@ref(cof-pointerical-tool-creator)`, `@ref(cof-glob-indexing)`, `@ref(cof-task-manager-node)`, `@ref(solving-tickets)`
+- **Skills**: `@ref(cof-pointerical-tool-creator)`, `@ref(cof-glob-indexing)`, `@ref(cof-task-manager-node)`, `@ref(cof-task-solver-agent-group)`
 - **Agents**: `@ref(cof-pointerical-tool-creator-agent)`, `@ref(cof-task-manager-agent)`
 - **Best Practices**: `@ref(skill-authoring-best-practices)`

@@ -137,7 +137,7 @@ COF 독트린의 "Skill-Mediated Creation Only" 원칙에 따라, 다음 작업�
 
 | 목적 (Intent) | 대상 Node | 필수 Skill | 비고 |
 |---|---|---|---|
-| **작업 맥락 생성/초기화** | `task-manager/` | `cof-task-manager-node` | `create_node.py` 실행 |
+| **작업 맥락 생성/초기화** | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-manager-node` | `create_node.py` 실행 |
 | **작업 티켓 발행** | `tickets/` | `cof-task-manager-node` | `create_ticket.py` 실행 |
 | **완료 작업 정리** | `archive/` | `cof-task-manager-node` | `archive_tasks.py` 실행 |
 
@@ -145,7 +145,7 @@ COF 독트린의 "Skill-Mediated Creation Only" 원칙에 따라, 다음 작업�
 
 ## 2. Node Definitions
 
-### 2.1. Task-Manager Node (`task-manager/`)
+### 2.1. Agents Task Context Node (`NN.agents-task-context/`)
 - **역할**: 에이전트의 작업 맥락(Context)을 저장하고 추적한다.
 - **위치**: 작업 대상 디렉토리의 Sibling 위치
 - **권한**:
@@ -156,7 +156,7 @@ COF 독트린의 "Skill-Mediated Creation Only" 원칙에 따라, 다음 작업�
 
 모든 에이전트는 작업 시작 전 다음 순서를 따른다:
 
-1. **Check**: 현재 디렉토리에 `task-manager/`가 있는가?
+1. **Check**: 현재 디렉토리에 `NN.agents-task-context/`가 있는가?
 2. **If Missing**: `cof-task-manager-node` 스킬을 사용하여 노드를 생성한다. (사용자 승인 필요)
 3. **If Present**: `tickets/`에서 할당된 티켓을 확인하거나, 새로운 티켓을 발행한다.
 
@@ -169,7 +169,7 @@ COF 독트린의 "Skill-Mediated Creation Only" 원칙에 따라, 다음 작업�
 Archive completed tasks.
 
 Usage:
-    python archive_tasks.py <task_manager_path>
+    python archive_tasks.py <node_path>
 """
 
 import argparse

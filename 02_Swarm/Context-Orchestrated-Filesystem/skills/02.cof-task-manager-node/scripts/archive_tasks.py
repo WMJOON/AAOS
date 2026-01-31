@@ -3,7 +3,7 @@
 Archive completed tasks.
 
 Usage:
-    python archive_tasks.py <task_manager_path>
+    python archive_tasks.py <node_path>
 """
 
 import argparse
@@ -72,7 +72,7 @@ def archive_tasks(node_path: str) -> bool:
 
 def main():
     parser = argparse.ArgumentParser(description="Archive completed tickets.")
-    parser.add_argument("path", help="Path to task-manager node")
+    parser.add_argument("path", help="Path to NN.agents-task-context node (or legacy: task-manager)")
     args = parser.parse_args()
     
     archive_tasks(args.path)

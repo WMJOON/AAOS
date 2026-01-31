@@ -25,4 +25,4 @@ Manifestation은 AAOS의 **현현과 접속(Manifestation & Interface)** 계층�
 
 ## Components
 
-- Call CLI Agents: `Summon-Agents/skill/call-cli-agents/` (external AI CLI execution binding; a.k.a. AI Collaborator)
+- Call CLI Agents: `Summon-Agents/skill/sa-call-cli-agents/` (external AI CLI execution binding; a.k.a. AI Collaborator)

@@ -51,8 +51,10 @@ inherits_skill: cof-task-manager-node
 
 | 파라미터 | 타입 | 필수 | 설명 |
 |---------|------|------|------|
-| `node_path` | `string` | Y | task-manager/ 경로 |
+| `node_path` | `string` | Y | NN.agents-task-context/ 경로 (legacy: task-manager/) |
 | `dry_run` | `boolean` | N | true면 이동 없이 대상만 반환 |
+| `qa_filter` | `enum` | N | `all` \| `qa_passed` (default: `qa_passed`) |
+| `qa_threshold` | `enum` | N | `A` \| `B` \| `C` (default: `B`) |
 
 ### Outputs
 
@@ -61,6 +63,7 @@ inherits_skill: cof-task-manager-node
 | `success` | `boolean` | 아카이빙 성공 여부 |
 | `archived` | `array` | 아카이빙된 티켓 목록 |
 | `skipped` | `array` | 건너뛴 티켓 목록 (done이 아닌 것) |
+| `qa_skipped` | `array` | QA 미통과로 제외된 티켓 목록 |
 | `errors` | `array` | 에러 목록 |
 
 ---
@@ -71,14 +74,24 @@ inherits_skill: cof-task-manager-node
 
 ```
 대상 조건:
-- 위치: task-manager/tickets/*.md
+- 위치: NN.agents-task-context/tickets/*.md (legacy: task-manager/tickets/*.md)
 - frontmatter.status == "done"
+- (qa_filter == 'qa_passed') ?
+    └─ frontmatter.qa_grade in ['A', 'B'] (또는 qa_threshold 이상)
+    └─ 또는 ## QA Review 섹션 존재 + Grade 확인
+- (qa_filter == 'all') ?
+    └─ QA 상태 무관 (강제 아카이브)
 ```
+
+**QA Grade 확인 우선순위:**
+1. `frontmatter.qa_grade`
+2. 본문 `## QA Review` 섹션 내 Grade 파싱
+3. 둘 다 없으면 → `unreviewed` (qa_passed 필터 시 제외)
 
 ### 3.2 Archive Structure
 
 ```
-task-manager/
+NN.agents-task-context/
 ├── tickets/
 │   ├── Active-Task.md  (status: in-progress)
 │   └── ...
@@ -109,17 +122,52 @@ task-manager/
 
 ---
 
-## 4. Execution Flow
+## 4. Execution Flow (도구 기반, 병렬)
 
 ```
-1. tickets/*.md 스캔
-2. 각 파일의 YAML frontmatter 파싱
-3. status == "done" 필터링
-4. archive/tickets/ 디렉토리 확인 (없으면 생성)
-5. 충돌 검사 및 이동
-6. archive/README.md에 로그 추가
-7. 결과 반환
+[Phase 1: 대상 식별] (순차)
+1. Glob: tickets/*.md 목록 수집
+
+2. 각 티켓에 대해:
+   Read: 티켓 파일 → YAML frontmatter 파싱
+   - status == "done" 확인
+   - qa_grade 또는 ## QA Review 섹션 확인
+   - qa_filter 조건 충족 여부 판정
+
+3. 대상 티켓 목록 확정 (done + QA 통과)
+
+[Phase 2: 아카이브 준비] (순차)
+4. Glob: archive/tickets/ 존재 확인
+   └─ 없으면 → Bash(mkdir -p): archive/tickets/ 생성
+
+5. 각 대상 티켓에 대해:
+   Glob: archive/tickets/{name}.md 충돌 확인
+   └─ 충돌 시 → 타임스탬프 suffix 결정
+
+[Phase 3: 이동] (병렬)
+6. 대상 티켓들을 병렬로 이동:
+   각 티켓마다:
+   ├─ Read: tickets/{name}.md
+   ├─ Write: archive/tickets/{final_name}.md
+   └─ Bash(rm): tickets/{name}.md 삭제
+
+[Phase 4: 로그] (순차)
+7. Read: archive/README.md (없으면 생성)
+   Edit: 아카이빙 로그 append
+
+8. 결과 반환
 ```
+
+### 4.1 Required Tools
+
+| 도구 | 용도 |
+|------|------|
+| `Glob` | 티켓 목록 수집, 충돌 확인 |
+| `Read` | 티켓 파일/README.md 읽기, YAML 파싱 |
+| `Write` | 아카이브 파일 생성 |
+| `Edit` | README.md 로그 append |
+| `Bash` | `mkdir -p`, `rm` (디렉토리 생성, 원본 삭제) |
+| `Task` | 이동 작업 병렬 호출 |
 
 ---
 
@@ -158,9 +206,11 @@ task-manager/
 ## 6. Constraints
 
 - **done 티켓만 대상**: 다른 status는 무시
+- **QA 통과 기본 필수**: `qa_filter: qa_passed`가 기본값
 - **비파괴적 이동**: 원본 삭제 전 복사 완료 확인
 - **로그 필수**: 모든 아카이빙은 README.md에 기록
 - **충돌 회피**: 타임스탬프 suffix로 해결 (덮어쓰기 금지)
+- **QA 미통과 강제 아카이브 금지**: `qa_filter: all`은 Orchestrator에서만 설정 가능
 
 ---
 
@@ -169,4 +219,4 @@ task-manager/
 | 문서 | 설명 |
 |------|------|
 | `../../AGENT.md` | Parent Agent |
-| `scripts/archive_tasks.py` | 아카이빙 스크립트 |
+| `cof-task-qa-agent` | QA Agent (아카이브 전 품질 검토) |

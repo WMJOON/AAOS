@@ -51,7 +51,7 @@ inherits_skill: cof-task-manager-node
 
 | 파라미터 | 타입 | 필수 | 설명 |
 |---------|------|------|------|
-| `target_path` | `string` | Y | task-manager/ 또는 tickets/ 경로 |
+| `target_path` | `string` | Y | NN.agents-task-context/ 또는 tickets/ 경로 (legacy: task-manager/) |
 | `name` | `string` | Y | 티켓 제목 |
 | `priority` | `enum` | N | `P0`\|`P1`\|`P2`\|`P3` (default: `P2`) |
 | `dependencies` | `string[]` | N | 의존 티켓 목록 |
@@ -119,8 +119,44 @@ tags: []
 
 `target_path` 해석 순서:
 1. `*/tickets` → 그대로 사용
-2. `*/task-manager` → `./tickets` 추가
-3. 기타 → `./tickets` 또는 `./task-manager/tickets` 탐색
+2. `*/NN.agents-task-context` 또는 `*/task-manager` → `./tickets` 추가
+3. 기타 → `./tickets` 또는 `./NN.agents-task-context/tickets` (legacy: `./task-manager/tickets`) 탐색
+
+### 4.4 Execution Steps (도구 기반)
+
+```
+1. Glob: target_path 해석 및 tickets/ 디렉토리 확인
+   └─ 없으면 → TICKETS_DIR_NOT_FOUND 반환
+
+2. 파일명 생성:
+   - name → sanitize (공백→하이픈, 허용문자만)
+   - 확장자 .md 추가
+
+3. Glob: tickets/{sanitized_name}.md 중복 확인
+   └─ 있으면 → TICKET_ALREADY_EXISTS 반환
+
+4. Read: templates/TICKET-TEMPLATE.md 읽기
+
+5. 템플릿 치환:
+   - {title} → name
+   - frontmatter 생성 (status, priority, dependencies, created)
+
+6. Write: tickets/{sanitized_name}.md 생성
+
+7. (if dependencies)
+   Glob: 각 dependency 존재 확인
+   └─ 없으면 → warnings에 DEP_NOT_FOUND 추가
+
+8. 결과 반환
+```
+
+### 4.5 Required Tools
+
+| 도구 | 용도 |
+|------|------|
+| `Glob` | 디렉토리 확인, 중복/의존성 검사 |
+| `Read` | 템플릿 파일 읽기 |
+| `Write` | 티켓 파일 생성 |
 
 ---
 
@@ -140,7 +176,7 @@ tags: []
 ```json
 {
   "success": true | false,
-  "path": "/path/to/task-manager/tickets/My-Task.md",
+  "path": "/path/to/01.agents-task-context/tickets/My-Task.md",
   "warnings": [
     {"code": "DEP_NOT_FOUND", "message": "Dependency 'Unknown-Task' not found"}
   ],
@@ -163,5 +199,4 @@ tags: []
 | 문서 | 설명 |
 |------|------|
 | `../../AGENT.md` | Parent Agent |
-| `scripts/create_ticket.py` | 티켓 생성 스크립트 |
-| `templates/TICKET-TEMPLATE.md` | 티켓 템플릿 |
+| `../../../../skills/02.cof-task-manager-node/templates/TICKET-TEMPLATE.md` | 티켓 템플릿 |

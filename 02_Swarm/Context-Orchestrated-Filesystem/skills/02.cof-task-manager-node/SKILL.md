@@ -1,12 +1,12 @@
 ---
 name: cof-task-manager-node
-description: Creates and manages `task-manager/` nodes (tickets, verification, validation, archiving) for persistent agent context tracking in COF.
+description: Creates and manages `NN.agents-task-context/` nodes (tickets, verification, validation, archiving) for persistent agent context tracking in COF. (legacy: `task-manager/`)
 version: "0.2"
 ---
 
 # COF Task-Manager Node
 
-task-manager/ 노드는 에이전트 작업 맥락을 저장하고 개별 작업 티켓을 관리하는 COF 노드이다.
+NN.agents-task-context/ 노드는 에이전트 작업 맥락을 저장하고 개별 작업 티켓을 관리하는 COF 노드이다. (기본 생성: `01.agents-task-context/`, legacy: `task-manager/`)
 
 > **설계 스펙**: [SPEC.md](SPEC.md) 참조
 
@@ -23,27 +23,27 @@ python3 scripts/bootstrap_node.py <target_path>
 ```
 
 수행 내용:
-1. `task-manager/` 생성 (`create_node.py --all`)
+1. `01.agents-task-context/` 생성 (`create_node.py --all`)
 2. 구조 검증 (`verify_node.py`)
 
 ## Node Creation (Manual)
 
 ```bash
 python3 scripts/create_node.py <target_path> --all
-python3 scripts/verify_node.py <target_path>/task-manager
+python3 scripts/verify_node.py <target_path>/01.agents-task-context
 ```
 
 ## Ticket Creation
 
 ```bash
 python3 scripts/create_ticket.py "Ticket Name" \
-  --dir "<target_path>/task-manager" \
+  --dir "<target_path>/01.agents-task-context" \
   --priority P1 \
   --deps "Prerequisite Ticket"
 ```
 
 Options:
-- `--dir`: `task-manager/` 또는 `tickets/` 기준 경로
+- `--dir`: `01.agents-task-context/` 또는 `tickets/` 기준 경로 (legacy: `task-manager/`)
 - `--deps`: 의존 티켓 목록 (입력은 파일 stem 기준으로 정규화되어 기록됨)
 - `--priority`: `P0|P1|P2|P3` (Default: `P2`)
 
@@ -68,7 +68,7 @@ tags: []
 **Archiving Completed Tasks**
 
 ```bash
-python3 scripts/archive_tasks.py <node_path>/task-manager
+python3 scripts/archive_tasks.py <node_path>/01.agents-task-context
 ```
 
 Moves `status: done` tickets to `archive/tickets/` and logs them in `archive/README.md`.
@@ -77,7 +77,7 @@ Moves `status: done` tickets to `archive/tickets/` and logs them in `archive/REA
 **Node Validation**
 
 ```bash
-python3 scripts/validate_node.py <node_path>/task-manager
+python3 scripts/validate_node.py <node_path>/01.agents-task-context
 ```
 
 Checks for `cof-environment-set.md` presence and broken ticket dependencies.
@@ -87,7 +87,7 @@ Checks for `cof-environment-set.md` presence and broken ticket dependencies.
 | Script | Purpose |
 |--------|---------|
 | `bootstrap_node.py` | **[NEW]** 1-Click Node Creation & Verification |
-| `create_node.py` | task-manager/ 노드 생성 (Low-level) |
+| `create_node.py` | 01.agents-task-context/ 노드 생성 (Low-level) |
 | `create_ticket.py` | 표준화된 티켓 생성 |
 | `verify_node.py` | 구조 검증 |
 | `validate_node.py` | 노드 건강(Health) 진단 (의존성 등) |
@@ -96,7 +96,7 @@ Checks for `cof-environment-set.md` presence and broken ticket dependencies.
 
 ## Context Scope Rule
 
-1. task-manager/ 노드의 **sibling 디렉토리는 repository로 정의한다.**
+1. NN.agents-task-context/ 노드의 **sibling 디렉토리는 repository로 정의한다.**
 2. sibling 및 descendants 노드 맥락 저장
 3. repository/ 참조 시 children 범위까지만 저장
 4. 모든 기록은 후속 에이전트 재사용 가능하도록 명시적 서술

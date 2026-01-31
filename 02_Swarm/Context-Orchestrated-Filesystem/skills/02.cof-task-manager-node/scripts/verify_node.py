@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-task-manager/ 노드 구조 검증 스크립트
+agents-task-context 노드 구조 검증 스크립트 (legacy: task-manager/)
 
 Usage:
     python verify_node.py <node_path>
@@ -8,8 +8,11 @@ Usage:
 
 import argparse
 import sys
+import re
 from pathlib import Path
 
+NODE_NAME_PATTERN = re.compile(r"^\d{2}\.agents-task-context$")
+LEGACY_NODE_NAME = "task-manager"
 
 REQUIRED_STRUCTURE = {
     "dirs": ["tickets"],
@@ -28,7 +31,7 @@ OPTIONAL_STRUCTURE = {
 
 def verify_task_manager_node(node_path: str) -> dict:
     """
-    task-manager/ 노드 구조 검증
+    agents-task-context 노드 구조 검증
 
     Returns:
         dict: {"valid": bool, "missing": list, "warnings": list, "found": list}
@@ -51,9 +54,15 @@ def verify_task_manager_node(node_path: str) -> dict:
         result["missing"].append(f"Node path is not a directory: {path}")
         return result
 
-    # task-manager/ 이름 확인
-    if path.name != "task-manager":
-        result["warnings"].append(f"Expected 'task-manager/', found '{path.name}/'")
+    # 이름 확인 (권장: NN.agents-task-context/)
+    if path.name == LEGACY_NODE_NAME:
+        result["warnings"].append(
+            f"Legacy node name detected: '{LEGACY_NODE_NAME}/' (recommended: 'NN.agents-task-context/')."
+        )
+    elif not NODE_NAME_PATTERN.match(path.name):
+        result["warnings"].append(
+            f"Expected 'NN.agents-task-context/', found '{path.name}/'."
+        )
 
     # 필수 디렉토리 확인
     for dir_name in REQUIRED_STRUCTURE["dirs"]:
@@ -91,18 +100,18 @@ def verify_task_manager_node(node_path: str) -> dict:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Verify task-manager/ node structure"
+        description="Verify agents-task-context node structure (NN.agents-task-context/)"
     )
     parser.add_argument(
         "node_path",
-        help="Path to task-manager/ directory"
+        help="Path to NN.agents-task-context/ (or legacy: task-manager/) directory"
     )
 
     args = parser.parse_args()
     result = verify_task_manager_node(args.node_path)
 
     if result["valid"]:
-        print(f"OK: Valid task-manager/ node")
+        print("OK: Valid node")
     else:
         print("INVALID: Missing required items", file=sys.stderr)
 

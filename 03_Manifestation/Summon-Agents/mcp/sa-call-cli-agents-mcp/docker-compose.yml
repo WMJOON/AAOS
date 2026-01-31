@@ -1,0 +1,18 @@
+services:
+  sa-call-cli-agents-mcp:
+    build: .
+    image: sa-call-cli-agents-mcp:latest
+    container_name: sa-call-cli-agents-mcp
+    stdin_open: true
+    tty: true
+    volumes:
+      # Mount entire AAOS workspace (includes skills)
+      - ${AAOS_ROOT:?AAOS_ROOT must be set}:/workspace:rw
+    environment:
+      - AAOS_ROOT=/workspace
+      - COF_ROOT=/workspace/02_Swarm/Context-Orchestrated-Filesystem
+      # API keys for each provider
+      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY required}
+      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
+      - GOOGLE_API_KEY=${GOOGLE_API_KEY:-}
+      - GOOGLE_APPLICATION_CREDENTIALS=${GOOGLE_APPLICATION_CREDENTIALS:-}

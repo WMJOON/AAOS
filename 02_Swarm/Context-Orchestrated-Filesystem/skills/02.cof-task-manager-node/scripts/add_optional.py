@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-기존 task-manager/ 노드에 선택적 하위 노드 추가
+기존 agents-task-context 노드에 선택적 하위 노드 추가 (legacy: task-manager/)
 
 Usage:
     python add_optional.py <node_path> --issue-notes
@@ -12,6 +12,7 @@ import argparse
 import sys
 from pathlib import Path
 
+LEGACY_NODE_NAME = "task-manager"
 
 def create_issue_notes(node_path: Path) -> list:
     """issue_notes/ 추가"""
@@ -74,11 +75,11 @@ def create_release_notes(node_path: Path) -> list:
 
 def main():
     parser = argparse.ArgumentParser(
-        description="Add optional child nodes to task-manager/"
+        description="Add optional child nodes to NN.agents-task-context/ (or legacy: task-manager/)"
     )
     parser.add_argument(
         "node_path",
-        help="Path to existing task-manager/ directory"
+        help="Path to existing NN.agents-task-context/ (or legacy: task-manager/) directory"
     )
     parser.add_argument(
         "--issue-notes",
@@ -104,8 +105,11 @@ def main():
         print(f"FAILED: Path does not exist: {path}", file=sys.stderr)
         sys.exit(1)
 
-    if path.name != "task-manager":
-        print(f"WARNING: Expected 'task-manager/', found '{path.name}/'")
+    if path.name == LEGACY_NODE_NAME:
+        print(
+            f"WARNING: Legacy node name detected: '{LEGACY_NODE_NAME}/' "
+            "(recommended: 'NN.agents-task-context/')."
+        )
 
     created = []
 

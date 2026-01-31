@@ -53,28 +53,75 @@ inherits_skill: cof-pointerical-tool-creator
 |---------|------|------|------|
 | `raw_request` | `object` | Y | 검증할 원본 요청 |
 | `existing_ids` | `string[]` | N | 기존 context_id 목록 (유일성 검사용) |
+| `execution_mode` | `enum` | Y | `cof` \| `standalone` (Orchestrator에서 전달) |
 
 ### Outputs
 
 | 산출물 | 타입 | 설명 |
 |--------|------|------|
-| `validation_result` | `object` | `{ passed: bool, errors: [], warnings: [] }` |
+| `validation_result` | `object` | `{ passed: bool, errors: [], warnings: [], mode: "cof"\|"standalone" }` |
 | `parsed_params` | `object` | 파싱된 파라미터 (검증 통과 시) |
 
 ---
 
 ## 3. Validation Rules
 
-### 3.1 Input Validation
+### 3.0 Internal Parallel Execution
 
-| 규칙 | 검증 조건 | 실패 시 에러 코드 |
-|------|----------|------------------|
-| `doc_type` 필수 | 값 존재 + enum 일치 | `MISSING_DOC_TYPE` / `INVALID_DOC_TYPE` |
-| `context_id` 필수 | 값 존재 + 형식 일치 | `MISSING_CONTEXT_ID` / `INVALID_CONTEXT_ID` |
-| `output_path` 필수 | 값 존재 + 부모 디렉토리 존재 | `MISSING_OUTPUT_PATH` / `INVALID_OUTPUT_PATH` |
-| `title` 필수 | 값 존재 | `MISSING_TITLE` |
+Validator 내부에서 3개의 검증 작업을 **병렬로 실행**합니다.
 
-### 3.2 Pointer Safety
+```
+[raw_request + execution_mode]
+      │
+      ▼
+┌─────────────────────────────────────────────┐
+│           Validator (Parallel)              │
+│  ┌─────────────┬─────────────┬───────────┐  │
+│  │ Input Check │ Pointer Safe│ Hard Const│  │  ← 병렬 실행
+│  │  (3.1)      │   (3.2)*    │   (3.3)*  │  │    * COF Mode Only
+│  └──────┬──────┴──────┬──────┴─────┬─────┘  │
+│         └─────────────┴────────────┘        │
+│                       │                      │
+│                 Merge Results                │
+│                       │                      │
+└───────────────────────┼──────────────────────┘
+                        ▼
+              [validation_result]
+```
+
+**병렬화 이점:**
+- 각 검증이 독립적이므로 동시 실행 가능
+- 전체 검증 시간 단축
+- 모든 에러를 한 번에 수집 (fail-fast 아님)
+
+---
+
+### 3.1 Input Validation (공통)
+
+**모든 모드에서 적용**되는 기본 검증입니다.
+
+| 규칙 | COF Mode | Standalone Mode | 에러 코드 |
+|------|----------|-----------------|----------|
+| `doc_type` 필수 | SEV-1 | SEV-1 | `MISSING_DOC_TYPE` |
+| `output_path` 필수 | SEV-1 | SEV-1 | `MISSING_OUTPUT_PATH` |
+| `title` 필수 | SEV-1 | SEV-1 | `MISSING_TITLE` |
+| `context_id` 필수 | SEV-1 | **SEV-3 (권장)** | `MISSING_CONTEXT_ID` |
+| `context_id` 형식 | `cof-[a-z0-9-]+` 강제 | **자유 형식** | `INVALID_CONTEXT_ID` |
+
+#### Standalone Mode 특수 처리
+
+```
+context_id 처리:
+- 값 없음 → 자동 생성 (doc_type-{timestamp})
+- 값 있음 → 형식 검증 생략
+- 경고 추가: "context_id 권장됨"
+```
+
+---
+
+### 3.2 Pointer Safety (COF Mode Only)
+
+**COF Mode에서만 적용**됩니다. Standalone Mode에서는 **전체 생략**.
 
 | 규칙 | 검증 조건 | SEV | 에러 코드 |
 |------|----------|-----|----------|
@@ -82,12 +129,50 @@ inherits_skill: cof-pointerical-tool-creator
 | history 참조 금지 | state가 `active`가 아님 | SEV-2 | `INVALID_HISTORY_REF` |
 | ROLE 일치 | 경로에서 추론한 ROLE과 일치 | SEV-3 | `ROLE_DIR_MISMATCH` |
 
-### 3.3 Hard Constraints
+```
+Standalone Mode:
+- Pointer Safety 전체 생략
+- 경고 없이 통과
+```
+
+---
+
+### 3.3 Hard Constraints (COF Mode Only)
+
+**COF Mode에서만 적용**됩니다. Standalone Mode에서는 **전체 생략**.
 
 | 규칙 | 조건 | SEV | 에러 코드 |
 |------|------|-----|----------|
 | Workflow 수명 전이 | `doc_type=workflow` → lifetime 명시 | SEV-1 | `MISSING_LIFETIME_TRANSITION` |
 | 인덱스 의미 부여 금지 | 숫자 인덱스 참조 없음 | SEV-3 | `INDEX_SEMANTIC_VIOLATION` |
+
+```
+Standalone Mode:
+- Hard Constraints 전체 생략
+- 경고 없이 통과
+```
+
+---
+
+### 3.4 Mode-Based Validation Summary
+
+| 검증 카테고리 | COF Mode | Standalone Mode |
+|--------------|----------|-----------------|
+| Input Validation (3.1) | 전체 적용 | 완화 적용 |
+| Pointer Safety (3.2) | 전체 적용 | **생략** |
+| Hard Constraints (3.3) | 전체 적용 | **생략** |
+
+---
+
+### 3.5 Result Merge Strategy
+
+```
+병렬 결과 병합:
+1. 모든 검증 완료 대기
+2. errors[] 배열 통합 (SEV 순 정렬)
+3. warnings[] 배열 통합
+4. passed = (SEV-1 에러 없음)
+```
 
 ---
 

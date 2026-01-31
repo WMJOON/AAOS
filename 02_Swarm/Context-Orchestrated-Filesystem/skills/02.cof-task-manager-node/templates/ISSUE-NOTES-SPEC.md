@@ -5,7 +5,7 @@
 ## Structure
 
 ```
-task-manager/
+NN.agents-task-context/
 └── issue_notes/
     ├── RULE.md
     └── {parentName}-issue_note-{timestamp}.md
@@ -14,7 +14,7 @@ task-manager/
 ## Creation Command
 
 ```bash
-mkdir -p {targetPath}/task-manager/issue_notes
+mkdir -p {targetPath}/01.agents-task-context/issue_notes
 ```
 
 ## Rules

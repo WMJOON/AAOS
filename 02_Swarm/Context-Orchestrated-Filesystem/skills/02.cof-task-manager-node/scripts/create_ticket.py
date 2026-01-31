@@ -14,6 +14,8 @@ from pathlib import Path
 from datetime import datetime
 import re
 
+NODE_DIRNAMES = ("01.agents-task-context", "task-manager")
+
 TEMPLATE = """---
 type: task-ticket
 status: todo # todo, in-progress, done, blocked
@@ -66,23 +68,23 @@ def create_ticket(
     target_path = Path(target_dir).resolve()
 
     # tickets/ 디렉토리 해석:
-    # - <...>/task-manager/tickets
-    # - <...>/task-manager
+    # - <...>/01.agents-task-context/tickets (or legacy: task-manager/tickets)
+    # - <...>/01.agents-task-context (or legacy: task-manager)
     # - <...>/tickets
-    # - <...>/ (상위에서 task-manager/tickets 탐색)
+    # - <...>/ (상위에서 <node>/tickets 탐색)
     if target_path.name == "tickets":
         tickets_dir = target_path
-    elif target_path.name == "task-manager":
+    elif target_path.name in NODE_DIRNAMES:
         tickets_dir = target_path / "tickets"
     else:
-        direct = target_path / "tickets"
-        nested = target_path / "task-manager" / "tickets"
-        tickets_dir = direct if direct.exists() else nested
+        candidates = [target_path / "tickets"]
+        candidates.extend([target_path / d / "tickets" for d in NODE_DIRNAMES])
+        tickets_dir = next((p for p in candidates if p.exists()), candidates[0])
 
     if not tickets_dir.exists():
         print(
             f"Error: 'tickets/' directory not found in {target_dir}. "
-            "Expected 'task-manager/tickets/' or 'tickets/'.",
+            "Expected '01.agents-task-context/tickets/', 'task-manager/tickets/', or 'tickets/'.",
             file=sys.stderr
         )
         return False
