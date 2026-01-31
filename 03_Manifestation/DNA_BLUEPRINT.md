@@ -56,3 +56,6 @@ Manifestation은 Swarm의 의도를 **실행 가능한 인터페이스/런타임
 - Output: 실행 결과(성공/실패), 로그 요약, 증빙 링크
 - Reporting: Record Archive + (필요 시) Immune System/Inquisitor
 
+## Components (Draft)
+
+- AI Collaborator: `ai-collaborator/DNA_BLUEPRINT.md`

@@ -23,3 +23,6 @@ Manifestation은 AAOS의 **현현과 접속(Manifestation & Interface)** 계층�
 - META Doctrine: `04_Agentic_AI_OS/METADoctrine.md`
 - Immune Doctrine: `04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md`
 
+## Components
+
+- AI Collaborator: `ai-collaborator/` (external AI CLI execution binding)
