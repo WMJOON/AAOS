@@ -21,11 +21,11 @@ Meta Spec (v0.2)
 - 대상: 임의의 작업 디렉토리(프로젝트/노트/레포 등)
 - 생성 위치: 대상 디렉토리의 자식으로 `task-manager/`를 생성
 - 산출물:
-  - `task-manager/RULE.md`
+  - `task-manager/cof-environment-set.md`
   - `task-manager/troubleshooting.md`
   - `task-manager/tickets/` (+ 티켓 파일들)
-  - (선택) `task-manager/issue_notes/` + `RULE.md`
-  - (선택) `task-manager/release_notes/` + `RULE.md`
+  - (선택) `task-manager/issue_notes/` + `cof-environment-set.md`
+  - (선택) `task-manager/release_notes/` + `cof-environment-set.md`
   - (아카이빙 시) `task-manager/archive/tickets/` + `task-manager/archive/README.md`
 
 ---
@@ -112,5 +112,5 @@ Task-Manager Node Workflow:
 
 ## 7. References
 
-- Rule Genome: `../../RULE.md`
+- Rule Genome: `../../rules/cof-environment-set.md`
 - COF Doctrine: `../../COF_DOCTRINE.md`

@@ -9,7 +9,7 @@ status: canonical
 # Normative References (inherit Immune System)
 canon_reference: "04_Agentic_AI_OS/README.md"
 meta_doctrine_reference: "04_Agentic_AI_OS/METADoctrine.md"
-immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md"
+immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_rules/cof-environment-set.md"
 inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/"
 audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AUDIT_LOG.md"
 
@@ -46,7 +46,7 @@ META Doctrine(METADoctrine.md) 및 **COF Doctrine**에 의거하여 작성되었
 - **Desc**: 4 Pillars of COF Philosophy (Locality, Self-Desc, Agent-First, Lifecycle)
 
 ## 1. Rule Genome
-- **Pointer**: `RULE.md`
+- **Pointer**: `rules/cof-environment-set.md`
 - **Desc**: Skill-Mediated Creation Mandate
 
 ## 2. Skill Genome

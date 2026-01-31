@@ -16,7 +16,7 @@ COF는 단순한 파일 규칙이 아니라, **"AI Agent가 물리적 공간(Fil
 | Pillar | Principle | Action |
 |--------|-----------|--------|
 | **Context Locality** | 작업이 일어나는 곳에 맥락이 있어야 한다 | 모든 노드는 작업 공간의 Sibling 위치에 배치 |
-| **Self-Descriptiveness** | 말하지 않는 노드는 존재하지 않는 것이다 | 모든 핵심 노드에 `RULE.md` 배치 |
+| **Self-Descriptiveness** | 말하지 않는 노드는 존재하지 않는 것이다 | 모든 핵심 노드에 `rules/cof-environment-set.md` 배치 |
 | **Agent-First Design** | 에이전트가 읽기 좋아야 한다 | YAML Frontmatter 필수화, 정형화된 네이밍 |
 | **Traceable Lifecycle** | 시작과 끝이 없는 데이터는 쓰레기다 | Natural Dissolution 원칙 적용 |
 
@@ -62,7 +62,7 @@ lifetime: ticket | persistent | archived
 ---
 ```
 
-> 상세: [RULE.md](RULE.md) § 0. COF Pointer Model Baseline
+> 상세: [rules/cof-environment-set.md](rules/cof-environment-set.md) § 0. COF Pointer Model Baseline
 
 ---
 
@@ -72,7 +72,7 @@ lifetime: ticket | persistent | archived
 Context-Orchestrated-Filesystem/
 ├── README.md                    ← 현재 문서
 ├── COF_DOCTRINE.md              ← 4 Pillars 철학
-├── RULE.md                      ← Rule Genome (실행 지침)
+├── rules/cof-environment-set.md                      ← Rule Genome (실행 지침)
 ├── DNA.md                       ← DNA 정의
 ├── DNA_BLUEPRINT.md             ← Lifecycle/Resource Limits
 │
@@ -167,7 +167,7 @@ python3 skills/01.cof-glob-indexing/scripts/cof_glob_indexing.py \
 | Document | Role | Description |
 |----------|------|-------------|
 | [COF_DOCTRINE.md](COF_DOCTRINE.md) | Doctrine Genome | 4 Pillars 철학 |
-| [RULE.md](RULE.md) | Rule Genome | 실행 지침 (Pointer Model, Skill Mandate) |
+| [rules/cof-environment-set.md](rules/cof-environment-set.md) | Rule Genome | 실행 지침 (Pointer Model, Skill Mandate) |
 | [DNA.md](DNA.md) | DNA Definition | Genome Pointers 정의 |
 | [DNA_BLUEPRINT.md](DNA_BLUEPRINT.md) | Lifecycle Genome | Natural Dissolution, Resource Limits |
 

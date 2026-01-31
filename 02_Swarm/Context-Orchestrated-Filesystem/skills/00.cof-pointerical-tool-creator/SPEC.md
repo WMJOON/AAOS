@@ -493,7 +493,7 @@ Sub-Agent는 SKILL 문서의 변형이다.
 | Workflow Normative | `references/workflow-normative-interpretation.md` | Workflow 문서 작성/해석 규범 |
 | Sub-Agent Normative | `references/subagent-normative-interpretation.md` | Sub-Agent 문서 작성/해석 규범 |
 | Glob Patterns | `references/glob-patterns.md` | Glob 패턴 문법 정의 |
-| COF Rule Genome | `../../RULE.md` | COF 전체 규칙 정의 |
+| COF Rule Genome | `../../rules/cof-environment-set.md` | COF 전체 규칙 정의 |
 
 ---
 

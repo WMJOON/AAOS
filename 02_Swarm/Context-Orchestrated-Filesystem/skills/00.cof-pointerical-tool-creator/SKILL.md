@@ -109,4 +109,4 @@ Doc Generation Progress:
 | [SPEC.md](SPEC.md) | 전체 설계 스펙 |
 | [references/](references/) | Normative 해석 문서들 |
 | [templates/](templates/) | 문서 타입별 템플릿 |
-| [../../RULE.md](../../RULE.md) | COF Rule Genome |
+| [../../rules/cof-environment-set.md](../../rules/cof-environment-set.md) | COF Rule Genome |

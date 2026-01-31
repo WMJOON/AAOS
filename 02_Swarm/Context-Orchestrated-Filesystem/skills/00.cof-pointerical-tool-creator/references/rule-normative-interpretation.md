@@ -2,7 +2,7 @@
 
 ## 1. RULE 문서용 Normative Interpretation (Glob)
 
-아래 섹션은 `RULE.md` 또는 `COF_RULES.md`에 별도 섹션으로 분리하는 것을 전제로 한다.
+아래 섹션은 `cof-environment-set.md` 또는 `COF_RULES.md`에 별도 섹션으로 분리하는 것을 전제로 한다.
 
 ### Glob Pattern Interpretation Rules (Normative)
 

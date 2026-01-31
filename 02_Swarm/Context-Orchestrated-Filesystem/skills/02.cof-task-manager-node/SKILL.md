@@ -80,7 +80,7 @@ Moves `status: done` tickets to `archive/tickets/` and logs them in `archive/REA
 python3 scripts/validate_node.py <node_path>/task-manager
 ```
 
-Checks for `RULE.md` presence and broken ticket dependencies.
+Checks for `cof-environment-set.md` presence and broken ticket dependencies.
 
 ## Utility Scripts
 
@@ -103,8 +103,8 @@ Checks for `RULE.md` presence and broken ticket dependencies.
 
 ## Reference
 
-- [NODE_RULE.md](templates/NODE_RULE.md): RULE.md 템플릿
+- [NODE_cof-environment-set.md](templates/NODE_cof-environment-set.md): cof-environment-set.md 템플릿
 - [TICKET-TEMPLATE.md](templates/TICKET-TEMPLATE.md): Ticket 템플릿
-- [ISSUE_NOTE_RULE.md](templates/ISSUE_NOTE_RULE.md): issue_notes/ 템플릿
-- [RELEASE_NOTE_RULE.md](templates/RELEASE_NOTE_RULE.md): release_notes/ 템플릿
-- Rule Genome: `../../RULE.md`
+- [ISSUE_NOTE_cof-environment-set.md](templates/ISSUE_NOTE_cof-environment-set.md): issue_notes/ 템플릿
+- [RELEASE_NOTE_cof-environment-set.md](templates/RELEASE_NOTE_cof-environment-set.md): release_notes/ 템플릿
+- Rule Genome: `../../rules/cof-environment-set.md`

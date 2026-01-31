@@ -9,7 +9,7 @@ status: canonical
 # Normative References (inherit Immune System)
 canon_reference: "04_Agentic_AI_OS/README.md"
 meta_doctrine_reference: "04_Agentic_AI_OS/METADoctrine.md"
-immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md"
+immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_rules/cof-environment-set.md"
 inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/"
 audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AUDIT_LOG.md"
 
@@ -42,7 +42,7 @@ inquisitor:
 - What it is: Context-Orchestrated Filesystem (COF) 규칙/스킬 묶음
 - Doctrine: `COF_DOCTRINE.md` (4 Pillars of COF)
 - DNA: `DNA.md` (Rule/Skill/Lifecycle 통합 정의)
-- Rule: `RULE.md`
+- Rule: `rules/cof-environment-set.md`
 - Skills: `skills/` (예: task-manager node 생성/티켓 발행/아카이빙)
 
 ## Canonical Layout
@@ -53,7 +53,7 @@ COF v0.1.3부터 COF canonical 문서는 버전 폴더가 아니라 본 디렉�
 Context-Orchestrated-Filesystem/
 ├── README.md
 ├── COF_DOCTRINE.md
-├── RULE.md
+├── rules/cof-environment-set.md
 ├── DNA.md
 ├── DNA_BLUEPRINT.md
 ├── skills/
@@ -62,7 +62,7 @@ Context-Orchestrated-Filesystem/
 
 ## Growth Rules
 
-- 새로운 노드 구조/티켓 스키마 추가는 `RULE.md` 및 관련 스킬 문서(`skills/*/SPEC.md`, `skills/*/SKILL.md`)와 함께 업데이트한다.
+- 새로운 노드 구조/티켓 스키마 추가는 `rules/cof-environment-set.md` 및 관련 스킬 문서(`skills/*/SPEC.md`, `skills/*/SKILL.md`)와 함께 업데이트한다.
 - 신규 자동화 스크립트 추가 시 `resource_limits`를 초과하지 않도록 한다.
 
 ## Dissolution Procedure

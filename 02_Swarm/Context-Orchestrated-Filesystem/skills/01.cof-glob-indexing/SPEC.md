@@ -288,7 +288,7 @@ history
 |------|------|------|
 | Glob Patterns | `[skills]/00.cof-pointerical-tool-creator/[reference]/glob-patterns.md` | glob 패턴 문법 정의 |
 | Rule Normative | `[skills]/00.cof-pointerical-tool-creator/[reference]/rule-normative-interpretation.md` | 규칙 해석 지침 |
-| COF Rule Genome | `[root]/RULE.md` | COF 전체 규칙 정의 |
+| COF Rule Genome | `[root]/cof-environment-set.md` | COF 전체 규칙 정의 |
 
 > **경로 표기법**: `[role]`은 해당 role을 가진 디렉토리의 실제 이름(예: `00.index/`, `01.reference/`)으로 치환한다. `[root]`는 해당 COF 노드의 Node Root를 의미한다.
 
