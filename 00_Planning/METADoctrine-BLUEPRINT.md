@@ -27,7 +27,7 @@ references:
     permission_request_template: "../01_Nucleus/Immune_system/templates/PERMISSION-REQUEST-TEMPLATE.md"
   deliberation_chamber: "../01_Nucleus/Deliberation_Chamber/README.md"
   record_archive: "../01_Nucleus/Record_Archive/README.md"
-  cof_latest_dna: "../02_Swarm/01_context-orchestrated-filesystem/COF%20v0.1.3/DNA.md"
+  cof_latest_dna: "../02_Swarm/01_context-orchestrated-filesystem/DNA.md"
 ---
 
 # METADoctrine Extension Blueprint (Draft)

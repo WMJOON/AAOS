@@ -5,7 +5,7 @@ COF를 planning 레이어에서 “요약/의도/확장 아이디어”로 다�
 ## Canonical Sources
 
 - Root: [01_context-orchestrated-filesystem](../02_Swarm/01_context-orchestrated-filesystem/DNA_BLUEPRINT.md)
-- Latest (existing): [COF v0.1.3 DNA](../02_Swarm/01_context-orchestrated-filesystem/COF%20v0.1.3/DNA.md)
+- Latest: [COF v0.1.3 DNA](../02_Swarm/01_context-orchestrated-filesystem/DNA.md)
 
 ## What COF Is (Draft)
 

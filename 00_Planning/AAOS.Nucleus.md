@@ -73,4 +73,4 @@ IS -->|Reject| ARG
 - Canon: [README.md](../README.md)
 - META Doctrine: [METADoctrine.md](../METADoctrine.md)
 - Deliberation Chamber DNA: [DNA_BLUEPRINT](../01_Nucleus/Deliberation_Chamber/DNA_BLUEPRINT.md)
-- COF (Context Orchestrated Filesystem): [COF v0.1.3 DNA](../02_Swarm/01_context-orchestrated-filesystem/COF%20v0.1.3/DNA.md)
+- COF (Context Orchestrated Filesystem): [COF v0.1.3 DNA](../02_Swarm/01_context-orchestrated-filesystem/DNA.md)

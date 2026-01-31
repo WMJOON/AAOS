@@ -1,6 +1,6 @@
 ---
 meta_doctrine: AAOS_META_DOCTRINE
-version: v0.1.11
+version: v0.1.13
 type: doctrine-rule
 status: canonical
 description: >
@@ -323,7 +323,7 @@ COF 구조의
 
 #### 2.1.1-1. COF 최신 정식 DNA (예시)
 
-- `02_Swarm/01_context-orchestrated-filesystem/COF v0.1.3/DNA.md`
+- `02_Swarm/01_context-orchestrated-filesystem/DNA.md`
 
 COF 내부 실제 노드 구조, Rule Genome, Skill Genome, Lifecycle Genome을 기술한다.
 
@@ -345,6 +345,49 @@ COO 구조의
 
 - `DNA.md`는 아직 미존재(승격 전).
 - 승격 시 Inquisitor 승인 + Audit Log 고정 후 `DNA.md`로 승격한다.
+
+---
+
+### 2.3. Cortex_Agora (Swarm Behavior Observer / Proposal Swarm)
+
+`02_Swarm/Cortex_Agora/`
+
+Cortex_Agora는 Swarm들의 행동을 관찰하고(Behavior Trace),
+반복되는 흐름을 “개선 제안”으로 변환한다.
+
+#### 책임 경계
+
+- Record_Archive는 Nucleus의 자산이며 “사실/증빙”을 보존한다(append-only).
+- Cortex_Agora는 Record_Archive를 **직접 읽지 않는다**.
+- Cortex_Agora의 입력은 “기록”이 아니라 “행동”이다(Behavior Feed).
+- Cortex_Agora의 출력은 “집행”이 아니라 “관찰 결과 + 제안”이다.
+
+#### 금지
+
+- 실행/자동반영/룰수정/에이전트 호출 금지
+
+---
+
+### 2.4. Swarm Observability Standard (Behavior Feed) — 권장/필수
+
+Swarm의 “행동(Behavior Trace)”은 Record_Archive(증빙)가 아니라,
+Cortex_Agora 관찰 입력(Behavior Feed)으로 남긴다.
+
+#### 권장(Recommended)
+
+- Swarm은 자신의 스코프 하위에 Behavior Feed를 둔다.
+  - 권장 경로: `<swarm_root>/behavior/BEHAVIOR_FEED.jsonl`
+- Swarm DNA frontmatter에 `observability.behavior_feed`를 기록한다.
+
+#### 필수(Required)
+
+아래 조건 중 하나라도 해당하는 Swarm은 Behavior Feed를 필수로 남긴다.
+
+- Manifestation 트리거(외부 실행 바인딩)가 발생하는 경우
+- Permission Request 또는 구조 생성/확장에 관여하는 경우
+- `halt/escalate` 또는 Human Gate로 종료되는 흐름이 존재하는 경우
+
+필수 최소 이벤트는 `02_Swarm/Cortex_Agora/DNA_BLUEPRINT.md`의 `Behavior Feed (Behavior Trace)` 스키마를 따른다.
 
 ---
 
@@ -434,3 +477,5 @@ Doctrine 형태로 집행 가능하게 정의하는 교리 규칙이다.
 | v0.1.9 | 2026-01-27 | 디렉토리 구조를 Nucleus/Swarm/Manifestation으로 재편: `01_Nucleus/{Record_Archive,Immune_system,Deliberation_Chamber}`, `02_Swarm`, `03_Manifestation`. Inquisitor 도구의 루트 탐색 경로 정합화. |
 | v0.1.10 | 2026-01-27 | 명칭 통일: `03_AAOS-Manifestation` → `03_Manifestation` (디렉토리/참조 경로 정합화). |
 | v0.1.11 | 2026-01-27 | 레거시(개념) 경로 제거/정합화(실경로만), COF/COO 레지스트리 정렬, Auto-Enforcement 실제 경로/CLI 고정, Change Packet 템플릿/동선 추가, Manifestation 최소 계약 명문화. |
+| v0.1.12 | 2026-01-30 | Record_Archive(사실/증빙) vs Cortex_Agora(행동 관찰/제안) 책임 경계 및 입력/출력 규약 명문화. |
+| v0.1.13 | 2026-01-30 | Swarm Observability Standard(Behavior Feed) 권장/필수 표준 추가. |

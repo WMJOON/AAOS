@@ -115,7 +115,7 @@ references:
 
 - Role: planning/cognition/pattern/skill (직접 하드웨어 실행은 하지 않음)
 - Examples:
-  - `Cortex_Agora/` (토론·아이데이션·개선 Argument Swarm; 존재/경로는 Swarm DNA로 정의)
+  - `Cortex_Agora/` (Swarm 행동(Behavior Trace) 관찰·요약·제안; Record_Archive 직접 조회 금지)
   - `01_context-orchestrated-filesystem/` (COF)
 
 ### Manifestation (`03_Manifestation/`)
@@ -340,7 +340,7 @@ def append_entry(log_path: str, entry: AuditEntry) -> str:
 
 - 컨테이너(버전 보관): `02_Swarm/01_context-orchestrated-filesystem/`
   - 컨테이너 Blueprint: `02_Swarm/01_context-orchestrated-filesystem/DNA_BLUEPRINT.md`
-- 최신 정식 DNA(예시): `02_Swarm/01_context-orchestrated-filesystem/COF v0.1.3/DNA.md`
+- 최신 정식 DNA(예시): `02_Swarm/01_context-orchestrated-filesystem/DNA.md`
 
 ### 2.2. AAOS-COO (Context Orchestrated Ontology)
 

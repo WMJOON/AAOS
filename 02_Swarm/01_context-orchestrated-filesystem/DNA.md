@@ -35,39 +35,27 @@ inquisitor:
   required: true
   audit_log: "../../01_Nucleus/Immune_system/AUDIT_LOG.md"
 ---
-# AAOS-COF DNA Blueprint (v0.1.3)
 
-## Overview
+# AAOS-COF DNA (v0.1.3)
 
-- What it is: Context-Orchestrated Filesystem (COF) 규칙/스킬 묶음
-- Doctrine: `COF_DOCTRINE.md` (4 Pillars of COF)
-- DNA: `DNA.md` (Rule/Skill/Lifecycle 통합 정의)
-- Rule: `RULE.md`
-- Skills: `skills/` (예: task-manager node 생성/티켓 발행/아카이빙)
+본 DNA는 `COF v0.1.3` 군체(Swarm) 구조를 정의하는 핵심 유전체(Genome)이다.
+META Doctrine(METADoctrine.md) 및 **COF Doctrine**에 의거하여 작성되었다.
 
-## Canonical Layout
+## 0. Doctrine Genome
+- **Pointer**: `COF_DOCTRINE.md`
+- **Desc**: 4 Pillars of COF Philosophy (Locality, Self-Desc, Agent-First, Lifecycle)
 
-COF v0.1.3부터 COF canonical 문서는 버전 폴더가 아니라 본 디렉토리에 직접 위치한다.
+## 1. Rule Genome
+- **Pointer**: `RULE.md`
+- **Desc**: Skill-Mediated Creation Mandate
 
-```
-01_context-orchestrated-filesystem/
-├── README.md
-├── COF_DOCTRINE.md
-├── RULE.md
-├── DNA.md
-├── DNA_BLUEPRINT.md
-├── skills/
-└── _archive/      (구버전/이전 스냅샷 보관)
-```
+## 2. Skill Genome
+- **Pointer**: `skills/`
+- **Desc**: `cof-task-manager-node` (creation, ticket, archive, validate)
 
-## Growth Rules
+## 3. Lifecycle Genome
+- **Pointer**: `DNA_BLUEPRINT.md`
+- **Desc**: Natural Dissolution & Resource Limits
 
-- 새로운 노드 구조/티켓 스키마 추가는 `RULE.md` 및 관련 스킬 문서(`skills/*/SPEC.md`, `skills/*/SKILL.md`)와 함께 업데이트한다.
-- 신규 자동화 스크립트 추가 시 `resource_limits`를 초과하지 않도록 한다.
-
-## Dissolution Procedure
-
-Natural Dissolution에 따라 구버전이 되면:
-1. 상위 버전으로 승계 문서화
-2. 핵심 규칙/사용법 요약 후 아카이브
-3. 구버전 파일 정리
+---
+> "See referenced files for full definitions."
