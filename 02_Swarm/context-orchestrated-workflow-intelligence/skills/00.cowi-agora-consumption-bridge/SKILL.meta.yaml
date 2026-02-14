@@ -1,0 +1,10 @@
+context_id: cowi-agora-consumption-bridge
+role: SKILL
+state: const
+scope: swarm
+lifetime: persistent
+created: "2026-02-14"
+trigger: model_decision
+consumers:
+  - context-orchestrated-workflow-intelligence
+notes: "COF metadata sidecar for SKILL.md minimal frontmatter policy."

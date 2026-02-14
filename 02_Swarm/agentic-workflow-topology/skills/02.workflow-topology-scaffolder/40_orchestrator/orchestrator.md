@@ -1,6 +1,14 @@
 # Orchestrator — Workflow Topology Designer
 
-## 5-Phase 프로세스
+## 6-Phase 프로세스
+
+### Phase 0: Mandatory Preflight
+
+1. `preflight.questions[0]`로 PF1을 반드시 배치한다.
+2. 고정 질문: `멘탈모델 먼저 세팅할까요?`
+3. PF1 응답이 yes이면 `mental_model_bundle` 준비를 선행한다.
+
+**산출물**: `preflight.questions[]` + `workflow_profile`
 
 ### Phase 1: Goal → DQ 분해 → RSV_total
 
@@ -30,7 +38,9 @@
 2. 각 노드에 Explicit Output 정의
 3. θ_GT band, rsv_target 설정
 4. assigned_dqs 연결
-5. 엣지(의존관계) 정의
+5. 전략/고위험이면 `H1`, `H2` 노드 강제 삽입
+6. 전략/고위험이면 `T4 -> C1 -> H1` 엣지 강제 삽입
+7. 엣지(의존관계) 정의
 
 **산출물**: `task_graph.nodes[]` + `task_graph.edges[]`
 
@@ -44,9 +54,21 @@
 
 **산출물**: `loop_risk_assessment[]` + `handoff_strategy`
 
-### Phase 5: Workflow Spec 산출
+### Phase 5: H1 Finalization Gate
 
-1. Phase 1~4 결과를 통합하여 Workflow Spec JSON 생성
+전략/고위험 워크플로우에서 `H1` finalization 전에 아래를 검증한다.
+
+1. `web_evidence_YYYY-MM-DD.md` 존재
+2. COWI 산출물 존재:
+  - `relation_context_map`
+  - `skill_usage_adaptation_report`
+3. `validate_strategy_h1_gate.py` 결과가 PASS
+
+**산출물**: `strategy_gate`
+
+### Phase 6: Workflow Spec 산출
+
+1. Phase 0~5 결과를 통합하여 Workflow Spec JSON 생성
 2. execution_policy 작성 (Continue/Reframe/Stop 규칙)
 3. (선택) Mermaid 시각화
 
@@ -63,7 +85,8 @@ Phase 1 → (모듈 불필요, Core만으로 처리)
 Phase 2 → topology_selection (필수)
 Phase 3 → node_design (필수)
 Phase 4 → loop_risk (필수) + handoff (조건부)
-Phase 5 → (모듈 불필요, 통합만)
+Phase 5 → strategy_gate 검증 (필수, strategy/high_risk 한정)
+Phase 6 → (모듈 불필요, 통합만)
 ```
 
 ### handoff 모듈 로딩 조건
@@ -72,6 +95,7 @@ Phase 5 → (모듈 불필요, 통합만)
 if task_graph에 다음 중 하나 이상:
   - parallel 노드 존재
   - human_gate 노드 존재
+  - strategy_gate.enabled == true
   - 다른 Agent/모델 위임 노드 존재
   - 컨텍스트 윈도우 초과 예상
 then:

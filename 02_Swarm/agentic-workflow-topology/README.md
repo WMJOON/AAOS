@@ -28,7 +28,8 @@ description: 워크플로우 구조/토폴로지 설계를 담당하는 Swarm. �
 - 멘탈모델 정의/로딩 정책
 - workflow topology 및 scaffold spec 설계
 - task-node별 멘탈모델 적용 방법 설계
-- SQLite SoT(`agent-audit-log v1.2.0`) 기반 실행 관찰/개선 제안
+- 전략/고위험 워크플로우의 PF1/H1/H2/H1-gate 강제
+- SQLite SoT(`agent-audit-log v1.3.0`) 기반 실행 관찰/개선 제안
 - SQLite SoT -> Behavior Feed(JSONL) 수동 요약 export
 - 주간/격주 수동 점검 템플릿 운영
 - 스킬 체계 메타관리(정책+체크리스트)
@@ -54,4 +55,20 @@ description: 워크플로우 구조/토폴로지 설계를 담당하는 Swarm. �
 python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-observability-and-evolution/scripts/export_behavior_feed.py \
   --db-path 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/00.context/agent_log.db \
   --out-path 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/behavior/BEHAVIOR_FEED.jsonl
+```
+
+## Strategy H1 Gate Validation
+
+- evidence path:
+  `02_Swarm/agentic-workflow-topology/agents/<agent-family>/<version>/artifacts/web_evidence/web_evidence_YYYY-MM-DD.md`
+- COWI artifacts required:
+  - `relation_context_map`
+  - `skill_usage_adaptation_report`
+
+```bash
+python3 02_Swarm/agentic-workflow-topology/skills/02.workflow-topology-scaffolder/scripts/validate_strategy_h1_gate.py \
+  --workflow-spec /path/to/workflow_topology_spec.json \
+  --agent-family claude \
+  --agent-version 4.0 \
+  --proposal-id P-SWARM-XXXX
 ```

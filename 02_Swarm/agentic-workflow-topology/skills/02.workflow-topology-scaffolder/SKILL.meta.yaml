@@ -1,0 +1,7 @@
+context_id: workflow-topology-scaffolder
+role: SKILL
+state: const
+scope: swarm
+lifetime: persistent
+created: "2026-02-14"
+

@@ -56,6 +56,8 @@ python3 scripts/create_pointerical_doc.py \
   --lifetime persistent
 ```
 
+`--type skill`의 경우 같은 디렉토리에 `SKILL.meta.yaml`을 함께 생성한다.
+
 ---
 
 ## Manual Usage (Templates)
@@ -65,6 +67,7 @@ python3 scripts/create_pointerical_doc.py \
 | 문서 타입 | 템플릿 |
 |----------|--------|
 | SKILL | [templates/SKILL_TEMPLATE.md](templates/SKILL_TEMPLATE.md) |
+| SKILL META | [templates/SKILL_META_TEMPLATE.yaml](templates/SKILL_META_TEMPLATE.yaml) |
 | RULE | [templates/RULE_TEMPLATE.md](templates/RULE_TEMPLATE.md) |
 | WORKFLOW | [templates/WORKFLOW_TEMPLATE.md](templates/WORKFLOW_TEMPLATE.md) |
 | SUB-AGENT | [templates/SUB_AGENT_TEMPLATE.md](templates/SUB_AGENT_TEMPLATE.md) |
@@ -77,7 +80,7 @@ python3 scripts/create_pointerical_doc.py \
 Doc Generation Progress:
 - [ ] Step 1: Validate Inputs (context_id 형식/유일성, output_path 유효성)
 - [ ] Step 2: Resolve Template (doc_type에 맞는 템플릿 선택)
-- [ ] Step 3: Render Frontmatter (context_id/role/state/scope/lifetime/created)
+- [ ] Step 3: Render Frontmatter (SKILL: minimal, COF metadata: SKILL.meta.yaml)
 - [ ] Step 4: Render Body (플레이스홀더 치환)
 - [ ] Step 5: Validate Pointer Safety (Hard Constraints 검증)
 - [ ] Step 6: Write Document (저장 및 반환 구조 생성)
@@ -108,4 +111,4 @@ Doc Generation Progress:
 | [SPEC.md](SPEC.md) | 전체 설계 스펙 |
 | [references/](references/) | Normative 해석 문서들 |
 | [templates/](templates/) | 문서 타입별 템플릿 |
-| [../../rules/cof-environment-set.md](../../rules/cof-environment-set.md) | COF Rule Genome |
+| [references/cof-environment-set.md](references/cof-environment-set.md) | COF Governance Guide |

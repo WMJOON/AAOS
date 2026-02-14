@@ -1,0 +1,9 @@
+context_id: cof-xxxx
+role: SKILL
+state: const
+scope: swarm
+lifetime: persistent
+created: "YYYY-MM-DD"
+trigger: model_decision
+consumers: []
+notes: ""

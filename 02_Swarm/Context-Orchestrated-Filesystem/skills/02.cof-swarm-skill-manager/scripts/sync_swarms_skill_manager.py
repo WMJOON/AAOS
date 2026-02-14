@@ -19,6 +19,7 @@ if str(SHARED_DIR) not in sys.path:
     sys.path.insert(0, str(SHARED_DIR))
 
 from frontmatter import FrontmatterParseError, as_list, safe_str, split_frontmatter_and_body
+from validate_skill_frontmatter import validate_skill_contracts
 
 
 SWARM_SKILL_DIR_CANDIDATES = ("skills", "SKILLS")
@@ -44,6 +45,24 @@ def read_frontmatter(md_path: Path) -> Tuple[Dict[str, Any], List[str]]:
     return data, errors
 
 
+def read_sidecar_meta(meta_path: Path) -> Tuple[Dict[str, Any], List[str]]:
+    errors: List[str] = []
+    if not meta_path.exists():
+        return {}, [f"{meta_path}: not found"]
+    try:
+        text = meta_path.read_text(encoding="utf-8").strip()
+    except OSError as exc:
+        return {}, [f"{meta_path}: cannot read - {exc}"]
+    wrapped = f"---\n{text}\n---\n"
+    try:
+        fm, _ = split_frontmatter_and_body(wrapped)
+    except FrontmatterParseError as exc:
+        return {}, [f"{meta_path}: parse error - {exc}"]
+    if not fm:
+        errors.append(f"{meta_path}: missing/invalid metadata")
+    return fm, errors
+
+
 @dataclass
 class SkillRecord:
     directory: Path
@@ -56,6 +75,7 @@ class SkillRecord:
     has_scripts: bool
     has_templates: bool
     has_references: bool
+    metadata_source: str
     consumers: List[str] = field(default_factory=list)
 
 
@@ -78,18 +98,38 @@ def discover_skills(swarm_root: Path) -> List[SkillRecord]:
                 continue
 
             fm, _ = read_frontmatter(md_path)
+            meta_path = sub / "SKILL.meta.yaml"
+            metadata_source = "none"
+            meta: Dict[str, Any] = {}
+            legacy_keys = {"context_id", "role", "state", "scope", "lifetime", "trigger", "created"}
+            legacy_present = any(key in fm for key in legacy_keys)
+            if meta_path.exists():
+                meta, meta_errors = read_sidecar_meta(meta_path)
+                if meta_errors:
+                    metadata_source = "broken_sidecar"
+                    meta = {}
+                else:
+                    metadata_source = "skill_meta"
+            elif legacy_present:
+                metadata_source = "legacy_frontmatter"
+
+            context_id = safe_str(meta.get("context_id"), safe_str(fm.get("context_id"), ""))
+            trigger = safe_str(meta.get("trigger"), safe_str(fm.get("trigger"), ""))
+            role = safe_str(meta.get("role"), safe_str(fm.get("role"), ""))
+            created = safe_str(meta.get("created"), safe_str(fm.get("created"), ""))
             skills.append(
                 SkillRecord(
                     directory=sub,
                     name=safe_str(fm.get("name"), sub.name),
-                    context_id=safe_str(fm.get("context_id"), ""),
+                    context_id=context_id,
                     description=safe_str(fm.get("description"), "").replace("\n", " "),
-                    trigger=safe_str(fm.get("trigger"), ""),
-                    role=safe_str(fm.get("role"), ""),
-                    created=safe_str(fm.get("created"), ""),
+                    trigger=trigger,
+                    role=role,
+                    created=created,
                     has_scripts=(sub / "scripts").is_dir(),
                     has_templates=(sub / "templates").is_dir(),
                     has_references=(sub / "references").is_dir(),
+                    metadata_source=metadata_source,
                 )
             )
 
@@ -131,7 +171,11 @@ def validate(records: List[SkillRecord]) -> Tuple[List[str], List[str]]:
         if not skill.description:
             warnings.append(f"{skill.directory}: missing description")
         if not skill.context_id:
-            errors.append(f"{skill.directory}: missing context_id in SKILL.md")
+            warnings.append(f"{skill.directory}: missing context_id in SKILL.meta.yaml or legacy SKILL.md")
+        if skill.metadata_source == "legacy_frontmatter":
+            warnings.append(f"{skill.directory}: WARN(legacy_frontmatter) using inline SKILL.md metadata")
+        if skill.metadata_source == "broken_sidecar":
+            errors.append(f"{skill.directory}: invalid SKILL.meta.yaml sidecar")
 
     seen_contexts: Dict[str, List[str]] = {}
     for skill in records:
@@ -407,6 +451,17 @@ def parse_args() -> argparse.Namespace:
         action="store_true",
         help="Skip writing registry files.",
     )
+    parser.add_argument(
+        "--allow-legacy-frontmatter",
+        action="store_true",
+        help="Allow legacy SKILL.md inline metadata during migration.",
+    )
+    parser.add_argument(
+        "--strict-skill-frontmatter",
+        action="store_true",
+        default=False,
+        help="Hard-fail when SKILL.md uses forbidden keys (recommended).",
+    )
     return parser.parse_args()
 
 
@@ -418,6 +473,22 @@ def main() -> int:
 
     if not swarm_root.is_dir():
         print(f"ERROR: swarm-root not found -> {swarm_root}")
+        return 1
+
+    strict_enabled = args.strict_skill_frontmatter or (not args.allow_legacy_frontmatter)
+    fm_errors, fm_warnings = validate_skill_contracts(
+        swarm_root,
+        strict=strict_enabled,
+        allow_legacy_frontmatter=args.allow_legacy_frontmatter,
+    )
+    if fm_warnings:
+        print("FRONTMATTER WARNINGS:")
+        for warning in fm_warnings:
+            print(f"- {warning}")
+    if fm_errors:
+        print("FRONTMATTER ERRORS:")
+        for error in fm_errors:
+            print(f"- {error}")
         return 1
 
     swarms = discover_swarms(swarm_root)

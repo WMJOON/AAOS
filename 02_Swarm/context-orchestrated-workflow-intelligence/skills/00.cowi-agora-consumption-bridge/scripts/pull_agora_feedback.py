@@ -9,6 +9,7 @@ import argparse
 import datetime as dt
 import json
 import re
+import subprocess
 from pathlib import Path
 from typing import Any
 
@@ -18,8 +19,7 @@ SKILL_ROOT = SCRIPT_DIR.parent
 COWI_ROOT = SKILL_ROOT.parent.parent
 
 DEFAULT_EVENTS_ROOT = COWI_ROOT.parent / "cortex-agora" / "change_archive" / "events"
-DEFAULT_OUT_ROOT = COWI_ROOT / "artifacts"
-DEFAULT_STATE_FILE = COWI_ROOT / "registry" / "AGORA_PULL_STATE.json"
+DEFAULT_NAMESPACE_ROOT = COWI_ROOT / "agents"
 
 
 def parse_iso8601(value: str) -> dt.datetime:
@@ -54,6 +54,88 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
 def sanitize_token(value: str) -> str:
     cleaned = re.sub(r"[^a-zA-Z0-9_-]+", "-", value.strip().lower())
     return cleaned.strip("-") or "item"
+
+def sanitize_namespace_token(value: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9._-]+", "-", value.strip()).strip("-")
+
+def parse_namespace_from_path(path: Path) -> tuple[str, str] | None:
+    parts = path.parts
+    for idx, part in enumerate(parts):
+        if part == "agents" and idx + 2 < len(parts):
+            family = sanitize_namespace_token(parts[idx + 1])
+            version = sanitize_namespace_token(parts[idx + 2])
+            if family and version:
+                return family, version
+    return None
+
+def resolve_agent_namespace(
+    namespace_root: Path,
+    agent_family: str,
+    agent_version: str,
+) -> tuple[str, str, Path]:
+    parsed = parse_namespace_from_path(namespace_root)
+    from_args = None
+    if agent_family or agent_version:
+        if not (agent_family and agent_version):
+            raise ValueError("both --agent-family and --agent-version are required together")
+        family = sanitize_namespace_token(agent_family)
+        version = sanitize_namespace_token(agent_version)
+        if not family or not version:
+            raise ValueError("invalid --agent-family/--agent-version")
+        from_args = (family, version)
+
+    if from_args and parsed and from_args != parsed:
+        raise ValueError(
+            "agent namespace mismatch between args and --namespace-root "
+            f"(args={from_args[0]}/{from_args[1]}, path={parsed[0]}/{parsed[1]})"
+        )
+
+    if parsed and not from_args:
+        family, version = parsed
+        return family, version, namespace_root
+
+    if from_args:
+        family, version = from_args
+        if parsed:
+            return family, version, namespace_root
+        return family, version, (namespace_root / family / version)
+
+    raise ValueError("cannot resolve agent namespace from --namespace-root or args")
+
+
+def shorten_for_single_line(value: str, max_chars: int) -> str:
+    if max_chars <= 0:
+        max_chars = 6000
+    compact = value.replace("\r\n", "\n").replace("\r", "\n").replace("\n", "\\n")
+    if len(compact) <= max_chars:
+        return compact
+    return compact[: max_chars - 3] + "..."
+
+
+def load_conversation_notes(
+    *,
+    source: str,
+    proposal_id: str,
+    session_id: str,
+    provided_notes: str,
+    remembering_query: str,
+    remembering_bin: str,
+    remembering_max_chars: int,
+) -> tuple[str, str]:
+    if source != "remembering-conversations":
+        return provided_notes, ""
+
+    query = remembering_query.strip() or f"{proposal_id} {session_id}".strip()
+    if not query:
+        raise ValueError("remembering-conversations source requires non-empty query")
+
+    cmd = [remembering_bin, "search", query]
+    proc = subprocess.run(cmd, capture_output=True, text=True)
+    if proc.returncode != 0:
+        stderr = (proc.stderr or "").strip() or "unknown error"
+        raise RuntimeError(f"remembering-conversations search failed: {stderr}")
+    raw = (proc.stdout or "").strip()
+    return shorten_for_single_line(raw, remembering_max_chars), query
 
 
 def read_state(path: Path) -> dict[str, Any]:
@@ -120,6 +202,8 @@ def build_relation_context_map(
     decision: dict[str, Any],
     source_snapshot: dict[str, str],
     feedback_rows: list[dict[str, Any]],
+    conversation_context: dict[str, Any],
+    agent_namespace: dict[str, str],
 ) -> dict[str, Any]:
     decision_id = str(decision.get("decision_id", "unknown"))
     decision_label = str(decision.get("decision", "unknown"))
@@ -172,6 +256,8 @@ def build_relation_context_map(
                 "payload_contract": f"decision_id={decision_id}; feedback_refs={','.join(feedback_ids)}",
             },
         ],
+        "conversation_context": conversation_context,
+        "agent_namespace": agent_namespace,
         "conflict_resolution_rule": {
             "strategy": "cortex-agora-source-first",
             "escalation_path": "01_Nucleus/deliberation_chamber",
@@ -186,6 +272,7 @@ def build_adaptation_report_markdown(
     decision: dict[str, Any],
     source_snapshot: dict[str, str],
     feedback_rows: list[dict[str, Any]],
+    conversation_context: dict[str, Any],
 ) -> str:
     feedback_lines: list[str] = []
     impact_lines: list[str] = []
@@ -258,6 +345,14 @@ def build_adaptation_report_markdown(
         "  - `feedback refs remain traceable to cortex-agora`",
         "- review_cycle: `daily-manual`",
         "",
+        "## conversation_alignment",
+        f"- source: `{conversation_context.get('source', '')}`",
+        f"- session_id: `{conversation_context.get('session_id', '')}`",
+        f"- snapshot_path: `{conversation_context.get('snapshot_path', '')}`",
+        "- decision_refs:",
+        *[f"  - `{ref}`" for ref in conversation_context.get("decision_refs", [])],
+        f"- note: `captured_at={conversation_context.get('captured_at', '')}`",
+        "",
         "## rollback_rule",
         "- trigger: `agora_ref missing or inconsistent with source_snapshot contract`",
         "- action: `discard generated artifact and rerun pull after source correction`",
@@ -271,8 +366,16 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Pull cortex-agora feedback/decisions for COWI")
     parser.add_argument("--proposal-id", required=True)
     parser.add_argument("--events-root", default=str(DEFAULT_EVENTS_ROOT))
-    parser.add_argument("--out-root", default=str(DEFAULT_OUT_ROOT))
-    parser.add_argument("--state-file", default=str(DEFAULT_STATE_FILE))
+    parser.add_argument("--namespace-root", default=str(DEFAULT_NAMESPACE_ROOT))
+    parser.add_argument("--state-file", default="")
+    parser.add_argument("--agent-family", default="")
+    parser.add_argument("--agent-version", default="")
+    parser.add_argument("--conversation-source", default="external-memory")
+    parser.add_argument("--conversation-session-id", default="")
+    parser.add_argument("--conversation-notes", default="")
+    parser.add_argument("--remembering-query", default="")
+    parser.add_argument("--remembering-bin", default="episodic-memory")
+    parser.add_argument("--remembering-max-chars", type=int, default=6000)
     parser.add_argument("--from-ts", default="")
     parser.add_argument("--dry-run", action="store_true")
     return parser
@@ -282,8 +385,18 @@ def main() -> int:
     args = build_parser().parse_args()
 
     events_root = Path(args.events_root).expanduser().resolve()
-    out_root = Path(args.out_root).expanduser().resolve()
-    state_file = Path(args.state_file).expanduser().resolve()
+    namespace_root_input = Path(args.namespace_root).expanduser().resolve()
+    family, version, namespace_root = resolve_agent_namespace(
+        namespace_root_input,
+        args.agent_family,
+        args.agent_version,
+    )
+    out_root = namespace_root / "artifacts"
+    state_file = (
+        Path(args.state_file).expanduser().resolve()
+        if args.state_file.strip()
+        else (namespace_root / "registry" / "AGORA_PULL_STATE.json")
+    )
 
     change_rows = load_jsonl(events_root / "CHANGE_EVENTS.jsonl")
     feedback_rows = load_jsonl(events_root / "PEER_FEEDBACK.jsonl")
@@ -305,6 +418,7 @@ def main() -> int:
 
     relation_dir = out_root / "relation_context_map"
     report_dir = out_root / "skill_usage_adaptation_report"
+    snapshot_dir = namespace_root / "conversation_snapshots"
     change_by_id = {str(r.get("event_id", "")): r for r in proposal_changes}
     feedback_by_id = {str(r.get("feedback_id", "")): r for r in proposal_feedback}
 
@@ -316,8 +430,24 @@ def main() -> int:
         return 0
 
     generated: list[tuple[Path, str]] = []
+    snapshot_writes: list[tuple[Path, str]] = []
     latest_ts = ""
     latest_decision_id = ""
+    session_id = args.conversation_session_id.strip() or f"session-{sanitize_token(args.proposal_id)}"
+    conversation_notes, remembering_query = load_conversation_notes(
+        source=args.conversation_source,
+        proposal_id=args.proposal_id,
+        session_id=session_id,
+        provided_notes=args.conversation_notes,
+        remembering_query=args.remembering_query,
+        remembering_bin=args.remembering_bin,
+        remembering_max_chars=args.remembering_max_chars,
+    )
+    namespace_payload = {
+        "agent_family": family,
+        "agent_version": version,
+        "namespace_path": str(namespace_root),
+    }
 
     for decision in pending_decisions:
         decision_id = str(decision.get("decision_id", "decision"))
@@ -333,12 +463,42 @@ def main() -> int:
         )
         feedback_refs = [str(item) for item in decision.get("feedback_refs", [])]
         feedback_for_decision = [feedback_by_id[item] for item in feedback_refs if item in feedback_by_id]
+        snapshot_path = snapshot_dir / f"{stamp}__{token}__{decision_token}.md"
+        conversation_context = {
+            "source": args.conversation_source,
+            "session_id": session_id,
+            "captured_at": decision_ts,
+            "snapshot_path": str(snapshot_path),
+            "decision_refs": [decision_id, *feedback_refs],
+        }
+        snapshot_writes.append(
+            (
+                snapshot_path,
+                "\n".join(
+                    [
+                        "# conversation_snapshot",
+                        "",
+                        f"- source: `{args.conversation_source}`",
+                        f"- query: `{remembering_query}`",
+                        f"- session_id: `{session_id}`",
+                        f"- captured_at: `{decision_ts}`",
+                        f"- proposal_id: `{args.proposal_id}`",
+                        f"- decision_id: `{decision_id}`",
+                        f"- feedback_refs: `{','.join(feedback_refs)}`",
+                        f"- notes: `{conversation_notes}`",
+                        "",
+                    ]
+                ),
+            )
+        )
 
         relation_payload = build_relation_context_map(
             proposal_id=args.proposal_id,
             decision=decision,
             source_snapshot=source_snapshot,
             feedback_rows=feedback_for_decision,
+            conversation_context=conversation_context,
+            agent_namespace=namespace_payload,
         )
         relation_path = relation_dir / f"{stamp}__{token}__{decision_token}.yaml"
         report_path = report_dir / f"{stamp}__{token}__{decision_token}.md"
@@ -352,6 +512,7 @@ def main() -> int:
                     decision=decision,
                     source_snapshot=source_snapshot,
                     feedback_rows=feedback_for_decision,
+                    conversation_context=conversation_context,
                 ),
             )
         )
@@ -364,6 +525,8 @@ def main() -> int:
     )
     for path, _ in generated:
         print(f"- {path}")
+    for path, _ in snapshot_writes:
+        print(f"- {path}")
 
     if args.dry_run:
         print(
@@ -373,8 +536,11 @@ def main() -> int:
 
     relation_dir.mkdir(parents=True, exist_ok=True)
     report_dir.mkdir(parents=True, exist_ok=True)
+    snapshot_dir.mkdir(parents=True, exist_ok=True)
 
     for path, content in generated:
+        path.write_text(content, encoding="utf-8")
+    for path, content in snapshot_writes:
         path.write_text(content, encoding="utf-8")
 
     proposal_cursors = state.setdefault("proposal_cursors", {})

@@ -4,15 +4,63 @@
   "type": "object",
   "required": [
     "goal",
+    "preflight",
+    "workflow_profile",
     "decision_questions",
     "rsv_total",
     "topology_type",
     "nodes",
     "edges",
-    "stop_policy"
+    "stop_policy",
+    "strategy_gate"
   ],
   "properties": {
     "goal": { "type": "string" },
+    "preflight": {
+      "type": "object",
+      "required": ["questions"],
+      "properties": {
+        "questions": {
+          "type": "array",
+          "minItems": 1,
+          "prefixItems": [
+            {
+              "type": "object",
+              "required": ["id", "question", "required"],
+              "properties": {
+                "id": { "const": "PF1" },
+                "question": { "const": "멘탈모델 먼저 세팅할까요?" },
+                "required": { "const": true }
+              }
+            }
+          ],
+          "items": {
+            "type": "object",
+            "required": ["id", "question", "required"],
+            "properties": {
+              "id": { "type": "string" },
+              "question": { "type": "string" },
+              "required": { "type": "boolean" }
+            }
+          }
+        }
+      }
+    },
+    "workflow_profile": {
+      "type": "object",
+      "required": ["class", "risk_tolerance", "is_strategy_or_high_risk"],
+      "properties": {
+        "class": {
+          "type": "string",
+          "enum": ["strategy", "high_risk", "general"]
+        },
+        "risk_tolerance": {
+          "type": "string",
+          "enum": ["low", "medium", "high"]
+        },
+        "is_strategy_or_high_risk": { "type": "boolean" }
+      }
+    },
     "decision_questions": {
       "type": "array",
       "items": {
@@ -27,8 +75,88 @@
     },
     "rsv_total": { "type": "number" },
     "topology_type": { "type": "string" },
-    "nodes": { "type": "array", "items": { "type": "object" } },
-    "edges": { "type": "array", "items": { "type": "object" } },
-    "stop_policy": { "type": "object" }
+    "nodes": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "properties": {
+          "node_id": { "type": "string" },
+          "name": { "type": "string" }
+        }
+      }
+    },
+    "edges": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["from", "to"],
+        "properties": {
+          "from": { "type": "string" },
+          "to": { "type": "string" },
+          "condition": { "type": "string" }
+        }
+      }
+    },
+    "stop_policy": { "type": "object" },
+    "strategy_gate": {
+      "type": "object",
+      "required": [
+        "enabled",
+        "required_nodes",
+        "required_edges",
+        "h1_requirements",
+        "finalization_guardrails"
+      ],
+      "properties": {
+        "enabled": { "type": "boolean" },
+        "required_nodes": {
+          "type": "array",
+          "items": { "type": "string" },
+          "default": ["H1", "H2"]
+        },
+        "required_edges": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "required": ["from", "to"],
+            "properties": {
+              "from": { "type": "string" },
+              "to": { "type": "string" }
+            }
+          },
+          "default": [
+            { "from": "T4", "to": "C1" },
+            { "from": "C1", "to": "H1" }
+          ]
+        },
+        "h1_requirements": {
+          "type": "object",
+          "required": ["web_evidence", "cowi_artifacts"],
+          "properties": {
+            "web_evidence": {
+              "type": "object",
+              "required": ["required", "path_pattern"],
+              "properties": {
+                "required": { "const": true },
+                "path_pattern": { "type": "string" }
+              }
+            },
+            "cowi_artifacts": {
+              "type": "object",
+              "required": ["relation_context_map", "skill_usage_adaptation_report"],
+              "properties": {
+                "relation_context_map": { "const": true },
+                "skill_usage_adaptation_report": { "const": true }
+              }
+            }
+          }
+        },
+        "finalization_guardrails": {
+          "type": "array",
+          "minItems": 1,
+          "items": { "type": "string" }
+        }
+      }
+    }
   }
 }

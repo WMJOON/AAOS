@@ -15,7 +15,7 @@ SCOPE_DEFAULT = "swarm"
 LIFETIME_DEFAULT = "persistent"
 
 
-def build_frontmatter(context_id, role, state, scope, lifetime, created, extra=None):
+def build_cof_frontmatter(context_id, role, state, scope, lifetime, created, extra=None):
     lines = [
         "---",
         f"context_id: {context_id}",
@@ -31,8 +31,40 @@ def build_frontmatter(context_id, role, state, scope, lifetime, created, extra=N
     return "\n".join(lines)
 
 
+def build_skill_frontmatter(name, description):
+    escaped_name = name.replace("\"", "\\\"")
+    escaped_description = description.replace("\"", "\\\"")
+    lines = [
+        "---",
+        f"name: \"{escaped_name}\"",
+        f"description: \"{escaped_description}\"",
+        "---",
+    ]
+    return "\n".join(lines)
+
+
+def build_skill_meta(context_id, role, state, scope, lifetime, created, trigger="", consumers=None, notes=""):
+    lines = [
+        f"context_id: {context_id}",
+        f"role: {role}",
+        f"state: {state}",
+        f"scope: {scope}",
+        f"lifetime: {lifetime}",
+        f"created: \"{created}\"",
+    ]
+    if trigger:
+        lines.append(f"trigger: {trigger}")
+    if consumers:
+        quoted = ", ".join([f'\"{item}\"' for item in consumers])
+        lines.append(f"consumers: [{quoted}]")
+    if notes:
+        escaped_notes = notes.replace("\"", "\\\"")
+        lines.append(f"notes: \"{escaped_notes}\"")
+    return "\n".join(lines) + "\n"
+
+
 def template_skill(title, frontmatter):
-    body = f"""{frontmatter}
+    return f"""{frontmatter}
 
 # {title}
 
@@ -55,11 +87,10 @@ def template_skill(title, frontmatter):
 ## 4. References
 - 관련 Rule/Workflow 링크
 """
-    return body
 
 
 def template_rule(title, frontmatter):
-    body = f"""{frontmatter}
+    return f"""{frontmatter}
 
 # {title}
 
@@ -79,11 +110,10 @@ def template_rule(title, frontmatter):
 ## 3. References
 - 관련 Skill/Workflow 링크
 """
-    return body
 
 
 def template_workflow(title, frontmatter):
-    body = f"""{frontmatter}
+    return f"""{frontmatter}
 
 # {title}
 
@@ -103,11 +133,10 @@ def template_workflow(title, frontmatter):
 ## 4. References
 - 관련 Rule/Skill 링크
 """
-    return body
 
 
 def template_sub_agent(title, frontmatter):
-    body = f"""{frontmatter}
+    return f"""{frontmatter}
 
 # {title}
 
@@ -129,7 +158,6 @@ def template_sub_agent(title, frontmatter):
 ## 4. References
 - 관련 Rule/Workflow/Skill 링크
 """
-    return body
 
 
 def main():
@@ -138,20 +166,52 @@ def main():
     parser.add_argument("--title", required=True)
     parser.add_argument("--out", required=True)
     parser.add_argument("--context-id", required=True)
+    parser.add_argument("--name", default="")
+    parser.add_argument("--description", default="")
     parser.add_argument("--role", default=None)
     parser.add_argument("--state", default=STATE_DEFAULT)
     parser.add_argument("--scope", default=SCOPE_DEFAULT)
     parser.add_argument("--lifetime", default=LIFETIME_DEFAULT)
     parser.add_argument("--created", default=date.today().isoformat())
+    parser.add_argument("--trigger", default="")
+    parser.add_argument("--consumers", nargs="*", default=[])
+    parser.add_argument("--notes", default="")
 
     args = parser.parse_args()
 
     role = args.role or ROLE_BY_TYPE[args.type]
+    out_path = Path(args.out)
+    out_path.parent.mkdir(parents=True, exist_ok=True)
+
+    if args.type == "skill":
+        skill_name = args.name or out_path.parent.name
+        skill_description = args.description or "Use when this skill is needed."
+        skill_frontmatter = build_skill_frontmatter(skill_name, skill_description)
+        content = template_skill(args.title, skill_frontmatter)
+
+        meta_content = build_skill_meta(
+            context_id=args.context_id,
+            role=role,
+            state=args.state,
+            scope=args.scope,
+            lifetime=args.lifetime,
+            created=args.created,
+            trigger=args.trigger,
+            consumers=args.consumers,
+            notes=args.notes,
+        )
+        meta_path = out_path.parent / "SKILL.meta.yaml"
+        meta_path.write_text(meta_content, encoding="utf-8")
+        out_path.write_text(content, encoding="utf-8")
+        print(f"written: {out_path}")
+        print(f"written: {meta_path}")
+        return
+
     extra = []
     if args.type == "sub-agent":
         extra.append("agent_kind: sub-agent")
 
-    frontmatter = build_frontmatter(
+    cof_frontmatter = build_cof_frontmatter(
         context_id=args.context_id,
         role=role,
         state=args.state,
@@ -161,18 +221,15 @@ def main():
         extra=extra,
     )
 
-    if args.type == "skill":
-        content = template_skill(args.title, frontmatter)
-    elif args.type == "rule":
-        content = template_rule(args.title, frontmatter)
+    if args.type == "rule":
+        content = template_rule(args.title, cof_frontmatter)
     elif args.type == "workflow":
-        content = template_workflow(args.title, frontmatter)
+        content = template_workflow(args.title, cof_frontmatter)
     else:
-        content = template_sub_agent(args.title, frontmatter)
+        content = template_sub_agent(args.title, cof_frontmatter)
 
-    out_path = Path(args.out)
-    out_path.parent.mkdir(parents=True, exist_ok=True)
     out_path.write_text(content, encoding="utf-8")
+    print(f"written: {out_path}")
 
 
 if __name__ == "__main__":

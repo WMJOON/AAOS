@@ -1,11 +1,6 @@
 ---
 name: structuring-cortex-agora-proposals
 description: Structures cortex-agora observation proposals into reusable semantic contract format for COWI/Nucleus downstream consumers (5 types/fields/modes/contract). Use when formalizing behavior patterns as instruction candidates.
-context_id: cortex-agora-instruction-nucleus
-role: SKILL
-state: const
-scope: swarm
-lifetime: persistent
 ---
 
 # Cortex Agora Instruction Nucleus

@@ -1,5 +1,5 @@
 name: workflow-topology-scaffolder
-version: "2.0.0"
+version: "2.1.0"
 domain: agentic-workflow-architecture
 description: >
   Goal → Decision Questions → RSV 추정 → Topology 선택 → Task Graph 설계.

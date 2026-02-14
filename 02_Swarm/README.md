@@ -32,6 +32,18 @@ description: AAOS 군체(Swarm) 계층. 의식적 사고/행동양식(계획/대
 2. `02_Swarm/context-orchestrated-workflow-intelligence/`가 관계 맥락 계약과 적응 보고서를 구성한다.
 3. `02_Swarm/context-orchestrated-filesystem/`가 로컬 티켓 운영과 실행 맥락 관리를 수행한다.
 
+## Logical Integration Contract (No Physical Merge)
+
+- `context-orchestrated-filesystem`와 `agentic-workflow-topology`는 물리적으로 병합하지 않는다.
+- 두 Swarm은 `context-orchestrated-workflow-intelligence` 계약을 통해 논리적으로 통합한다.
+- 공통 추적 키는 아래 4개를 표준으로 사용한다.
+- `ticket_context_id`
+- `workflow_id`
+- `conversation_session_id`
+- `agora_ref`
+- 생성물은 `NN.agents-task-context/<agent-family>/<version>/...` 또는 `agents/<agent-family>/<version>/...` 하위로만 생성한다.
+- `README.md`, `DNA.md`, `rules/`, `registry/`만 shared 경로 예외로 허용한다.
+
 ## Swarm Observability Standard (Behavior Feed) — 권장/필수
 
 Swarm은 “증빙(record_archive)”이 아니라 “행동(Behavior Trace)”을 남긴다.

@@ -80,6 +80,19 @@ Swarm 행동
 → Human / Deliberation  
 → Rules / Skills (선별적 반영; 승인/승격 필요)
 
+## Logical Integration Contract (COF/AWT via COWI)
+
+- COF(운영)와 AWT(설계)는 물리 병합 없이 책임 분리를 유지한다.
+- 통합은 COWI의 relation contract를 통해서만 수행한다.
+- 공통 추적 키:
+- `ticket_context_id`
+- `workflow_id`
+- `conversation_session_id`
+- `agora_ref`
+- 생성물 네임스페이스 규칙:
+- COF: `NN.agents-task-context/<agent-family>/<version>/...`
+- AWT/COWI: `agents/<agent-family>/<version>/...`
+
 ## Swarm Observability Standard (Behavior Feed)
 
 Swarm의 “행동(Behavior Trace)”은 cortex-agora 관찰 입력으로 남긴다.

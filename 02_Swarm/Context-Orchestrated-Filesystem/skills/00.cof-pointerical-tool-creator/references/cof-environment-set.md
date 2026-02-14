@@ -17,9 +17,6 @@ references:
     - cof-task-manager-node
     - cof-task-solver-agent-group
     - cof-swarm-skill-manager
-  agents:
-    - cof-pointerical-tool-creator-agent
-    - cof-task-manager-agent
   external:
     - summon-agents
 ---
@@ -41,15 +38,6 @@ references:
 | `cof-task-manager-node` | `NN.agents-task-context/` 및 버전 브랜치 노드 관리 (legacy: `task-manager/`) | `@skill(cof-task-manager-node)` |
 | `solving-tickets` | 티켓 → 에이전트 할당 | `@skill(cof-task-solver-agent-group)` |
 | `cof-swarm-skill-manager` | Swarm 스킬 레지스트리/관리 | `@skill(cof-swarm-skill-manager)` |
-
-### Available Agents
-
-| Agent | Purpose |
-|-------|---------|
-| `cof-pointerical-tool-creator` | 포인터 안전 문서 생성 오케스트레이터 |
-| `cof-task-manager` | 티켓 관리 오케스트레이터 |
-
----
 
 ## 1. Pointer Model Baseline
 
@@ -107,6 +95,8 @@ lifetime: ticket | persistent | archived
 ```
 
 > **SKILL.md 예외**: SKILL.md 파일은 [Claude Code Skills 표준](https://code.claude.com/docs/en/skills)을 따른다. Frontmatter는 `name`, `description`, `allowed-tools` 등 공식 필드만 사용한다.
+> COF 식별 메타(`context_id`, `role`, `state`, `scope`, `lifetime`, `created`, `trigger`)는 `SKILL.meta.yaml`에 저장한다.
+> precedence: 실행 인터페이스는 `SKILL.md`, COF 식별 SoT는 `SKILL.meta.yaml`을 따른다.
 
 ---
 
@@ -124,6 +114,27 @@ lifetime: ticket | persistent | archived
 | 컨텍스트 탐색 | Node boundary | `cof-glob-indexing` |
 
 > **Warning**: `mkdir`/`touch`로 위 구조를 직접 생성하는 것은 **금지**. 모델 분기 브랜치 생성은 `cof-task-manager-node`를 통해서만 진행합니다.
+
+### 2.1 Agent Namespace Hard-Fail Policy
+
+생성물(티켓/실행 로그/중간 산출물)은 반드시 아래 경로 하위로만 생성한다.
+
+`NN.agents-task-context/<agent-family>/<version>/...`
+
+- `agent-family`/`version`은 경로 또는 CLI 인자(`--agent-family`, `--agent-version`)에서 해석 가능해야 한다.
+- 해석 불가 시 즉시 실패(exit code 1)한다.
+- 비표준(shared) 경로 쓰기 시도는 즉시 실패하고 `[AUDIT] namespace_policy_violation` 로그를 출력한다.
+
+### 2.2 Shared Path Exception (Governance Only)
+
+아래 공용 경로는 문서 거버넌스 목적의 예외로 허용한다.
+
+- `README.md`
+- `DNA.md`
+- `skills/`
+- `registry/`
+
+위 예외 외의 생성물은 모두 agent namespace 하위에서만 생성/갱신한다.
 
 ---
 
@@ -158,7 +169,7 @@ ticket(todo) → cof-glob-indexing → agent selection → dispatch → result i
 
 다음을 위반하는 문서는 **생성 불가**:
 
-1. `context_id` 없는 문서
+1. `context_id` 없는 문서 (단, `SKILL.md`는 `SKILL.meta.yaml`로 대체 가능)
 2. `history` context를 `active`로 참조
 3. 디렉토리 ROLE과 state 불일치
 4. 수명 전이가 명시되지 않은 Workflow
@@ -196,14 +207,13 @@ ticket(todo) → cof-glob-indexing → agent selection → dispatch → result i
 |--------|---------|---------|
 | `@ref(context_id)` | 문서 참조 | `@ref(cof-doctrine)` |
 | `@skill(context_id)` | 스킬 호출 | `@skill(cof-glob-indexing)` |
-| `@agent(context_id)` | 에이전트 호출 | `@agent(cof-task-manager)` |
 
 ### 6.2 Resolution Order
 
 1. **Local Config**: `.agent/config.yaml`의 `context_map`
 2. **Swarm Registry**: 상위 COF의 `index/` 테이블
 3. **Swarm Registry**: `registry/SWARM_SKILL_REGISTRY.md`와 각 Swarm의 `registry/SKILL_REGISTRY.md`
-4. **Global Registry**: 각 Swarm 레지스트리 간 정합성은 `cof-swarm-skill-manager`로 갱신
+4. **Global Registry**: `02_Swarm/registry/SWARM_SKILL_REGISTRY.md` + `02_Swarm/registry/GLOBAL_SKILL_REGISTRY.json`
 
 ### 6.3 Config Example
 
@@ -224,5 +234,4 @@ context_map:
 
 - **Doctrine**: `@ref(cof-doctrine)`
 - **Skills**: `@ref(cof-pointerical-tool-creator)`, `@ref(cof-glob-indexing)`, `@ref(cof-task-manager-node)`, `@ref(cof-task-solver-agent-group)`, `@ref(cof-swarm-skill-manager)`
-- **Agents**: `@ref(cof-pointerical-tool-creator-agent)`, `@ref(cof-task-manager-agent)`
 - **Best Practices**: `@ref(skill-authoring-best-practices)`

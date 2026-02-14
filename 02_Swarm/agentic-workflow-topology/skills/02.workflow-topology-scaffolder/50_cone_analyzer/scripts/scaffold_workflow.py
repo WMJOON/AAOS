@@ -171,6 +171,55 @@ def detect_topology(edges):
     return "linear"
 
 
+def is_strategy_or_high_risk(workflow_class, risk_tolerance):
+    cls = (workflow_class or "").strip().lower()
+    risk = (risk_tolerance or "").strip().lower()
+    return cls in {"strategy", "high_risk"} or risk == "high"
+
+
+def make_gate_node(name, index):
+    defaults = THETA_DEFAULTS["L0"]
+    return {
+        "index": index,
+        "id": f"n{index}",
+        "name": name,
+        "mode": "validate",
+        "theta": "L0",
+        "regime": defaults["regime"],
+        "model": defaults["model"],
+        "temp": defaults["temp"],
+        "d_min": defaults["d_min"],
+        "termination_type": defaults["termination_type"],
+    }
+
+
+def ensure_strategy_gate(nodes, edges):
+    node_names = [n["name"] for n in nodes]
+    next_index = len(nodes) + 1
+    for gate in ("C1", "H1", "H2"):
+        if gate not in node_names:
+            nodes.append(make_gate_node(gate, next_index))
+            node_names.append(gate)
+            next_index += 1
+
+    edge_keys = {(e["from"], e["to"]) for e in edges}
+    required = [("T4", "C1"), ("C1", "H1"), ("H1", "H2")]
+    for src, dst in required:
+        if src in node_names and dst in node_names and (src, dst) not in edge_keys:
+            edges.append({"from": src, "to": dst, "type": "sequential"})
+            edge_keys.add((src, dst))
+
+    # 가능한 경우 H2 뒤를 기존 합성 노드로 연결한다.
+    if "H2" in node_names:
+        downstream = None
+        for candidate in ("T5", "T8"):
+            if candidate in node_names:
+                downstream = candidate
+                break
+        if downstream and ("H2", downstream) not in edge_keys:
+            edges.append({"from": "H2", "to": downstream, "type": "sequential"})
+
+
 # ── 문서 생성 ──
 
 def gen_mermaid(nodes, edges):
@@ -196,7 +245,7 @@ def gen_mermaid(nodes, edges):
     return "\n".join(lines)
 
 
-def gen_workflow_md(wf_name, nodes, edges, d_min_override, cooldown):
+def gen_workflow_md(wf_name, nodes, edges, d_min_override, cooldown, strategy_gate_enabled):
     """workflow.md 생성."""
     today = datetime.now().strftime("%Y.%m.%d")
     topology = detect_topology(edges)
@@ -236,6 +285,19 @@ def gen_workflow_md(wf_name, nodes, edges, d_min_override, cooldown):
 
     delib_detail = "\n\n".join(delib_sections) if delib_sections else "_deliberative 노드 없음_"
 
+    pf1_block = ""
+    if strategy_gate_enabled:
+        pf1_block = """## Mandatory Preflight
+
+- PF1: 멘탈모델 먼저 세팅할까요?
+
+## Strategy/High-Risk Gate
+
+- 필수 노드: C1, H1, H2
+- 필수 엣지: T4 -> C1 -> H1
+- H1 finalization 전 web evidence + COWI artifacts 검증 필요
+"""
+
     return f"""# {wf_name}
 
 > Convergence Cone v1.1 기반 워크플로우 정의서
@@ -264,6 +326,9 @@ def gen_workflow_md(wf_name, nodes, edges, d_min_override, cooldown):
 
 {mermaid}
 
+---
+
+{pf1_block}
 ---
 
 ## Termination Strategy ⭐
@@ -525,6 +590,10 @@ def scaffold(args):
     else:
         edges = infer_linear_edges(nodes)
 
+    strategy_gate_enabled = is_strategy_or_high_risk(args.workflow_class, args.risk_tolerance)
+    if strategy_gate_enabled:
+        ensure_strategy_gate(nodes, edges)
+
     topology = detect_topology(edges)
     base = os.path.join(args.output, args.name)
 
@@ -534,7 +603,16 @@ def scaffold(args):
 
     # workflow.md
     with open(os.path.join(base, "workflow.md"), "w") as f:
-        f.write(gen_workflow_md(args.name, nodes, edges, args.d_min, args.cooldown))
+        f.write(
+            gen_workflow_md(
+                args.name,
+                nodes,
+                edges,
+                args.d_min,
+                args.cooldown,
+                strategy_gate_enabled,
+            )
+        )
 
     # 노드 상세
     for n in nodes:
@@ -570,6 +648,7 @@ def scaffold(args):
     # 결과 출력
     print(f"✅ Scaffolded: {base}/")
     print(f"   topology: {topology}")
+    print(f"   strategy_gate_enabled: {strategy_gate_enabled}")
     print(f"   {len(nodes)} nodes + {len(edges)} edges")
     print(f"   termination/ + validation/ + analysis/")
     print()
@@ -609,6 +688,18 @@ Examples:
     parser.add_argument("--output", default=".", help="출력 경로 (기본: 현재 디렉토리)")
     parser.add_argument("--d-min", type=int, default=None, help="deliberative 노드의 D_min 오버라이드")
     parser.add_argument("--cooldown", type=int, default=2, help="쿨다운 윈도우 w (기본: 2)")
+    parser.add_argument(
+        "--workflow-class",
+        choices=["strategy", "high_risk", "general"],
+        default="general",
+        help="워크플로우 분류 (기본: general)",
+    )
+    parser.add_argument(
+        "--risk-tolerance",
+        choices=["low", "medium", "high"],
+        default="medium",
+        help="리스크 허용도 (기본: medium)",
+    )
 
     args = parser.parse_args()
     scaffold(args)

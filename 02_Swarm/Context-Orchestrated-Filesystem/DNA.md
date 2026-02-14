@@ -64,7 +64,7 @@ META Doctrine(DNA.md) 및 **COF Doctrine**에 의거하여 작성되었다.
 - **Desc**: 4 Pillars of COF Philosophy (Locality, Self-Desc, Agent-First, Lifecycle)
 
 ## 1. Rule Genome
-- **Pointer**: `rules/cof-environment-set.md`
+- **Pointer**: `skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md`
 - **Desc**: Skill-Mediated Creation Mandate
 
 ## 2. Skill Genome

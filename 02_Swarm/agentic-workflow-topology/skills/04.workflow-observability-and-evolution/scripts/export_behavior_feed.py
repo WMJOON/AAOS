@@ -8,9 +8,67 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import re
 import sqlite3
 from pathlib import Path
 from typing import Any
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+DEFAULT_AWT_ROOT = SCRIPT_DIR.parent.parent.parent.parent
+
+
+def sanitize_namespace_token(value: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9._-]+", "-", value.strip()).strip("-")
+
+
+def parse_namespace_from_path(path: Path) -> tuple[str, str] | None:
+    parts = path.parts
+    for idx, part in enumerate(parts):
+        if part == "agents" and idx + 2 < len(parts):
+            family = sanitize_namespace_token(parts[idx + 1])
+            version = sanitize_namespace_token(parts[idx + 2])
+            if family and version:
+                return family, version
+    return None
+
+
+def resolve_agent_namespace(
+    *,
+    out_path: Path | None,
+    agent_family: str,
+    agent_version: str,
+) -> tuple[str, str]:
+    from_path = parse_namespace_from_path(out_path) if out_path is not None else None
+    from_args = None
+    if agent_family or agent_version:
+        if not (agent_family and agent_version):
+            raise ValueError("both --agent-family and --agent-version are required together")
+        family = sanitize_namespace_token(agent_family)
+        version = sanitize_namespace_token(agent_version)
+        if not family or not version:
+            raise ValueError("invalid --agent-family/--agent-version")
+        from_args = (family, version)
+
+    if from_args and from_path and from_args != from_path:
+        raise ValueError(
+            "agent namespace mismatch between args and --out-path "
+            f"(args={from_args[0]}/{from_args[1]}, path={from_path[0]}/{from_path[1]})"
+        )
+    if from_args:
+        return from_args
+    if from_path:
+        return from_path
+    raise ValueError("cannot resolve agent namespace from --out-path or args")
+
+
+def resolve_out_path(raw_out_path: str, awt_root: Path, agent_family: str, agent_version: str) -> Path:
+    if raw_out_path.strip():
+        out_path = Path(raw_out_path).expanduser().resolve()
+        parsed = parse_namespace_from_path(out_path)
+        if parsed is None:
+            raise ValueError("--out-path must include namespace segment 'agents/<agent-family>/<version>'")
+        return out_path
+    return awt_root / "agents" / agent_family / agent_version / "behavior" / "BEHAVIOR_FEED.jsonl"
 
 
 def parse_iso8601(value: str) -> dt.datetime:
@@ -96,6 +154,8 @@ def export_behavior_feed(
     *,
     db_path: Path,
     out_path: Path,
+    agent_family: str,
+    agent_version: str,
     from_ts: str,
     limit: int,
     dry_run: bool,
@@ -175,6 +235,10 @@ def export_behavior_feed(
                 "task_name": str(row["task_name"] or ""),
                 "mode": mode,
                 "action": action,
+                "agent_namespace": {
+                    "agent_family": agent_family,
+                    "agent_version": agent_version,
+                },
             },
             "outcome": {
                 "status": map_outcome_status(status),
@@ -208,7 +272,10 @@ def export_behavior_feed(
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Export AWT SQLite logs to Behavior Feed JSONL")
     parser.add_argument("--db-path", required=True)
-    parser.add_argument("--out-path", required=True)
+    parser.add_argument("--out-path", default="")
+    parser.add_argument("--awt-root", default=str(DEFAULT_AWT_ROOT))
+    parser.add_argument("--agent-family", default="")
+    parser.add_argument("--agent-version", default="")
     parser.add_argument("--from-ts", default="")
     parser.add_argument("--limit", type=int, default=500)
     parser.add_argument("--dry-run", action="store_true")
@@ -218,9 +285,19 @@ def build_parser() -> argparse.ArgumentParser:
 def main() -> int:
     args = build_parser().parse_args()
     try:
+        awt_root = Path(args.awt_root).expanduser().resolve()
+        candidate_out_path = Path(args.out_path).expanduser().resolve() if args.out_path.strip() else None
+        family, version = resolve_agent_namespace(
+            out_path=candidate_out_path,
+            agent_family=args.agent_family,
+            agent_version=args.agent_version,
+        )
+        out_path = resolve_out_path(args.out_path, awt_root, family, version)
         return export_behavior_feed(
             db_path=Path(args.db_path).expanduser().resolve(),
-            out_path=Path(args.out_path).expanduser().resolve(),
+            out_path=out_path,
+            agent_family=family,
+            agent_version=version,
             from_ts=args.from_ts,
             limit=args.limit,
             dry_run=args.dry_run,

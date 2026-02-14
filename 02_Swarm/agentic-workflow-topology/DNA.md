@@ -1,6 +1,6 @@
 ---
 name: "AAOS-Agentic-Workflow-Topology"
-version: "0.1.3"
+version: "0.2.0"
 scope: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology"
 owner: "AAOS Swarm"
 created: "2026-02-14"
@@ -29,7 +29,7 @@ observability:
   log_sot:
     type: "sqlite"
     path: "00.context/agent_log.db"
-    schema_contract: "agent-audit-log@1.2.0"
+    schema_contract: "agent-audit-log@1.3.0"
   behavior_feed_export:
     enabled: true
     mode: "manual_summary_export"
@@ -37,12 +37,29 @@ observability:
       on_new_review_batch: "manual_run"
       daily_manual_batch: true
     script: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-observability-and-evolution/scripts/export_behavior_feed.py"
-    path: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/behavior/BEHAVIOR_FEED.jsonl"
+    path: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/agents/<agent-family>/<version>/behavior/BEHAVIOR_FEED.jsonl"
     format: "jsonl"
     append_only: true
     canonical_group_field: "group_id"
     backward_compatibility_field: "trace_id"
     retention_days: 30
+
+strategy_gate:
+  scope: "strategy_or_high_risk_only"
+  preflight_first_question:
+    id: "PF1"
+    question: "멘탈모델 먼저 세팅할까요?"
+  required_nodes: ["H1", "H2"]
+  required_edges:
+    - "T4->C1"
+    - "C1->H1"
+  h1_requirements:
+    web_evidence_path: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/agents/<agent-family>/<version>/artifacts/web_evidence/web_evidence_YYYY-MM-DD.md"
+    cowi_artifacts:
+      - relation_context_map
+      - skill_usage_adaptation_report
+  validator_script: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/02.workflow-topology-scaffolder/scripts/validate_strategy_h1_gate.py"
+  enforcement: "block_h1_finalization_if_missing"
 
 natural_dissolution:
   purpose: "워크플로우 토폴로지 설계 표준을 제공하고 COF/실행 계층과 경계를 유지"
@@ -76,13 +93,15 @@ inquisitor:
 - COF 티켓 운영 계층과 책임 경계를 분리한다.
 - 실행 런너가 아닌 설계 계약 중심으로 운영한다.
 - 실행 로그 SoT는 SQLite로 유지하고, behavior feed는 필요 시 요약 export만 허용한다.
+- 전략/고위험 워크플로우에는 PF1/H1/H2/H1 gate를 강제한다.
 
 ## Behavior Feed Export Runbook
 
 ```bash
 python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-observability-and-evolution/scripts/export_behavior_feed.py \
   --db-path 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/00.context/agent_log.db \
-  --out-path 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/behavior/BEHAVIOR_FEED.jsonl
+  --agent-family claude \
+  --agent-version 4.0
 ```
 
 ## Boundary
@@ -105,3 +124,5 @@ python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-o
 
 - v0.1.2 : COWI mediation contract 및 비실행 경계(직접 실행/자동반영 금지) 명시
 - v0.1.3 : Behavior Feed 수동 export 활성화(`enabled: true`) 및 group_id canonical 필드 명시
+- v0.1.4 : Behavior Feed 기본 출력 경로를 `agents/<agent-family>/<version>/behavior/` 네임스페이스로 전환
+- v0.2.0 : 전략/고위험 PF1/H1/H2 강제 및 web evidence + COWI artifact 기반 H1 finalization gate 도입

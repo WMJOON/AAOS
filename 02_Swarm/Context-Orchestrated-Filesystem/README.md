@@ -24,7 +24,7 @@ COF는 단순한 파일 규칙이 아니라, **"AI Agent가 물리적 공간(Fil
 | Pillar | Principle | Action |
 |--------|-----------|--------|
 | **Context Locality** | 작업이 일어나는 곳에 맥락이 있어야 한다 | 모든 노드는 작업 공간의 Sibling 위치에 배치 |
-| **Self-Descriptiveness** | 말하지 않는 노드는 존재하지 않는 것이다 | 모든 핵심 노드에 `rules/cof-environment-set.md` 배치 |
+| **Self-Descriptiveness** | 말하지 않는 노드는 존재하지 않는 것이다 | 모든 핵심 노드에 스킬 기반 규약 참조를 배치 |
 | **Agent-First Design** | 에이전트가 읽기 좋아야 한다 | YAML Frontmatter 필수화, 정형화된 네이밍 |
 | **Traceable Lifecycle** | 시작과 끝이 없는 데이터는 쓰레기다 | Natural Dissolution 원칙 적용 |
 
@@ -63,14 +63,18 @@ COF의 핵심은 **포인터 모델**이다. 모든 문서는 Context Pointer로
 ```yaml
 ---
 context_id: cof-xxxx          # 전역 유일, 불변
-role: SKILL | RULE | WORKFLOW
+role: RULE | WORKFLOW
 state: const | mutable | active | frozen | archived
 scope: immune | agora | nucleus | swarm
 lifetime: ticket | persistent | archived
 ---
 ```
 
-> 상세: [rules/cof-environment-set.md](rules/cof-environment-set.md) § 0. COF Pointer Model Baseline
+`SKILL.md`는 표준 스킬 frontmatter(`name`, `description`, `allowed-tools`)만 사용하며,
+COF 식별 메타는 같은 디렉토리의 `SKILL.meta.yaml`에 저장한다.
+우선순위는 `SKILL.md`(실행 인터페이스) → `SKILL.meta.yaml`(COF 식별 SoT)로 분리한다.
+
+> 상세: [skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md](skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md) § 0. COF Pointer Model Baseline
 
 ---
 
@@ -80,7 +84,7 @@ lifetime: ticket | persistent | archived
 context-orchestrated-filesystem/
 ├── README.md                    ← 현재 문서
 ├── core-docs/COF_DOCTRINE.md              ← 4 Pillars 철학
-├── rules/cof-environment-set.md                      ← Rule Genome (실행 지침)
+├── skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md   ← Skill-based Governance Guide
 ├── DNA.md                       ← DNA 정의
 ├── DNA.md                       ← Lifecycle/Resource Limits
 │
@@ -178,7 +182,7 @@ python3 skills/04.cof-swarm-skill-manager/scripts/sync_swarms_skill_manager.py \
 
 다음 항목을 위반하는 문서/행위는 **금지**된다:
 
-1. `context_id` 없는 문서 생성
+1. `context_id` 없는 문서 생성 (단, `SKILL.md`는 `SKILL.meta.yaml`로 대체 가능)
 2. `history` 컨텍스트를 `active`로 참조
 3. 디렉토리 ROLE과 state 불일치
 4. 수명 전이가 명시되지 않은 Workflow
@@ -191,7 +195,7 @@ python3 skills/04.cof-swarm-skill-manager/scripts/sync_swarms_skill_manager.py \
 | Document | Role | Description |
 |----------|------|-------------|
 | [core-docs/COF_DOCTRINE.md](core-docs/COF_DOCTRINE.md) | Doctrine Genome | 4 Pillars 철학 |
-| [rules/cof-environment-set.md](rules/cof-environment-set.md) | Rule Genome | 실행 지침 (Pointer Model, Skill Mandate) |
+| [skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md](skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md) | Skill Governance | 실행 지침 (Pointer Model, Skill Mandate) |
 | [DNA.md](DNA.md) | DNA Definition | Genome Pointers 정의 |
 | [DNA.md](DNA.md) | Lifecycle Genome | Natural Dissolution, Resource Limits |
 

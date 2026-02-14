@@ -65,40 +65,92 @@ def normalize_dependency(dep: str) -> str:
         dep = dep[:-3]
     return sanitize_filename(dep)
 
+def sanitize_namespace_token(value: str) -> str:
+    return re.sub(r"[^a-zA-Z0-9._-]+", "-", value.strip()).strip("-")
+
+def parse_namespace_from_path(path: Path) -> tuple[str, str] | None:
+    parts = path.parts
+    for i, part in enumerate(parts):
+        if part in NODE_DIRNAMES and i + 2 < len(parts):
+            family = sanitize_namespace_token(parts[i + 1])
+            version = sanitize_namespace_token(parts[i + 2])
+            if family and version:
+                return family, version
+    return None
+
+def resolve_node_root(target_path: Path) -> Path | None:
+    cursor = target_path
+    while True:
+        if cursor.name in NODE_DIRNAMES:
+            return cursor
+        for dirname in NODE_DIRNAMES:
+            candidate = cursor / dirname
+            if candidate.exists():
+                return candidate
+        if cursor.parent == cursor:
+            break
+        cursor = cursor.parent
+    return None
+
+def resolve_namespace(target_path: Path, node_root: Path, agent_family: str, agent_version: str) -> tuple[str, str]:
+    from_path = parse_namespace_from_path(target_path) or parse_namespace_from_path(node_root)
+    from_args = None
+    if agent_family or agent_version:
+        if not (agent_family and agent_version):
+            raise ValueError("both --agent-family and --agent-version are required together")
+        family = sanitize_namespace_token(agent_family)
+        version = sanitize_namespace_token(agent_version)
+        if not family or not version:
+            raise ValueError("invalid --agent-family/--agent-version")
+        from_args = (family, version)
+
+    if from_args and from_path and from_args != from_path:
+        raise ValueError(
+            "agent namespace mismatch between args and target path "
+            f"(args={from_args[0]}/{from_args[1]}, path={from_path[0]}/{from_path[1]})"
+        )
+    if from_args:
+        return from_args
+    if from_path:
+        return from_path
+    raise ValueError("cannot resolve agent namespace from path or args")
+
 def create_ticket(
     target_dir: str,
     title: str,
     dependencies: list = None,
-    priority: str = "P2"
+    priority: str = "P2",
+    agent_family: str = "",
+    agent_version: str = "",
 ) -> bool:
     target_path = Path(target_dir).resolve()
+    node_root = resolve_node_root(target_path)
+    if node_root is None:
+        print(
+            f"Error: Could not locate '{NODE_DIRNAMES[0]}/' or '{NODE_DIRNAMES[1]}/' from {target_path}",
+            file=sys.stderr
+        )
+        print(f"[AUDIT] namespace_policy_violation path={target_path}", file=sys.stderr)
+        return False
 
-    # tickets/ 디렉토리 해석:
-    # - <...>/01.agents-task-context/tickets (or legacy: task-manager/tickets)
-    # - <...>/01.agents-task-context (or legacy: task-manager)
-    # - <...>/tickets
-    # - <...>/ (상위에서 <node>/tickets 탐색)
-    if target_path.name == "tickets":
-        tickets_dir = target_path
-    elif target_path.name in NODE_DIRNAMES:
-        tickets_dir = target_path / "tickets"
-    else:
-        candidates = [target_path / "tickets"]
-        candidates.extend([target_path / d / "tickets" for d in NODE_DIRNAMES])
-        tickets_dir = next((p for p in candidates if p.exists()), candidates[0])
+    try:
+        family, version = resolve_namespace(target_path, node_root, agent_family, agent_version)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        print(f"[AUDIT] namespace_policy_violation path={target_path}", file=sys.stderr)
+        return False
+
+    tickets_dir = node_root / family / version / "tickets"
 
     if not tickets_dir.exists():
         print(
-            f"Error: 'tickets/' directory not found in {target_dir}. "
-            "Expected '01.agents-task-context/tickets/', 'task-manager/tickets/', or 'tickets/'.",
+            f"Error: Namespace ticket path not found: {tickets_dir}. "
+            "Expected 'NN.agents-task-context/<agent-family>/<version>/tickets/'.",
             file=sys.stderr
         )
+        print(f"[AUDIT] namespace_policy_violation path={tickets_dir}", file=sys.stderr)
         return False
 
-    if not tickets_dir.exists():
-        print(f"Error: Tickets directory not found at {tickets_dir}", file=sys.stderr)
-        return False
-        
     normalized_dependencies: list[str] = []
     if dependencies:
         normalized_dependencies = [normalize_dependency(d) for d in dependencies if d and d.strip()]
@@ -142,7 +194,7 @@ def create_ticket(
 
     try:
         file_path.write_text(content, encoding="utf-8")
-        print(f"Created ticket: {file_path}")
+        print(f"Created ticket: {file_path} (namespace={family}/{version})")
         return True
     except Exception as e:
         print(f"Error creating ticket: {e}", file=sys.stderr)
@@ -151,9 +203,11 @@ def create_ticket(
 def main():
     parser = argparse.ArgumentParser(description="Create a new task ticket based on COF standard.")
     parser.add_argument("name", help="Ticket title/name")
-    parser.add_argument("--dir", default=".", help="Target directory (task-manager root or tickets/ dir)")
+    parser.add_argument("--dir", default=".", help="Target directory (must resolve to agent namespace)")
     parser.add_argument("--deps", nargs="*", help="List of dependent ticket names")
     parser.add_argument("--priority", default="P2", choices=["P0", "P1", "P2", "P3"], help="Priority level")
+    parser.add_argument("--agent-family", default="", help="Agent family namespace key")
+    parser.add_argument("--agent-version", default="", help="Agent version namespace key")
 
     args = parser.parse_args()
 
@@ -161,7 +215,9 @@ def main():
         args.dir,
         args.name,
         dependencies=args.deps,
-        priority=args.priority
+        priority=args.priority,
+        agent_family=args.agent_family,
+        agent_version=args.agent_version,
     )
 
     if not success:

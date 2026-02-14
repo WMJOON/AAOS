@@ -25,6 +25,9 @@
 
 ### Output (요약)
 
+**Preflight**:
+- PF1: 멘탈모델 먼저 세팅할까요?
+
 **Topology**: `parallel + synthesis_centric`
 
 **Decision Questions (6개, RSV_total = 6.5)**:
@@ -40,15 +43,19 @@
 - T2: 운영 영향 분석 (risk_register, SE 중간, θ_GT 중간, RSV 1.0, DQ2)
 - T3: 고객 커뮤니케이션 위험/금지문구 (checklist, SE 중간, θ_GT 중간, RSV 1.0, DQ3)
 - T4: 경쟁 사례 비교 (table, SE 중간, θ_GT 중간, RSV 1.0, DQ4)
+- C1: COWI consumption checkpoint (checklist)
+- H1: Human gate #1 (evidence + cowi artifacts 검증)
+- H2: Human gate #2 (최종 승인)
 - T5: 최종 Decision Memo 합성 (decision, SE 높음, θ_GT 넓음, RSV 2.0, DQ5+DQ6)
 
-**구조**: {T1, T2, T3, T4} → T5
+**구조**: {T1, T2, T3, T4} → C1 → H1 → H2 → T5
 
 **Loop Risk**:
 - redundancy_accumulation on T5 (high) → Output 스키마에 Trade-off Matrix + Boundary 필수
 - exploration_spiral on T4 (low) → 경쟁사 3~5개로 상한 설정
 
 **Handoff**: 단일 handoff at T5만 허용. T1~T4는 동일 스키마(table/risk_register)로 통일.
+**Gate Rule**: `web_evidence_YYYY-MM-DD.md` + `relation_context_map` + `skill_usage_adaptation_report`가 없으면 H1 실패.
 
 ---
 
@@ -120,6 +127,9 @@
 
 ### Output (요약)
 
+**Preflight**:
+- PF1: 멘탈모델 먼저 세팅할까요?
+
 **Topology**: `hierarchical + synthesis_centric` (composite)
 
 **Decision Questions (8개, RSV_total = 10.0)**:
@@ -136,10 +146,11 @@
 - Layer 1 (parallel): T1 시장분석, T2 경쟁분석, T3 규제분석, T4 기술적합성
 - Layer 2 (synthesis): T5 중간합성 (decision_memo)
 - Layer 3 (parallel): T6 GTM전략, T7 재무모델
-- Layer 4 (synthesis): T8 최종 Go/No-Go Decision Memo
+- Layer 4: C1 consumption checkpoint -> H1 -> H2
+- Layer 5 (synthesis): T8 최종 Go/No-Go Decision Memo
 
 **Loop Risk**:
 - rsv_inflation (med) → DQ가 8개로 많음, token_budget 소진 전 모든 DQ를 닫기 어려울 수 있음 → Reframe 규칙: DQ7 우선순위 하향 가능
 - redundancy_accumulation on T5, T8 (high) → 합성 노드 Output 스키마 강화
 
-**Human Gate**: T5 (중간합성 후 방향 확인), T8 (최종 판단)
+**Human Gate**: H1 (중간합성 후 방향 확인), H2 (최종 판단)

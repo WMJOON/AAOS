@@ -127,3 +127,49 @@
     topology: null
     must_trigger_when_unsure: true
   modules_used: []
+
+- id: TC11
+  name: "PF1 preflight 첫 질문 강제"
+  input:
+    goal: "AI 사업전략 수립"
+    workflow_profile: { class: strategy, risk_tolerance: high }
+    constraints: {}
+    context: { domain: "AI SaaS", risk_tolerance: high }
+  expected:
+    preflight_first_question:
+      id: PF1
+      question: "멘탈모델 먼저 세팅할까요?"
+    strategy_gate_enabled: true
+  modules_used: [topology_selection, node_design, loop_risk, handoff]
+
+- id: TC12
+  name: "전략 워크플로우 H1/H2 + T4->C1->H1 강제"
+  input:
+    goal: "신규 시장 진입 전략 제안"
+    workflow_profile: { class: strategy, risk_tolerance: high }
+    constraints: {}
+    context: { domain: strategy, risk_tolerance: high }
+  expected:
+    must_have_nodes: ["H1", "H2", "C1"]
+    must_have_edges:
+      - { from: T4, to: C1 }
+      - { from: C1, to: H1 }
+  modules_used: [topology_selection, node_design, loop_risk, handoff]
+
+- id: TC13
+  name: "H1 gate artifact 누락 시 차단"
+  input:
+    goal: "고위험 규제 대응 전략"
+    workflow_profile: { class: high_risk, risk_tolerance: high }
+    constraints: {}
+    context: { domain: fintech, risk_tolerance: high }
+    artifacts:
+      web_evidence: false
+      relation_context_map: false
+      skill_usage_adaptation_report: true
+  expected:
+    validator_exit_code: 1
+    must_fail_checks:
+      - "web evidence missing"
+      - "relation_context_map missing"
+  modules_used: [topology_selection, node_design, loop_risk, handoff]

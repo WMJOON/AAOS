@@ -1,0 +1,11 @@
+context_id: cortex-agora-instruction-nucleus
+role: SKILL
+state: const
+scope: swarm
+lifetime: persistent
+created: "2026-02-14"
+consumers:
+  - context-orchestrated-workflow-intelligence
+  - deliberation_chamber
+  - agent
+notes: "COF metadata sidecar for SKILL.md minimal frontmatter policy."

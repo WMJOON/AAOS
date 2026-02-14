@@ -7,6 +7,7 @@ required:
   - cof_awt_impact
   - proposed_adjustments
   - expected_effect
+  - conversation_alignment
   - rollback_rule
 properties:
   source_snapshot:
@@ -88,6 +89,27 @@ properties:
         items:
           type: string
       review_cycle:
+        type: string
+    additionalProperties: true
+  conversation_alignment:
+    type: object
+    required:
+      - source
+      - session_id
+      - snapshot_path
+      - decision_refs
+    properties:
+      source:
+        type: string
+      session_id:
+        type: string
+      snapshot_path:
+        type: string
+      decision_refs:
+        type: array
+        items:
+          type: string
+      note:
         type: string
     additionalProperties: true
   rollback_rule:

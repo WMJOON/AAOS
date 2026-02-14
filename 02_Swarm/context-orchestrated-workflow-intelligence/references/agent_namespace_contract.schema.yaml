@@ -1,0 +1,38 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: agent_namespace_contract
+type: object
+required:
+  - namespace_id
+  - agent_family
+  - agent_version
+  - ticket_context_id
+  - workflow_id
+  - conversation_session_id
+  - conversation_snapshot_ref
+  - agora_ref
+properties:
+  namespace_id:
+    type: string
+    minLength: 1
+  agent_family:
+    type: string
+    minLength: 1
+  agent_version:
+    type: string
+    minLength: 1
+  ticket_context_id:
+    type: string
+    minLength: 1
+  workflow_id:
+    type: string
+    minLength: 1
+  conversation_session_id:
+    type: string
+    minLength: 1
+  conversation_snapshot_ref:
+    type: string
+    minLength: 1
+  agora_ref:
+    type: string
+    minLength: 1
+additionalProperties: false

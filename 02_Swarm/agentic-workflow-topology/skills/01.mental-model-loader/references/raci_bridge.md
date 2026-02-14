@@ -28,6 +28,14 @@ raci_input:
       reference_triggers: ["키워드A", "키워드B"]
   patterns: [Evaluate, Critique, Translate, Prioritize, Arbitrate, Simulate]
   output_schema: "{판단, 근거, 트레이드오프, 확신도}"
+  bundle_ref:
+    id: "bundle.<domain>.<version>"
+    version: "x.y.z"
+    generated_at: "ISO-8601"
+  node_chart_map:
+    - node_id: T1
+      chart_ids: ["chart.regulation.scan"]
+      checkpoint_id: preflight
 ```
 
 ### 2. Workflow Planner → Skillpack 요청 형식
@@ -55,3 +63,23 @@ raci_routing:
 | Simulate | 페르소나 모듈 2~3개 | - | 시나리오 데이터 시 pack |
 
 > **A (Accountable)는 모든 패턴에서 Core + Orchestrator로 고정**이므로 테이블에서 생략.
+
+## Execution Checkpoint Contract
+
+아래 체크포인트는 전략/고위험 워크플로우에서 기본 적용한다.
+
+```yaml
+execution_checkpoints:
+  - checkpoint_id: preflight
+    stage: preflight
+    required_inputs: ["PF1 response"]
+    required_artifacts: ["bundle_ref", "node_chart_map"]
+  - checkpoint_id: pre_h1
+    stage: pre_h1
+    required_inputs: ["T4 output", "C1 consumption output"]
+    required_artifacts: ["bundle_ref", "node_chart_map"]
+  - checkpoint_id: pre_h2
+    stage: pre_h2
+    required_inputs: ["H1 review notes"]
+    required_artifacts: ["bundle_ref", "node_chart_map"]
+```

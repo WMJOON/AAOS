@@ -28,7 +28,7 @@ parent_skill: cof-task-solver-agent-group
 | `tickets/`에 todo 티켓이 있고 에이전트에게 맡기고 싶을 때 | O |
 | 티켓 해결 과정을 자동으로 기록하고 싶을 때 | O |
 | 티켓을 새로 만들고 구조를 잡을 때 | X → `@skill(cof-task-manager-node)` |
-| 결과 품질을 평가/QA할 때 | X → `@agent(cof-task-qa)` |
+| 결과 품질을 평가/QA할 때 | X → 수동 리뷰 체크리스트 사용 |
 | 여러 티켓을 병렬 처리할 때 | X (지원 안 함) |
 
 ---

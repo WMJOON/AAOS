@@ -7,6 +7,8 @@ required:
   - topology_nodes
   - context_links
   - handoff_rules
+  - conversation_context
+  - agent_namespace
   - conflict_resolution_rule
 properties:
   workflow_id:
@@ -65,6 +67,42 @@ properties:
         payload_contract:
           type: string
       additionalProperties: true
+  conversation_context:
+    type: object
+    required:
+      - source
+      - session_id
+      - captured_at
+      - snapshot_path
+      - decision_refs
+    properties:
+      source:
+        type: string
+      session_id:
+        type: string
+      captured_at:
+        type: string
+      snapshot_path:
+        type: string
+      decision_refs:
+        type: array
+        items:
+          type: string
+    additionalProperties: true
+  agent_namespace:
+    type: object
+    required:
+      - agent_family
+      - agent_version
+      - namespace_path
+    properties:
+      agent_family:
+        type: string
+      agent_version:
+        type: string
+      namespace_path:
+        type: string
+    additionalProperties: true
   conflict_resolution_rule:
     type: object
     required:

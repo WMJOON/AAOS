@@ -1,6 +1,6 @@
 ---
 name: "AAOS-COWI"
-version: "0.2.2"
+version: "0.3.0"
 scope: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence"
 owner: "AAOS Swarm"
 created: "2026-02-14"
@@ -26,6 +26,8 @@ inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITO
 audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md"
 
 intelligence_contracts:
+  agent_namespace_contract:
+    schema: "references/agent_namespace_contract.schema.yaml"
   relation_context_map:
     schema: "references/relation_context_map.schema.yaml"
   skill_usage_adaptation_report:
@@ -41,8 +43,14 @@ consumption_bridge:
   script: "02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py"
   cursor_state: "02_Swarm/context-orchestrated-workflow-intelligence/registry/AGORA_PULL_STATE.json"
   outputs:
-    relation_context_map: "02_Swarm/context-orchestrated-workflow-intelligence/artifacts/relation_context_map/*.yaml"
-    skill_usage_adaptation_report: "02_Swarm/context-orchestrated-workflow-intelligence/artifacts/skill_usage_adaptation_report/*.md"
+    relation_context_map: "02_Swarm/context-orchestrated-workflow-intelligence/agents/<agent-family>/<version>/artifacts/relation_context_map/*.yaml"
+    skill_usage_adaptation_report: "02_Swarm/context-orchestrated-workflow-intelligence/agents/<agent-family>/<version>/artifacts/skill_usage_adaptation_report/*.md"
+    conversation_snapshot: "02_Swarm/context-orchestrated-workflow-intelligence/agents/<agent-family>/<version>/conversation_snapshots/*.md"
+  h1_finalization_guard:
+    required_artifacts:
+      - relation_context_map
+      - skill_usage_adaptation_report
+    enforcement: "block_if_missing"
 
 natural_dissolution:
   purpose: "COF↔AWT 관계 맥락과 스킬 사용 패턴 개선 제안을 연결하는 COWI intelligence mediator 제공"
@@ -76,6 +84,8 @@ COWI는 COF 운영 맥락과 AWT 설계 맥락을 연결하고, `cortex-agora` �
 - `cortex-agora` 출력 우선 원칙으로 스킬 사용 패턴 개선 제안을 만든다.
 - 자동 집행 없이 `skill_usage_adaptation_report`로 수동 반영 판단 근거를 제공한다.
 - `IMPROVEMENT_DECISIONS` 신규 이벤트를 pull해 관계 맥락/적응 보고서 산출물을 materialize한다.
+- 대화 메모리는 Hybrid 정책(외부 메모리 읽기 + 로컬 snapshot ref 저장)으로 연결한다.
+- 전략/고위험 topology에서는 `T4 -> C1 -> H1` 구간의 C1 consumption step을 필수로 둔다.
 
 ## Core Constraints
 
@@ -83,6 +93,7 @@ COWI는 COF 운영 맥락과 AWT 설계 맥락을 연결하고, `cortex-agora` �
 2. COF/AWT 실행 오케스트레이션 개입을 금지한다.
 3. 자동 규칙 반영/자동 차단을 금지한다.
 4. 계약 변경은 감사 가능한 문서 변경으로 남긴다.
+5. COWI 산출물 누락 시 H1 finalization을 차단한다.
 
 ## Governance Boundary
 
@@ -91,17 +102,24 @@ COWI는 COF 운영 맥락과 AWT 설계 맥락을 연결하고, `cortex-agora` �
 - COWI는 `cortex-agora/change_archive`에서 전달된 feedback/decision을 `source_snapshot.agora_ref` 기준으로만 소비한다.
 - COF 티켓 실행/Manifestation 바인딩은 COWI 범위가 아니다.
 - 규칙/스킬 자동 집행은 수행하지 않는다.
+- 전략/고위험 workflow의 H1 gate는 `relation_context_map` + `skill_usage_adaptation_report` 존재를 전제로 한다.
 
 ## Consumption Runbook
 
 ```bash
 python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py \
-  --proposal-id P-SWARM-V014-BATCH
+  --proposal-id P-SWARM-V014-BATCH \
+  --agent-family claude \
+  --agent-version 4.0 \
+  --conversation-session-id chat-2026-02-14
 ```
 
 ```bash
 python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py \
   --proposal-id P-SWARM-V014-BATCH \
+  --agent-family claude \
+  --agent-version 4.0 \
+  --conversation-session-id chat-2026-02-14 \
   --dry-run
 ```
 
@@ -116,3 +134,5 @@ python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/ski
 
 - v0.2.1 : `cortex-agora/change_archive` 연계 경계(`agora_ref` 기준 feedback/decision 소비) 명시
 - v0.2.2 : COWI pull bridge(`IMPROVEMENT_DECISIONS` trigger + 일일 수동 배치 + cursor state) 운영 계약 추가
+- v0.2.3 : `agents/<agent-family>/<version>/` 네임스페이스 출력 강제 및 conversation snapshot(Hybrid) 계약 추가
+- v0.3.0 : 전략/고위험 `T4 -> C1 -> H1` 구간의 consumption step 강제 및 H1 finalization artifact gate 추가

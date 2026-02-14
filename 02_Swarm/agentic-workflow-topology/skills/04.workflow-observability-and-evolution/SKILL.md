@@ -1,6 +1,6 @@
 ---
 name: workflow-observability-and-evolution
-description: Analyze workflow execution logs from SQLite SoT, produce periodic manual review outputs, and propose workflow improvements based on repeated patterns with agent-audit-log v1.2.0 compatibility.
+description: Analyze workflow execution logs from SQLite SoT, produce periodic manual review outputs, and propose workflow improvements based on repeated patterns with agent-audit-log v1.3.0 compatibility.
 ---
 
 # Workflow Observability and Evolution
@@ -10,7 +10,7 @@ SQLite 로그를 기준으로 워크플로우 반복 패턴을 분석하고 개�
 ## Logging Policy
 
 - SoT: SQLite (`00.context/agent_log.db`)
-- Schema compatibility target: `agent-audit-log v1.2.0`
+- Schema compatibility target: `agent-audit-log v1.3.0`
 - 자동 스케줄링 없음
 - 수동 정기 점검 템플릿 사용 (주간/격주)
 - behavior feed는 기본 dual-write 금지, 수동 요약 export만 허용

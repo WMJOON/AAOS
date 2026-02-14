@@ -1,5 +1,19 @@
 # Changelog
 
+## v2.1.0 (2026-02-14)
+
+### Added
+- 전략/고위험 워크플로우 강제 게이트 도입:
+  - PF1 preflight 첫 질문 고정(`멘탈모델 먼저 세팅할까요?`)
+  - `H1/H2` 필수 노드
+  - `T4 -> C1 -> H1` 필수 엣지
+- H1 finalization validator 추가:
+  - `scripts/validate_strategy_h1_gate.py`
+- 웹 근거 템플릿 추가:
+  - `30_references/packs/web_evidence.template.md`
+- `workflow_topology_spec` 스키마 확장:
+  - `preflight`, `workflow_profile`, `strategy_gate`
+
 ## v2.0.0 (2026-02-10)
 
 ### Breaking Change: SKILL.md → Self-Contained Runbook

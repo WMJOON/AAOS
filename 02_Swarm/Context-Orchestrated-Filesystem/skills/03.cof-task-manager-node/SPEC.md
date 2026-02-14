@@ -114,5 +114,5 @@ Task-Manager Node Workflow:
 
 ## 7. References
 
-- Rule Genome: `../../rules/cof-environment-set.md`
+- Governance Guide: `../00.cof-pointerical-tool-creator/references/cof-environment-set.md`
 - COF Doctrine: `../../core-docs/COF_DOCTRINE.md`

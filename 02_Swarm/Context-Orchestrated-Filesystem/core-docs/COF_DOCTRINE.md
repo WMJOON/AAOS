@@ -39,8 +39,8 @@ COF는 버전 폴더(`COF vX.Y.Z/`)로 보관하지 않는다. COF의 canonical 
 > **"말하지 않는 노드는 존재하지 않는 것이다."**
 
 - **원칙**: 모든 노드(디렉토리/파일)는 자신이 무엇이며, 어떤 규칙을 따르는지 명시적으로 설명해야 한다.
-- **Why**: 인간은 암묵적 합의로 폴더를 쓰지만, 에이전트는 명시적 텍스트(`README.md`, `rules/cof-environment-set.md`) 없이는 폴더의 의도를 추론해야 하므로 오류가 발생한다.
-- **Action**: 핵심 노드에는 반드시 `rules/cof-environment-set.md`를 배치하여 에이전트에게 "이 공간의 법칙"을 선언한다.
+- **Why**: 인간은 암묵적 합의로 폴더를 쓰지만, 에이전트는 명시적 텍스트(`README.md`, `skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md`) 없이는 폴더의 의도를 추론해야 하므로 오류가 발생한다.
+- **Action**: 핵심 노드는 반드시 스킬 기반 규약 문서(`skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md`)를 참조하여 "이 공간의 법칙"을 선언한다.
 
 ## 3. Agent-First Design (에이전트 우선 설계)
 

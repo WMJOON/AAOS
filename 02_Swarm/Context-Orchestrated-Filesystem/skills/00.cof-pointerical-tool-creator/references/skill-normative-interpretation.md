@@ -85,6 +85,6 @@ Skill Doc Validation:
 ## 7. References
 
 - Spec: `../SPEC.md`
-- Rule Genome: `../../rules/cof-environment-set.md`
+- Governance Guide: `cof-environment-set.md`
 - Glob: `glob-patterns.md`
 - Glob Normative: `rule-normative-interpretation.md`

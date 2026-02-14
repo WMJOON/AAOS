@@ -15,6 +15,8 @@ description: Design how each workflow task node should apply mental models/chart
 ## Output: `workflow_mental_model_execution_plan`
 
 필수 키:
+- `bundle_ref`
+- `node_chart_map`
 - `task_to_chart_map`
 - `node_mode_policy`
 - `model_selection_policy`
@@ -26,9 +28,11 @@ description: Design how each workflow task node should apply mental models/chart
 ## Method
 
 1. 노드별 판단 목적과 필요한 chart를 매핑한다.
-2. node mode(`converge`, `diverge`, `validate`)를 실행 정책으로 연결한다.
-3. handoff 시 필요한 최소 구조를 정의한다.
-4. 과설명/과압축 리스크를 fallback 규칙으로 명시한다.
+2. `bundle_ref`를 execution plan 루트에 고정하여 추적 가능하게 만든다.
+3. `node_chart_map`를 checkpoint(`preflight`, `pre_h1`, `pre_h2`) 기준으로 연결한다.
+4. node mode(`converge`, `diverge`, `validate`)를 실행 정책으로 연결한다.
+5. handoff 시 필요한 최소 구조를 정의한다.
+6. 과설명/과압축 리스크를 fallback 규칙으로 명시한다.
 
 ## Scope Boundary
 

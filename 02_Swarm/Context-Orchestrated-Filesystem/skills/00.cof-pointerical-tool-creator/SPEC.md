@@ -23,6 +23,7 @@ Workflow, Rule, Skill, Sub-Agent 문서를 생성하기 위한 메타 생성기
 - 대상: COF 규칙을 따르는 문서(SKILL, RULE, WORKFLOW, SUB-AGENT)
 - 산출물 위치: 사용자가 지정한 경로 (COF 디렉토리 구조 준수 권장)
 - 생성 대상: 실제 문서 또는 템플릿 스켈레톤
+- 정책: `SKILL.md`는 표준 스킬 frontmatter만 유지하고, COF 식별 메타는 `SKILL.meta.yaml` sidecar에 저장한다.
 
 ---
 
@@ -74,14 +75,14 @@ Workflow, Rule, Skill, Sub-Agent 문서를 생성하기 위한 메타 생성기
 
 | Type | Role Value | Description |
 |------|------------|-------------|
-| SKILL | `SKILL` | 포인터 연산 능력(capability) 선언 |
+| SKILL | `SKILL` (in `SKILL.meta.yaml`) | 포인터 연산 능력(capability) 선언 |
 | RULE | `RULE` | 접근 제어와 위반 처리 정의 |
 | WORKFLOW | `WORKFLOW` | 상태 전이 및 수명 관리 정의 |
 | SUB-AGENT | `SKILL` + `agent_kind: sub-agent` | 하위 에이전트 역할 선언 |
 
 ### 2.5 Context Identity Model
 
-모든 문서는 YAML Frontmatter에 다음을 포함해야 한다.
+`RULE`/`WORKFLOW`/`SUB-AGENT` 문서는 YAML Frontmatter에 다음을 포함해야 한다.
 
 ```yaml
 ---
@@ -102,6 +103,22 @@ created: "YYYY-MM-DD"
 | `scope` | 가변 | 가시성 범위 |
 | `lifetime` | 가변 | 수명 정책 |
 | `created` | 불변 | 생성일 |
+
+### 2.6 SKILL Sidecar Metadata (`SKILL.meta.yaml`)
+
+`SKILL.md`는 최소 frontmatter만 사용하고, COF 식별 메타는 sidecar 파일에 저장한다.
+
+```yaml
+context_id: cof-xxxx
+role: SKILL
+state: const | mutable | active | frozen | archived
+scope: immune | agora | nucleus | swarm
+lifetime: ticket | persistent | archived
+created: "YYYY-MM-DD"
+trigger: always_on | model_decision | using_instruction | data_state_change   # optional
+consumers: []                                                                  # optional
+notes: ""                                                                      # optional
+```
 
 ---
 
@@ -144,16 +161,12 @@ created: "YYYY-MM-DD"
 
 선택된 `doc_type`에 따라 다음 구조의 문서를 생성한다.
 
-#### SKILL 문서 예시
+#### SKILL 문서 예시 (`SKILL.md`)
 
 ```markdown
 ---
-context_id: cof-my-skill
-role: SKILL
-state: const
-scope: swarm
-lifetime: persistent
-created: "2025-05-20"
+name: my-skill
+description: Use when creating or updating pointer-safe COF documents.
 ---
 
 # My Skill Title
@@ -176,6 +189,20 @@ created: "2025-05-20"
 
 ## 4. References
 - 관련 Rule/Workflow 링크
+```
+
+#### SKILL 메타 예시 (`SKILL.meta.yaml`)
+
+```yaml
+context_id: cof-my-skill
+role: SKILL
+state: const
+scope: swarm
+lifetime: persistent
+created: "2025-05-20"
+trigger: model_decision
+consumers: ["agent"]
+notes: ""
 ```
 
 #### RULE 문서 예시
@@ -288,10 +315,12 @@ created: "2025-05-20"
 
 ### Step 3) Render Frontmatter
 
-- YAML Frontmatter 생성:
-  - `context_id`, `role`, `state`, `scope`, `lifetime`, `created` 삽입
+- `skill`:
+  - `SKILL.md` frontmatter는 `name`, `description`, `allowed-tools`만 생성
+  - COF 식별 메타는 `SKILL.meta.yaml`로 생성
+- `rule/workflow/sub-agent`:
+  - 기존 COF frontmatter(`context_id`, `role`, `state`, `scope`, `lifetime`, `created`) 생성
   - `sub-agent`의 경우 `agent_kind: sub-agent` 추가
-- Frontmatter 필드 유효성 재검증
 
 ### Step 4) Render Body
 
@@ -304,7 +333,7 @@ created: "2025-05-20"
 ### Step 5) Validate Pointer Safety
 
 - Hard Constraints 준수 여부 검증:
-  - `context_id` 존재 확인
+  - `context_id` 존재 확인 (`skill`은 `SKILL.meta.yaml`에서 확인)
   - `role`과 디렉토리 ROLE 일치 여부 (경로에서 추론 가능 시)
   - `history` 컨텍스트를 `active`로 참조하는지 검사
   - WORKFLOW의 경우 수명 전이 명시 여부 확인
@@ -493,7 +522,7 @@ Sub-Agent는 SKILL 문서의 변형이다.
 | Workflow Normative | `references/workflow-normative-interpretation.md` | Workflow 문서 작성/해석 규범 |
 | Sub-Agent Normative | `references/subagent-normative-interpretation.md` | Sub-Agent 문서 작성/해석 규범 |
 | Glob Patterns | `references/glob-patterns.md` | Glob 패턴 문법 정의 |
-| COF Rule Genome | `../../rules/cof-environment-set.md` | COF 전체 규칙 정의 |
+| COF Governance Guide | `references/cof-environment-set.md` | COF 전체 규칙 정의 (skill-based) |
 
 ---
 

@@ -58,6 +58,6 @@ Indexing Progress:
 ## References
 
 - Spec: `SPEC.md`
-- Rule Genome: `../../rules/cof-environment-set.md`
+- Governance Guide: `../00.cof-pointerical-tool-creator/references/cof-environment-set.md`
 - Glob patterns: `../00.cof-pointerical-tool-creator/references/glob-patterns.md`
 - Rule normative: `../00.cof-pointerical-tool-creator/references/rule-normative-interpretation.md`

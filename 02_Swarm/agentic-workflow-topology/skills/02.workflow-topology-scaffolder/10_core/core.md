@@ -35,6 +35,15 @@ Workflow Spec 전체 JSON 스키마 → `30_references/packs/pack.output_contrac
 ```json
 {
   "goal": "string",
+  "workflow_profile": {
+    "class": "strategy | high_risk | general",
+    "risk_tolerance": "low | medium | high"
+  },
+  "preflight": {
+    "questions": [
+      {"id": "PF1", "question": "멘탈모델 먼저 세팅할까요?", "required": true}
+    ]
+  },
   "constraints": {
     "time_budget": "optional string",
     "token_budget": "optional number",
@@ -51,12 +60,20 @@ Workflow Spec 전체 JSON 스키마 → `30_references/packs/pack.output_contrac
     "llm": true,
     "retrieval": true,
     "embedding": "optional",
-    "human_in_the_loop": "optional"
+    "human_in_the_loop": "required_when_strategy_or_high_risk"
   }
 }
 ```
 
 ---
+
+## 전략/고위험 강제 게이트
+
+- `workflow_profile.class in {strategy, high_risk}` 또는 `risk_tolerance=high`인 경우:
+  - `H1`, `H2` 노드를 기본 포함한다.
+  - `T4 -> C1 -> H1` 엣지를 강제한다.
+  - `web_evidence_YYYY-MM-DD.md`가 없으면 `H1` 승인 불가.
+  - COWI 산출물(`relation_context_map`, `skill_usage_adaptation_report`)이 없으면 `H1` finalization 불가.
 
 ## 책임 범위
 

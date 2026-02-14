@@ -56,6 +56,6 @@ python3 scripts/sync_swarms_skill_manager.py \
 
 ## References
 
-- Rule: `../rules/cof-environment-set.md`
+- Governance: `../00.cof-pointerical-tool-creator/references/cof-environment-set.md`
 - Parent Skill: `00.cof-pointerical-tool-creator`
 - Neighbor Skills: `cof-glob-indexing`, `cof-task-manager-node`, `cof-task-solver-agent-group`

@@ -1,10 +1,6 @@
 ---
-context_id: cof-xxxx
-role: SKILL
-state: const
-scope: swarm
-lifetime: persistent
-created: "YYYY-MM-DD"
+name: your-skill-name
+description: Describe when to use this skill in one sentence.
 ---
 
 # [Skill Title]

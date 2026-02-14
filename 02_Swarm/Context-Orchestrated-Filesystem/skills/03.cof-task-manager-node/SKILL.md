@@ -108,4 +108,4 @@ Checks for `cof-environment-set.md` presence and broken ticket dependencies.
 - [TICKET-TEMPLATE.md](templates/TICKET-TEMPLATE.md): Ticket 템플릿
 - [ISSUE_NOTE_RULE.md](templates/ISSUE_NOTE_RULE.md): issue_notes/ 템플릿
 - [RELEASE_NOTE_RULE.md](templates/RELEASE_NOTE_RULE.md): release_notes/ 템플릿
-- Rule Genome: `../../rules/cof-environment-set.md`
+- Governance Guide: `../00.cof-pointerical-tool-creator/references/cof-environment-set.md`
