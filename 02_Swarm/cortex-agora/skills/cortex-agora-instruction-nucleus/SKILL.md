@@ -1,6 +1,11 @@
 ---
 name: structuring-cortex-agora-proposals
-description: Structures cortex-agora observation proposals into Nucleus semantic contract format (5 types/fields/modes/contract). Use when formalizing behavior patterns as instruction candidates.
+description: Structures cortex-agora observation proposals into reusable semantic contract format for COWI/Nucleus downstream consumers (5 types/fields/modes/contract). Use when formalizing behavior patterns as instruction candidates.
+context_id: cortex-agora-instruction-nucleus
+role: SKILL
+state: const
+scope: swarm
+lifetime: persistent
 ---
 
 # Cortex Agora Instruction Nucleus
@@ -15,7 +20,7 @@ cortex-agora에서 Behavior Feed를 관찰하고 제안(Proposal)을 생성할 �
 |----------|-------|
 | allowed_contexts | `ticket`, `reference`, `working` |
 | forbidden_contexts | `history` (read-only), `runtime` (execution) |
-| consumers | agent |
+| consumers | `context-orchestrated-workflow-intelligence`, `deliberation_chamber`, `agent` |
 | execution_mode | `:reference_only` (proposals only) |
 
 ---
@@ -27,6 +32,7 @@ cortex-agora에서 Behavior Feed를 관찰하고 제안(Proposal)을 생성할 �
 3. Type Assignment Guide를 참고하여 적절한 `:type`을 부여한다.
 4. Boundary Check를 수행하여 Nucleus 범위 외 요소를 분리한다.
 5. 규칙/스킬 변경이 필요한 제안은 Escalation Path를 따른다.
+6. COWI 전달 시 `source_snapshot.agora_ref`, `source_snapshot.captured_at`를 함께 제공한다.
 
 ---
 
@@ -275,6 +281,7 @@ cortex-agora 제안의 :execution.mode는 반드시 :reference_only여야 한다
 | 범위 외 요소 | 담당 레이어 | 분리 위치 |
 |-------------|------------|----------|
 | 저장/주소/인덱스/리졸버 | COF | `proposal.out_of_scope.cof` |
+| COF↔AWT 관계 맥락 맵/적응 리포트 작성 | COWI | `proposal.out_of_scope.cowi` |
 | 트리거 평가 로직 | Antigravity (오케스트레이션) | `proposal.out_of_scope.orchestration` |
 | 실패 시 행동/HITL 트리거 | Antigravity (정책) | `proposal.out_of_scope.policy` |
 | 실제 실행/검증/재시도 | Runtime | `proposal.out_of_scope.runtime` |

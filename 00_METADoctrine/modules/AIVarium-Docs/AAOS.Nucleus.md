@@ -19,7 +19,8 @@ end
 
 subgraph SW["AAOS_Swarms"]
     ARG["cortex-agora"]
-    COF["Context_Orchestrated_Filesystem"]
+    COWI["context-orchestrated-workflow-intelligence"]
+    COF["context-orchestrated-filesystem"]
     OSW["Other_Swarms"]
 end
 
@@ -33,8 +34,9 @@ RA -->|"Evidence/History"| DCN
 IS -->|"Audit Verdict"| RA
 
 SW -->|"Promotion Proposal"| DCN
-RA -->|"Historical Evidence"| ARG
-ARG -->|"Rule Improvement Proposal"| DCN
+SW -->|"Behavior Feed (Agora-First)"| ARG
+ARG -->|"Observation Output (agora_ref)"| COWI
+COWI -->|"Relation/Adaptation Proposal"| DCN
 COF -->|"Execution Context"| MC
 OSW -->|"Execution Context"| MC
 ```

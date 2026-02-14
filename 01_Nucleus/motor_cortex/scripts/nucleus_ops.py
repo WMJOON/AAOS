@@ -400,7 +400,7 @@ def _iter_layer_modules(layer_root: Path) -> list[Path]:
 OUTWARD_SUPERVISION_TARGETS = {
     "02_Swarm": [
         "context-orchestrated-filesystem",
-        "context-orchestrated-ontology",
+        "context-orchestrated-workflow-intelligence",
         "cortex-agora",
     ],
     "03_Manifestation": ["summon-agents"],

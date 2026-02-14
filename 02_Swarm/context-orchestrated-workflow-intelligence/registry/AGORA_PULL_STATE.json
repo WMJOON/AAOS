@@ -1,0 +1,9 @@
+{
+  "version": "1",
+  "proposal_cursors": {
+    "P-SWARM-V014-BATCH": {
+      "last_decision_ts": "2026-02-14T12:09:00Z",
+      "last_decision_id": "id_20260214T120900Z_swarm-v014-batch_accept"
+    }
+  }
+}

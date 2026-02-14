@@ -1,0 +1,12 @@
+# agora_improvement_decision_event template
+
+decision_id: "id_20260214T110000Z_p001_accept"
+ts: "2026-02-14T11:00:00Z"
+proposal_id: "P-001"
+decision: "accepted" # accepted|partially_accepted|deferred|rejected
+rationale: "피드백 반영으로 계약 충돌 가능성을 낮춤"
+applied_event_ids:
+  - "ce_20260214T104000Z_p001_updated"
+feedback_refs:
+  - "fb_20260214T103000Z_p001_cowi"
+next_action: "weekly seal batch"

@@ -1,0 +1,23 @@
+{
+  "normalized_output": {
+    "decision_questions": [
+      {"id": "DQ1", "question": "자사 서비스 중 규제 적용 대상은?", "status": "open"},
+      {"id": "DQ2", "question": "운영 프로세스 변경 범위는?", "status": "open"},
+      {"id": "DQ3", "question": "고객 커뮤니케이션 시 법적 리스크는?", "status": "open"}
+    ],
+    "claims": [
+      {"id": "C1", "text": "가상자산이용자보호법 2024년 7월 시행", "type": "fact", "source": "금융위원회"},
+      {"id": "C2", "text": "이용자 예치금 분리보관 의무화", "type": "fact", "source": "법률 제1조"}
+    ],
+    "assumptions": [
+      {"id": "A1", "text": "자사 서비스가 가상자산 거래업에 해당함"}
+    ],
+    "constraints": [
+      {"id": "K1", "text": "시행일까지 3개월 이내 대응 필요"}
+    ],
+    "risks": [
+      {"id": "R1", "text": "미준수 시 영업정지 가능", "severity": "high"}
+    ],
+    "tradeoffs": []
+  }
+}

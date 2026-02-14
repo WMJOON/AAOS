@@ -11,13 +11,25 @@ import sys
 import shutil
 from pathlib import Path
 from datetime import datetime
-import re
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+SHARED_DIR = SCRIPT_DIR.parent.parent / "_shared"
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
+
+from frontmatter import FrontmatterParseError, split_frontmatter_and_body
 
 def get_ticket_status(content: str) -> str:
     """Extract status from frontmatter."""
-    match = re.search(r"^status:\s*(\w+)", content, re.MULTILINE)
-    if match:
-        return match.group(1).lower()
+    try:
+        frontmatter, _ = split_frontmatter_and_body(content)
+    except FrontmatterParseError:
+        return "unknown"
+    status = frontmatter.get("status")
+    if status is None:
+        return "unknown"
+    if isinstance(status, str):
+        return status.lower()
     return "unknown"
 
 def archive_tasks(node_path: str) -> bool:

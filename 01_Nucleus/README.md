@@ -38,6 +38,7 @@ Nucleus는 AAOS의 **기관 레이어(Validation Engine)** 이다.
 - 동일 단계의 핵심 판단은 동일 모델군 단독 종료가 아니라 상호검증 분산 수행이어야 합니다.
 - 패키지·증빙·판정은 모두 추적 가능해야 하며, Record Archive에 append-only로 보존한다.
 - Nucleus 내부에서 발생하는 영구 기록은 모두 `01_Nucleus/record_archive/`로 일원화하며, 다른 폴더의 로그/증적은 작업 산출로만 취급한다.
+- Swarm 행동 관찰 입력은 `02_Swarm/cortex-agora` 경유를 원칙으로 하며, `record_archive`는 봉인(seal) 단계의 장기 immutable SoT로 취급한다.
 - Nucleus 산출물은 항상 종료 조건(`termination conditions`)과 다음 단계 입력(`context_for_next`)을 남긴다.
 - `legacy`/`change_packets` 계열 경로는 운영 루트에서 금지하며, 반드시 `_archive/` 하위에만 둔다.
 - `*_BLUEPRINT.md` 파일은 운영 루트에서 금지하며, 필요 시 `_archive/legacy/`로 격리 보관한다.
@@ -108,8 +109,9 @@ Nucleus는 AAOS의 **기관 레이어(Validation Engine)** 이다.
 
 - 핵심 운영 스킬
   - `agent-audit-log`: 운영 로그 표준화(SQLite)와 인수인계 추적 보조
-  - `workflow-topology-designer`: Deliberation 구조 설계
-  - `workflow-cone-analyzer`: 종료 선언(termination declaration) 보강
+  - `02.workflow-topology-scaffolder`: Deliberation 구조/종료 전략 설계
+  - `03.workflow-mental-model-execution-designer`: 노드별 실행 시 멘탈모델 적용 설계
+  - `04.workflow-observability-and-evolution`: 실행 로그 관찰 기반 개선 제안
 - 핵심 실행 스크립트
   - `motor_cortex/scripts/nucleus_ops.py`
 

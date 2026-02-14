@@ -4,7 +4,7 @@ description: AAOS 군체(Swarm) 계층. 의식적 사고/행동양식(계획/대
 ---
 # AAOS 군체(Swarm)
 
-군체(Swarm)는 AAOS에서 의식적 사고/행동양식이 발생하고, 하위 구조(프로젝트/노드/온톨로지/워크플로우)가 성장하는 계층이다.
+군체(Swarm)는 AAOS에서 의식적 사고/행동양식이 발생하고, 하위 구조(프로젝트/노드/관계 맥락/워크플로우)가 성장하는 계층이다.
 모든 군체(Swarm) 하위 구조는 **Canon → META Doctrine → Immune Doctrine → Inquisitor** 순서의 규범을 참조하여 “면역체계 계승”을 보장해야 한다.
 
 > 실행(하드웨어/OS/네트워크/런타임 바인딩)은 Swarm이 직접 수행하지 않으며, `03_Manifestation/` 계층으로 위임한다.
@@ -15,6 +15,22 @@ description: AAOS 군체(Swarm) 계층. 의식적 사고/행동양식(계획/대
 - `02_Swarm/cortex-agora/`는 Swarm들의 **행동(Behavior Trace)** 을 수집·요약하고 “반복되는 습관”을 **제안**으로 만든다.
 - cortex-agora는 실행/자동반영/룰수정/에이전트 호출을 하지 않는다.
 - cortex-agora는 record_archive를 직접 읽지 않는다(입력은 Behavior Feed).
+- Behavior Feed는 Agora-First이며, 장기 immutable SoT는 `cortex-agora change_archive -> record_archive seal` 결과로만 취급한다.
+
+## 책임 경계: context-orchestrated-filesystem vs agentic-workflow-topology
+
+- `02_Swarm/context-orchestrated-filesystem/`는 업무 티켓을 로컬 파일로 생성/관리/추적하는 운영 계층이다.
+- `02_Swarm/agentic-workflow-topology/`는 "어떤 워크플로우를 설계할 것인가"를 다루는 설계 계층이다.
+- 전자는 실행 맥락 운영에 가깝고, 후자는 topology/node/handoff/termination 설계에 집중한다.
+- `02_Swarm/context-orchestrated-workflow-intelligence/`는 COF↔AWT 사이를 잇는 **intelligence mediator**로서
+  관계 맥락 계약(relation context)과 스킬 사용 패턴 개선 제안(report)을 관리한다.
+- 위 mediator는 `cortex-agora output` 우선이며, 직접 전역 관찰/직접 실행/자동반영을 수행하지 않는다.
+
+## COF↔AWT 연계 흐름 (설계→중재→운영)
+
+1. `02_Swarm/agentic-workflow-topology/`가 topology/node/handoff/termination 설계를 생성한다.
+2. `02_Swarm/context-orchestrated-workflow-intelligence/`가 관계 맥락 계약과 적응 보고서를 구성한다.
+3. `02_Swarm/context-orchestrated-filesystem/`가 로컬 티켓 운영과 실행 맥락 관리를 수행한다.
 
 ## Swarm Observability Standard (Behavior Feed) — 권장/필수
 
@@ -74,3 +90,7 @@ audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-
 
 - DNA 검증(권장): `python3 04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITOR_SKILL/_shared/yaml_validator.py <DNA.md>`
 - 전체 스캔 리포트: `python3 04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --scan 04_Agentic_AI_OS --format md`
+
+## Version Note
+
+- 2026-02-14: Agora-First 봉인 정책(`change_archive -> record_archive seal`) 및 COF↔AWT 연계 흐름(설계→중재→운영) 명문화

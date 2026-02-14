@@ -1,0 +1,34 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: skill_system_manifest
+type: object
+required:
+  - skill_id
+  - version
+  - status
+  - depends_on
+  - contracts
+  - deprecation_policy
+properties:
+  skill_id:
+    type: string
+  version:
+    type: string
+  status:
+    type: string
+    enum: [active, deprecated, frozen]
+  depends_on:
+    type: array
+    items:
+      type: string
+  contracts:
+    type: array
+    items:
+      type: string
+  deprecation_policy:
+    type: object
+    required: [enabled, sunset_condition]
+    properties:
+      enabled:
+        type: boolean
+      sunset_condition:
+        type: string

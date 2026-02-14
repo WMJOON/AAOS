@@ -1,0 +1,34 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workflow_topology_spec",
+  "type": "object",
+  "required": [
+    "goal",
+    "decision_questions",
+    "rsv_total",
+    "topology_type",
+    "nodes",
+    "edges",
+    "stop_policy"
+  ],
+  "properties": {
+    "goal": { "type": "string" },
+    "decision_questions": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["id", "question", "weight"],
+        "properties": {
+          "id": { "type": "string" },
+          "question": { "type": "string" },
+          "weight": { "type": "number" }
+        }
+      }
+    },
+    "rsv_total": { "type": "number" },
+    "topology_type": { "type": "string" },
+    "nodes": { "type": "array", "items": { "type": "object" } },
+    "edges": { "type": "array", "items": { "type": "object" } },
+    "stop_policy": { "type": "object" }
+  }
+}

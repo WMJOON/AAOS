@@ -68,8 +68,8 @@ updated: "2026-02-14"
 ## Quick Start (권장)
 
 1. 글로벌 스킬로 목표를 DQ/RSV 단계로 구조화  
-   - `workflow-topology-designer`
-   - `workflow-cone-analyzer`
+   - `02.workflow-topology-scaffolder`
+   - `03.workflow-mental-model-execution-designer`
 2. plans/tasks 폴더에서 증빙·판단 근거를 정리
 3. `templates/DELIBERATION_PACKET_TEMPLATE.md` 기반으로 패킷 구성
 4. `SKILL` 체크리스트(termination declaration 포함) 충족
@@ -89,8 +89,8 @@ updated: "2026-02-14"
 ## Skills 연동
 
 - `deliberation-instruction-nucleus`: Nucleus 목적, 합의 규칙, 종료 조건을 사전 계약으로 고정
-- `workflow-topology-designer`: Goal→DQ→RSV 토폴로지 정렬
-- `workflow-cone-analyzer`: 노드별 종료 전략 선언
+- `02.workflow-topology-scaffolder`: Goal→DQ→RSV 토폴로지 + 종료 전략 설계
+- `03.workflow-mental-model-execution-designer`: 노드별 멘탈모델 적용 설계
 
 ## 버전 이력
 

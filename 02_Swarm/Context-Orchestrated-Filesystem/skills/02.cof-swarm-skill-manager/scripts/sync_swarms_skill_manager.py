@@ -7,46 +7,22 @@ from __future__ import annotations
 
 import argparse
 import json
-import re
 from dataclasses import dataclass, field
 from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, Iterable, List, Optional, Tuple
+import sys
 
-try:
-    import yaml
-except ImportError:
-    yaml = None
+SCRIPT_DIR = Path(__file__).resolve().parent
+SHARED_DIR = SCRIPT_DIR.parent.parent / "_shared"
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
+
+from frontmatter import FrontmatterParseError, as_list, safe_str, split_frontmatter_and_body
 
 
-FRONTMATTER_RE = re.compile(r"\A---\s*\n(.*?)\n---\s*\n", re.DOTALL)
 SWARM_SKILL_DIR_CANDIDATES = ("skills", "SKILLS")
 DEFAULT_MAX_SKILLS = 8
-
-
-def parse_frontmatter(text: str) -> Dict[str, Any]:
-    fm_match = FRONTMATTER_RE.search(text)
-    if not fm_match:
-        return {}
-
-    fm_text = fm_match.group(1)
-    if yaml is not None:
-        try:
-            data = yaml.safe_load(fm_text)
-            return data if isinstance(data, dict) else {}
-        except Exception:
-            return {}
-
-    data: Dict[str, Any] = {}
-    for raw in fm_text.splitlines():
-        line = raw.strip()
-        if not line or line.startswith("#"):
-            continue
-        if ":" not in line:
-            continue
-        key, value = line.split(":", 1)
-        data[key.strip()] = value.strip().strip("\"'")
-    return data
 
 
 def read_frontmatter(md_path: Path) -> Tuple[Dict[str, Any], List[str]]:
@@ -56,30 +32,16 @@ def read_frontmatter(md_path: Path) -> Tuple[Dict[str, Any], List[str]]:
     except OSError as exc:
         return {}, [f"{md_path}: cannot read - {exc}"]
 
-    data = parse_frontmatter(text)
+    try:
+        fm, _ = split_frontmatter_and_body(text)
+    except FrontmatterParseError as exc:
+        return {}, [f"{md_path}: frontmatter parse error - {exc}"]
+
+    data = fm
+
     if not data:
         errors.append(f"{md_path}: missing/invalid frontmatter")
     return data, errors
-
-
-def safe_text(value: Any, fallback: str = "") -> str:
-    if value is None:
-        return fallback
-    if isinstance(value, str):
-        return value.strip()
-    if isinstance(value, (int, float)):
-        return str(value)
-    return str(value)
-
-
-def as_list(value: Any) -> List[str]:
-    if value is None:
-        return []
-    if isinstance(value, str):
-        return [value]
-    if isinstance(value, list):
-        return [safe_text(v) for v in value if safe_text(v, "").strip()]
-    return [safe_text(value)] if safe_text(value).strip() else []
 
 
 @dataclass
@@ -119,12 +81,12 @@ def discover_skills(swarm_root: Path) -> List[SkillRecord]:
             skills.append(
                 SkillRecord(
                     directory=sub,
-                    name=safe_text(fm.get("name"), sub.name),
-                    context_id=safe_text(fm.get("context_id"), ""),
-                    description=safe_text(fm.get("description"), "").replace("\n", " "),
-                    trigger=safe_text(fm.get("trigger"), ""),
-                    role=safe_text(fm.get("role"), ""),
-                    created=safe_text(fm.get("created"), ""),
+                    name=safe_str(fm.get("name"), sub.name),
+                    context_id=safe_str(fm.get("context_id"), ""),
+                    description=safe_str(fm.get("description"), "").replace("\n", " "),
+                    trigger=safe_str(fm.get("trigger"), ""),
+                    role=safe_str(fm.get("role"), ""),
+                    created=safe_str(fm.get("created"), ""),
                     has_scripts=(sub / "scripts").is_dir(),
                     has_templates=(sub / "templates").is_dir(),
                     has_references=(sub / "references").is_dir(),
@@ -168,10 +130,14 @@ def validate(records: List[SkillRecord]) -> Tuple[List[str], List[str]]:
             warnings.append(f"{skill.directory}: missing name")
         if not skill.description:
             warnings.append(f"{skill.directory}: missing description")
+        if not skill.context_id:
+            errors.append(f"{skill.directory}: missing context_id in SKILL.md")
 
     seen_contexts: Dict[str, List[str]] = {}
     for skill in records:
-        identity = skill.context_id if skill.context_id else skill.name
+        if not skill.context_id:
+            continue
+        identity = skill.context_id
         seen_contexts.setdefault(identity, []).append(str(skill.directory))
     for context_id, paths in seen_contexts.items():
         if len(paths) > 1:
@@ -332,7 +298,7 @@ def collect_global_context_conflicts(summaries: List[Dict[str, Any]]) -> List[st
     location_map: Dict[str, List[str]] = {}
     for summary in summaries:
         for skill in summary.get("skills", []):
-            identity = safe_text(skill.get("context_id")) or safe_text(skill.get("name"))
+            identity = safe_str(skill.get("context_id")) or safe_str(skill.get("name"))
             if not identity:
                 continue
             location_map.setdefault(identity, []).append(f"{summary['name']}:{skill['path']}")

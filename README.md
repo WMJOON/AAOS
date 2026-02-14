@@ -37,7 +37,9 @@ AAOS(Agentic AI OS)는 자율적 지성 집단의 안정적 진화를 목표로 
 │   ├── deliberation_chamber/     (숙의/합의 정형화)
 │   └── motor_cortex/             (실행 오케스트레이션/검증)
 ├── 02_Swarm/                     (사고/행동양식)
+│   ├── agentic-workflow-topology/
 │   ├── context-orchestrated-filesystem/
+│   ├── context-orchestrated-workflow-intelligence/
 │   ├── cortex-agora/
 │   └── ... 기타 Swarm
 └── 03_Manifestation/             (실행 바인딩, 비인지 실행)
@@ -177,6 +179,7 @@ Swarm는 직접 실행을 소유하지 않고, 계획/분석/협업을 담당합
 
 - 권장: behavior feed / 실행 이력 분리  
 - 금지: 임의로 `record_archive`를 직접 조작하거나 증빙을 대체하는 행동
+- 원칙: Behavior Feed는 Agora-First로 관찰되며, 장기 immutable SoT는 `cortex-agora change_archive -> record_archive seal` 결과로만 취급한다.
 - 필수: `02_Swarm/*/skills/*/SKILL.md`는 frontmatter 표준 필드를 유지해야 함  
   (`context_id`, `description`, `trigger`, `role`, `state`, `scope`, `lifetime`, `created`)
 - 필수: Swarm 스킬 레지스트리 점검 시 경고(`missing context_id`, `missing description`)가 0이 아닐 경우 Non-Canonical 대기 상태로 분류

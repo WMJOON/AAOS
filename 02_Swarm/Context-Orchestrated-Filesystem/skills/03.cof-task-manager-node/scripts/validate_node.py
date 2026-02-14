@@ -10,7 +10,16 @@ Checks:
 import argparse
 import sys
 import re
+from typing import Any, Dict
 from pathlib import Path
+
+SCRIPT_DIR = Path(__file__).resolve().parent
+SHARED_DIR = SCRIPT_DIR.parent.parent / "_shared"
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
+
+from frontmatter import FrontmatterParseError, split_frontmatter_and_body
+
 
 def sanitize_filename(name: str) -> str:
     name = name.replace(" ", "-")
@@ -23,14 +32,17 @@ def normalize_dependency(dep: str) -> str:
         dep = dep[:-3]
     return sanitize_filename(dep)
 
-def get_dependencies(content: str) -> list[str]:
-    """Extract dependencies from frontmatter."""
-    match = re.search(r"^dependencies:\s*\[(.*?)\]", content, re.MULTILINE)
-    if match:
-        deps_str = match.group(1)
-        # Parse "Dep-1", "Dep-2"
-        return [d.strip().strip('"\'') for d in deps_str.split(",") if d.strip()]
-    return []
+def get_dependencies(frontmatter: Dict[str, Any]) -> list[str]:
+    """Extract dependencies from parsed frontmatter."""
+    raw_deps = frontmatter.get("dependencies")
+    if raw_deps is None:
+        return []
+    if isinstance(raw_deps, list):
+        values = raw_deps
+    else:
+        values = [raw_deps]
+
+    return [normalize_dependency(str(dep)) for dep in values if str(dep).strip()]
 
 def validate_node(node_path: str) -> bool:
     path = Path(node_path).resolve()
@@ -49,7 +61,13 @@ def validate_node(node_path: str) -> bool:
         
         for name, file_path in ticket_files.items():
             content = file_path.read_text(encoding="utf-8")
-            deps = [normalize_dependency(d) for d in get_dependencies(content)]
+            try:
+                frontmatter, _ = split_frontmatter_and_body(content)
+            except FrontmatterParseError as exc:
+                issues.append(f"[ERROR] Ticket '{name}' has invalid frontmatter: {exc}")
+                continue
+
+            deps = get_dependencies(frontmatter)
             
             for dep in deps:
                 if dep not in ticket_files:

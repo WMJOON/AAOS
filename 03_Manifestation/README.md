@@ -9,6 +9,7 @@ Manifestation은 AAOS의 **현현과 접속(Manifestation & Interface)** 계층�
 - Swarm이 수립한 사고/행동양식은 Manifestation을 통해 Agent Instance로 구체화되어 현실 세계에서 실행된다.
 - Manifestation은 스스로 목적을 정하거나 계획하지 않는다(Non-Cognition).
 - Manifestation은 실행 결과를 Record Archive/Immune System으로 환류해 Nucleus의 기억/규범 진화에 기여한다.
+- Swarm 행동 관찰은 `02_Swarm/cortex-agora` 채널로 환류하고, 실행 증빙/판정 근거는 Nucleus(`record_archive`, `immune_system`) 채널로 환류한다.
 
 ## 책임
 

@@ -1,0 +1,11 @@
+# agora_peer_feedback_event template
+
+feedback_id: "fb_20260214T103000Z_p001_cowi"
+ts: "2026-02-14T10:30:00Z"
+proposal_id: "P-001"
+reviewer: "agent:cowi"
+reviewer_model_family: "openai-gpt"
+reviewer_provider: "OpenAI"
+stance: "critique" # critique|suggestion|endorsement
+summary: "handoff 조건을 더 명확히 분리할 필요가 있음"
+linked_event_id: "ce_20260214T100000Z_p001_created"

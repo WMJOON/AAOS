@@ -1,0 +1,19 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "title": "workflow_mental_model_execution_plan",
+  "type": "object",
+  "required": [
+    "task_to_chart_map",
+    "node_mode_policy",
+    "model_selection_policy",
+    "handoff_contract",
+    "fallback_rules"
+  ],
+  "properties": {
+    "task_to_chart_map": { "type": "array", "items": { "type": "object" } },
+    "node_mode_policy": { "type": "object" },
+    "model_selection_policy": { "type": "object" },
+    "handoff_contract": { "type": "object" },
+    "fallback_rules": { "type": "array", "items": { "type": "string" } }
+  }
+}

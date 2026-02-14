@@ -22,6 +22,13 @@ from datetime import datetime, timezone
 from pathlib import Path
 from typing import Any, Dict, List, Optional, Tuple
 
+SCRIPT_DIR = Path(__file__).resolve().parent
+SHARED_DIR = SCRIPT_DIR.parent.parent / "_shared"
+if str(SHARED_DIR) not in sys.path:
+    sys.path.insert(0, str(SHARED_DIR))
+
+from frontmatter import FrontmatterParseError, as_list, serialize_frontmatter, split_frontmatter_and_body
+
 # ---------------------------------------------------------------------------
 # Constants
 # ---------------------------------------------------------------------------
@@ -74,24 +81,28 @@ EXIT_AGENT_FAILED = 5
 # Utility Functions
 # ---------------------------------------------------------------------------
 
+def _env_bool(value: Optional[str], default: bool = False) -> bool:
+    if value is None:
+        return default
+    return value.strip().lower() in {"1", "true", "yes", "on", "y"}
+
+
 def _utc_now_iso() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
 def _detect_cof_root(start_path: str) -> Optional[str]:
-    """Detect COF root by looking for characteristic files/directories."""
-    current = os.path.abspath(start_path)
+    """Detect COF root by walking upward from a ticket path."""
+    current = Path(start_path).resolve()
     while True:
-        # Check for COF markers
-        if os.path.isfile(os.path.join(current, "core-docs", "COF_DOCTRINE.md")):
-            return current
-        if os.path.isfile(os.path.join(current, "COF_DOCTRINE.md")):
-            return current
-        if os.path.isdir(os.path.join(current, "skills")):
-            parent = os.path.dirname(current)
-            if os.path.basename(current) == "context-orchestrated-filesystem":
-                return current
-        parent = os.path.dirname(current)
+        if (current / "core-docs" / "COF_DOCTRINE.md").is_file():
+            return str(current)
+        if (current / "COF_DOCTRINE.md").is_file():
+            return str(current)
+        if (current / "skills" / "01.cof-glob-indexing" / "scripts" / "cof_glob_indexing.py").is_file():
+            return str(current)
+
+        parent = current.parent
         if parent == current:
             return None
         current = parent
@@ -100,163 +111,52 @@ def _detect_cof_root(start_path: str) -> Optional[str]:
 def _detect_summon_agents_root(cof_root: Optional[str]) -> Optional[str]:
     """Detect summon-agents root relative to COF root."""
     if cof_root:
-        # Try relative path from COF
-        candidate = os.path.normpath(os.path.join(cof_root, "..", "..", "03_Manifestation", "summon-agents"))
-        if os.path.isdir(candidate):
-            return candidate
+        for ancestor in [Path(cof_root).resolve()] + list(Path(cof_root).resolve().parents):
+            candidate = ancestor / "03_Manifestation" / "summon-agents"
+            if candidate.is_dir():
+                return str(candidate)
     # Fallback to environment variable
     return os.environ.get("SUMMON_AGENTS_ROOT")
 
 
-# ---------------------------------------------------------------------------
-# YAML Frontmatter Parser (Minimal / No Dependencies)
-# ---------------------------------------------------------------------------
+def _normalize_target_dir(ticket_dir: str, target_path: Optional[Any]) -> str:
+    if target_path is None:
+        return os.path.abspath(ticket_dir)
 
-def _strip_yaml_inline_comment(value: str) -> str:
-    """
-    Strip YAML inline comments for unquoted scalars.
-    Example: 'status: todo # comment' -> 'todo'
-    """
-    in_single = False
-    in_double = False
-    escaped = False
+    path = os.path.expanduser(str(target_path).strip())
+    if not path:
+        return os.path.abspath(ticket_dir)
 
-    for i, ch in enumerate(value):
-        if escaped:
-            escaped = False
-            continue
-        if ch == "\\" and in_double:
-            escaped = True
-            continue
-        if ch == "'" and not in_double:
-            in_single = not in_single
-            continue
-        if ch == '"' and not in_single:
-            in_double = not in_double
-            continue
-        if ch == "#" and not in_single and not in_double:
-            if i == 0 or value[i - 1].isspace():
-                return value[:i].rstrip()
-    return value
+    if os.path.isabs(path):
+        return os.path.abspath(path)
+
+    return os.path.abspath(os.path.normpath(os.path.join(ticket_dir, path)))
 
 
-def _unquote_yaml_scalar(value: str) -> str:
-    if len(value) >= 2 and ((value[0] == value[-1] == '"') or (value[0] == value[-1] == "'")):
-        return value[1:-1]
-    return value
+def _ensure_ticket_within_boundary(ticket_path: str, cof_root: Optional[str], allow_external_ticket: bool) -> None:
+    ticket_path_obj = Path(ticket_path).resolve()
+    ticket_dir = ticket_path_obj.parent
 
+    if ticket_dir.name != "tickets":
+        if allow_external_ticket:
+            return
+        raise ValueError(
+            "Ticket is not inside a 'tickets' directory. "
+            "Use --allow-external-ticket if this is intended."
+        )
 
-def _parse_inline_yaml_list(value: str) -> List[str]:
-    inner = value[1:-1].strip()
-    if not inner:
-        return []
-    parts = [p.strip() for p in inner.split(",")]
-    return [_unquote_yaml_scalar(p) for p in parts if p]
+    if not cof_root:
+        return
 
-
-def parse_frontmatter(content: str) -> Tuple[Dict[str, Any], str]:
-    """Parse YAML frontmatter from markdown content."""
-    if not content.startswith("---"):
-        return {}, content
-
-    lines = content.split("\n")
-    end_index = -1
-    for i, line in enumerate(lines[1:], start=1):
-        if line.strip() == "---":
-            end_index = i
-            break
-
-    if end_index == -1:
-        return {}, content
-
-    frontmatter_lines = lines[1:end_index]
-    body = "\n".join(lines[end_index + 1:]).strip()
-
-    # Minimal YAML parsing (supports scalars, inline lists, multiline lists, 1-level nested dict)
-    frontmatter: Dict[str, Any] = {}
-    current_key: Optional[str] = None
-    current_kind: Optional[str] = None  # "list" | "dict"
-
-    for line in frontmatter_lines:
-        raw = line.rstrip("\n")
-        if not raw.strip():
-            continue
-
-        # List item
-        if raw.lstrip().startswith("- "):
-            if current_key and current_kind == "list" and isinstance(frontmatter.get(current_key), list):
-                frontmatter[current_key].append(raw.lstrip()[2:].strip())
-            continue
-
-        # Nested object (e.g. execution:)
-        if raw.strip().endswith(":") and not raw.lstrip().startswith("-"):
-            key = raw.strip()[:-1].strip()
-            frontmatter[key] = {}
-            current_key = key
-            current_kind = "dict"
-            continue
-
-        if ":" in raw:
-            parts = raw.strip().split(":", 1)
-            key = parts[0].strip()
-            value_raw = _strip_yaml_inline_comment(parts[1].strip())
-            value_raw = _unquote_yaml_scalar(value_raw)
-
-            if value_raw.startswith("[") and value_raw.endswith("]"):
-                parsed: Any = _parse_inline_yaml_list(value_raw)
-            elif value_raw == "":
-                frontmatter[key] = []
-                current_key = key
-                current_kind = "list"
-                continue
-            elif value_raw == "{}":
-                parsed = {}
-            else:
-                parsed = value_raw
-
-            # Detect leading spaces for nested objects
-            leading_spaces = len(line) - len(line.lstrip())
-            if leading_spaces > 0 and current_key and current_kind == "dict" and isinstance(frontmatter.get(current_key), dict):
-                frontmatter[current_key][key] = parsed
-            else:
-                frontmatter[key] = parsed
-                current_key = None
-                current_kind = None
-
-    return frontmatter, body
-
-
-def serialize_frontmatter(frontmatter: Dict[str, Any]) -> str:
-    """Serialize frontmatter dict back to YAML string."""
-    lines = ["---"]
-    for key, value in frontmatter.items():
-        if isinstance(value, dict):
-            lines.append(f"{key}:")
-            for k, v in value.items():
-                if isinstance(v, list):
-                    if not v:
-                        lines.append(f"  {k}: []")
-                    else:
-                        lines.append(f"  {k}:")
-                        for item in v:
-                            lines.append(f"    - {str(item)}")
-                elif isinstance(v, (int, float)):
-                    lines.append(f"  {k}: {v}")
-                else:
-                    lines.append(f'  {k}: "{str(v)}"')
-        elif isinstance(value, list):
-            if not value:
-                lines.append(f"{key}: []")
-            else:
-                lines.append(f"{key}:")
-                for item in value:
-                    lines.append(f"  - {str(item)}")
-        elif isinstance(value, (int, float)):
-            lines.append(f"{key}: {value}")
-        else:
-            lines.append(f'{key}: "{str(value)}"')
-    lines.append("---")
-    return "\n".join(lines)
+    try:
+        ticket_path_obj.relative_to(Path(cof_root).resolve())
+    except ValueError:
+        if allow_external_ticket:
+            return
+        raise ValueError(
+            f"Ticket is outside the detected COF root ({cof_root}); "
+            "use --allow-external-ticket to proceed."
+        )
 
 
 # ---------------------------------------------------------------------------
@@ -283,17 +183,11 @@ class TicketData:
 
     @property
     def tags(self) -> List[str]:
-        tags = self.frontmatter.get("tags", [])
-        if isinstance(tags, str):
-            return [tags]
-        return list(tags)
+        return as_list(self.frontmatter.get("tags", []))
 
     @property
     def dependencies(self) -> List[str]:
-        deps = self.frontmatter.get("dependencies", [])
-        if isinstance(deps, str):
-            return [deps]
-        return list(deps)
+        return as_list(self.frontmatter.get("dependencies", []))
 
     @property
     def target_path(self) -> Optional[str]:
@@ -351,12 +245,15 @@ class ExecutionResult:
 
 def parse_ticket(ticket_path: str) -> TicketData:
     """Parse a ticket file and extract structured data."""
-    path = Path(ticket_path)
+    path = Path(ticket_path).resolve()
     if not path.exists():
         raise FileNotFoundError(f"Ticket not found: {ticket_path}")
 
     content = path.read_text(encoding="utf-8")
-    frontmatter, body = parse_frontmatter(content)
+    try:
+        frontmatter, body = split_frontmatter_and_body(content)
+    except FrontmatterParseError as exc:
+        raise FrontmatterParseError(f"Failed to parse frontmatter for {path}: {exc}") from exc
 
     # Extract title (first # heading)
     title = ""
@@ -469,6 +366,8 @@ def run_context_indexing(
     target_dir: str,
     max_depth: int,
     cof_root: str,
+    include_hidden: bool,
+    follow_symlinks: bool,
 ) -> Tuple[Optional[str], Optional[str], List[str], Optional[str], Optional[Dict[str, Any]]]:
     """
     Run cof-glob-indexing and return paths to NODE_INDEX.md and ROLE_EVIDENCE.md.
@@ -487,6 +386,10 @@ def run_context_indexing(
         "--target-dir", target_dir,
         "--max-depth", str(max_depth),
     ]
+    if include_hidden:
+        cmd.append("--include-hidden")
+    if follow_symlinks:
+        cmd.append("--follow-symlinks")
 
     try:
         result = subprocess.run(
@@ -1014,7 +917,11 @@ def update_ticket_status(ticket: TicketData, new_status: str, execution_meta: Di
         ticket.frontmatter["execution"] = execution_meta
 
     current = Path(ticket.path).read_text(encoding="utf-8")
-    current_frontmatter, current_body = parse_frontmatter(current)
+    try:
+        current_frontmatter, current_body = split_frontmatter_and_body(current)
+    except FrontmatterParseError:
+        current_frontmatter = {}
+        current_body = current.strip()
     if not current_frontmatter:
         current_body = current.strip()
 
@@ -1177,6 +1084,10 @@ def solve_ticket(args: argparse.Namespace) -> ExecutionResult:
         result.error_code = "TICKET_NOT_FOUND"
         result.error_message = str(e)
         return result
+    except FrontmatterParseError as e:
+        result.error_code = "TICKET_PARSE_ERROR"
+        result.error_message = str(e)
+        return result
     except Exception as e:
         result.error_code = "TICKET_PARSE_ERROR"
         result.error_message = str(e)
@@ -1197,6 +1108,13 @@ def solve_ticket(args: argparse.Namespace) -> ExecutionResult:
     # Detect paths
     ticket_dir = os.path.dirname(ticket.path)
     cof_root = _detect_cof_root(ticket_dir) or os.environ.get("COF_ROOT", "")
+    try:
+        _ensure_ticket_within_boundary(ticket.path, cof_root, bool(args.allow_external_ticket))
+    except ValueError as e:
+        result.error_code = "INVALID_TICKET_LOCATION"
+        result.error_message = str(e)
+        return result
+
     summon_agents_root = _detect_summon_agents_root(cof_root)
 
     if not summon_agents_root:
@@ -1225,15 +1143,23 @@ def solve_ticket(args: argparse.Namespace) -> ExecutionResult:
     role_evidence_path: Optional[str] = None
 
     if not args.skip_indexing and cof_root:
-        target_dir = ticket.target_path or ticket_dir
+        target_dir = _normalize_target_dir(ticket_dir, ticket.target_path)
+        if not os.path.isdir(target_dir):
+            result.warnings.append(f"target_path '{ticket.target_path}' is not a directory; using ticket directory fallback")
+            target_dir = os.path.abspath(ticket_dir)
+
         node_index_path, role_evidence_path, index_warnings, index_error_code, index_raw = run_context_indexing(
             target_dir,
             args.context_depth,
             cof_root,
+            include_hidden=bool(args.include_hidden),
+            follow_symlinks=bool(args.follow_symlinks),
         )
         result.warnings.extend(index_warnings)
     else:
-        target_dir = ticket.target_path or ticket_dir
+        target_dir = _normalize_target_dir(ticket_dir, ticket.target_path)
+        if not os.path.isdir(target_dir):
+            target_dir = os.path.abspath(ticket_dir)
         index_error_code = "COF_ROOT_NOT_DETECTED"
         index_raw = None
 
@@ -1506,6 +1432,18 @@ Examples:
         help="Max depth for cof-glob-indexing (default: 10)",
     )
     parser.add_argument(
+        "--include-hidden",
+        action="store_true",
+        default=_env_bool(os.environ.get("COF_SOLVING_TICKETS_INCLUDE_HIDDEN")),
+        help="Include dot-prefixed directories during context indexing.",
+    )
+    parser.add_argument(
+        "--follow-symlinks",
+        action="store_true",
+        default=_env_bool(os.environ.get("COF_SOLVING_TICKETS_FOLLOW_SYMLINKS")),
+        help="Follow symlinks during context indexing.",
+    )
+    parser.add_argument(
         "--dry-run",
         action="store_true",
         help="Parse and plan without execution",
@@ -1524,6 +1462,11 @@ Examples:
         "--allow-minimal-context",
         action="store_true",
         help="Allow execution when indexing produces no artifacts (fallback to minimal context).",
+    )
+    parser.add_argument(
+        "--allow-external-ticket",
+        action="store_true",
+        help="Allow processing tickets outside the detected COF root/tickets path.",
     )
     parser.add_argument(
         "--max-retries",
@@ -1623,6 +1566,8 @@ Examples:
     elif result.error_code == "TICKET_PARSE_ERROR":
         return EXIT_TICKET_ERROR
     elif result.error_code == "TICKET_INVALID_STATUS":
+        return EXIT_TICKET_ERROR
+    elif result.error_code == "INVALID_TICKET_LOCATION":
         return EXIT_TICKET_ERROR
     elif result.error_code == "CONTEXT_INDEXING_FAILED":
         return EXIT_CONTEXT_ERROR

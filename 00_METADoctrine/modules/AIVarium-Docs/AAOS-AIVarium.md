@@ -82,16 +82,14 @@ AAOS-AIVarium/
 │
 ├── Swarm/                                     # 의식 · 사고 · 행동양식 계층
 │   │
-│   ├── cortex-agora/                          # 토론 · 아이데이션 · 개선 Argument Swarm
-│   │   ├── Ideation_and_Argument/             
-│   │   ├── Context_Analysis/                  
-│   │   ├── History_Analysis/                  
-│   │   └── Improve_Swarm_Rules/               
+│   ├── cortex-agora/                          # workspace observer + change review bridge
+│   │   ├── behavior/
+│   │   ├── change_archive/
+│   │   └── skills/
 │   │
-│   └── Context_Orchestrated_Filesystem/       # 실행 논리 · 컨텍스트 유지 Swarm
-│       ├── tickets/
-│       ├── Context_Record/
-│       └── Ticket_Manager/
+│   ├── context-orchestrated-workflow-intelligence/  # COF↔AWT intelligence mediator
+│   ├── agentic-workflow-topology/             # workflow 설계 계층
+│   └── context-orchestrated-filesystem/       # 티켓 운영/실행 맥락 계층
 │
 └── Manifestation/                             # 실행체 · Agent 현현 계층
     └── Agent_Instance_Provider/

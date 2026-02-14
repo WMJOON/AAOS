@@ -1,6 +1,6 @@
 ---
 name: "AAOS-Swarm"
-version: "0.1.3"
+version: "0.1.4"
 scope: "04_Agentic_AI_OS/02_Swarm"
 owner: "AAOS Canon"
 created: "2026-01-21"
@@ -25,7 +25,7 @@ inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITO
 audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md"
 
 natural_dissolution:
-  purpose: "군체(Swarm) 하위 체계(COF/COO 등)가 생성·성장하는 실행 계층의 컨테이너"
+  purpose: "군체(Swarm) 하위 체계(COF/COWI/AGORA 등)가 생성·성장하는 실행 계층의 컨테이너"
   termination_conditions:
     - "AAOS 군체(Swarm) 계층이 구조적으로 대체될 때"
   dissolution_steps:
@@ -60,6 +60,8 @@ AAOS는 “기억(증빙)”과 “행동 관찰(습관)”을 분리한다.
 - cortex-agora는 record_archive를 **직접 읽지 않는다**.
 - cortex-agora의 입력은 “기록”이 아니라 “행동”이다. (Behavior Feed / Behavior Trace)
 - cortex-agora의 출력은 “집행/자동반영”이 아니라 **관찰 결과 + 제안**이다.
+- Behavior Feed는 Agora-First를 따른다.
+- 장기 immutable SoT는 `cortex-agora change_archive -> record_archive seal` 결과로만 유지한다.
 
 ### Two Kinds of Logs (Conceptual)
 
@@ -72,6 +74,9 @@ AAOS는 “기억(증빙)”과 “행동 관찰(습관)”을 분리한다.
 
 Swarm 행동  
 → cortex-agora (관찰·요약·제안)  
+→ cortex-agora change_archive (optional critique / stage_then_seal)  
+→ record_archive seal (장기 immutable SoT)  
+→ context-orchestrated-workflow-intelligence (COF↔AWT intelligence mediator)  
 → Human / Deliberation  
 → Rules / Skills (선별적 반영; 승인/승격 필요)
 
@@ -79,6 +84,7 @@ Swarm 행동
 
 Swarm의 “행동(Behavior Trace)”은 cortex-agora 관찰 입력으로 남긴다.
 이는 record_archive(증빙)와 분리된 Swarm 표준이다.
+직접 `record_archive` sink로 유입하는 방식은 허용하지 않는다.
 
 ### Recommended (권장)
 
@@ -102,3 +108,4 @@ Swarm의 “행동(Behavior Trace)”은 cortex-agora 관찰 입력으로 남긴
 - v0.1.1 : governance.voice=homing_instinct 및 mother_ref(모체) 기반 귀속 규칙 추가
 - v0.1.2 : record_archive(사실/증빙) vs cortex-agora(행동 관찰/제안) 책임 경계 및 입력/출력 규약 명문화
 - v0.1.3 : Swarm Observability Standard(Behavior Feed) 권장/필수 표준 추가
+- v0.1.4 : Agora-First 봉인 정책(`change_archive -> record_archive seal`) 및 direct record_archive sink 금지 규칙 추가

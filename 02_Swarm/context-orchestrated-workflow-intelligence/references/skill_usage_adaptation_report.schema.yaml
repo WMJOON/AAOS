@@ -1,0 +1,106 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: skill_usage_adaptation_report
+type: object
+required:
+  - source_snapshot
+  - usage_patterns
+  - cof_awt_impact
+  - proposed_adjustments
+  - expected_effect
+  - rollback_rule
+properties:
+  source_snapshot:
+    type: object
+    required:
+      - agora_ref
+      - captured_at
+    properties:
+      agora_ref:
+        type: string
+      captured_at:
+        type: string
+      period:
+        type: string
+      notes:
+        type: string
+    additionalProperties: true
+  usage_patterns:
+    type: array
+    items:
+      type: object
+      required:
+        - pattern
+      properties:
+        pattern:
+          type: string
+        evidence:
+          type: array
+          items:
+            type: string
+        confidence:
+          type: number
+          minimum: 0
+          maximum: 1
+      additionalProperties: true
+  cof_awt_impact:
+    type: array
+    items:
+      type: object
+      required:
+        - scope
+        - impact
+      properties:
+        scope:
+          type: string
+        impact:
+          type: string
+        risk:
+          type: string
+      additionalProperties: true
+  proposed_adjustments:
+    type: array
+    items:
+      type: object
+      required:
+        - id
+        - summary
+      properties:
+        id:
+          type: string
+        summary:
+          type: string
+        guardrails:
+          type: array
+          items:
+            type: string
+      additionalProperties: true
+  expected_effect:
+    type: object
+    required:
+      - hypotheses
+    properties:
+      hypotheses:
+        type: array
+        items:
+          type: string
+      success_signals:
+        type: array
+        items:
+          type: string
+      review_cycle:
+        type: string
+    additionalProperties: true
+  rollback_rule:
+    type: object
+    required:
+      - trigger
+      - action
+    properties:
+      trigger:
+        type: string
+      action:
+        type: string
+      owner:
+        type: string
+    additionalProperties: true
+additionalProperties: false

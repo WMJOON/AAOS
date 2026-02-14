@@ -1,0 +1,37 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: mental_model_bundle
+type: object
+required:
+  - domain
+  - core_axioms
+  - local_charts
+  - module_index
+  - loading_policy
+  - output_contract
+properties:
+  domain:
+    type: string
+  core_axioms:
+    type: array
+    items: { type: string }
+  local_charts:
+    type: array
+    items:
+      type: object
+      required: [id, purpose, selection_rule]
+      properties:
+        id: { type: string }
+        purpose: { type: string }
+        selection_rule: { type: string }
+  module_index:
+    type: array
+    items:
+      type: object
+      required: [module_id, question_axis]
+      properties:
+        module_id: { type: string }
+        question_axis: { type: string }
+  loading_policy:
+    type: object
+  output_contract:
+    type: object

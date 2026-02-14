@@ -1,4 +1,4 @@
-# COF v0.1.3
+# COF v0.1.4
 **Context-Orchestrated Filesystem**
 
 ---
@@ -8,6 +8,14 @@
 COF는 단순한 파일 규칙이 아니라, **"AI Agent가 물리적 공간(Filesystem)을 인지하는 철학"**이다.
 
 에이전트가 제한된 Context Window 내에서 효율적으로 작업할 수 있도록, 파일시스템의 구조 자체가 맥락(Context)을 전달하고, 참조(Pointer)를 통해 연결되며, 수명(Lifecycle)을 스스로 관리하는 시스템이다.
+
+---
+
+## Integration Boundary (Agora/COWI)
+
+- COF는 로컬 티켓 운영/실행 맥락 관리를 담당하는 운영 계층이다.
+- 관찰/패턴 개선 제안은 `cortex-agora`(관찰)와 `context-orchestrated-workflow-intelligence`(중재) 경유를 따른다.
+- `record_archive`는 봉인 대상 SoT이며, COF의 직접 관찰 입력 경로가 아니다.
 
 ---
 
@@ -198,7 +206,7 @@ META Doctrine (DNA.md)
     ↓
 Immune System (01_Nucleus/immune_system/)
     ↓
-COF v0.1.3 (현재)
+COF v0.1.4 (현재)
 ```
 
 ---
@@ -207,6 +215,7 @@ COF v0.1.3 (현재)
 
 | Version | Date | Changes |
 |---------|------|---------|
+| v0.1.4 | 2026-02-14 | Agora/COWI 연계 경계 및 direct record_archive 관찰 입력 금지 명문화 |
 | v0.1.3 | 2026-01-22 | Pointer Model 도입, 스킬 구조 재편 (`[n].[role]/`), SPEC 강화 |
 | v0.1.2 | - | 초기 버전, 4 Pillars 정의 |
 

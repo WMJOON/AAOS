@@ -1,0 +1,12 @@
+# agora_change_event template
+
+event_id: "ce_20260214T100000Z_p001_created"
+ts: "2026-02-14T10:00:00Z"
+proposal_id: "P-001"
+change_type: "created" # created|updated|superseded|withdrawn|sealed
+actor: "agent:cortex-agora"
+source_snapshot:
+  agora_ref: "agora://proposal/P-001"
+  captured_at: "2026-02-14T10:00:00Z"
+artifact_ref: "02_Swarm/cortex-agora/skills/cortex-agora-instruction-nucleus/SKILL.md"
+status: "open" # open|improving|closed|sealed

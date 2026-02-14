@@ -17,8 +17,9 @@ Nucleus 개선 시 글로벌 스킬을 일관되게 적용하기 위한 운영 �
 | Skill | Primary Use | Nucleus Touchpoint |
 |---|---|---|
 | `agent-audit-log` | 세션 간 운영 로그 표준화(SQLite) | Immune, record_archive |
-| `workflow-topology-designer` | Goal→DQ→RSV→Task Graph 설계 | Deliberation |
-| `workflow-cone-analyzer` | θ_GT 기반 종료 전략/termination 선언 | Deliberation, Immune |
+| `02.workflow-topology-scaffolder` | Goal→DQ→RSV→Task Graph + termination 설계 | Deliberation |
+| `03.workflow-mental-model-execution-designer` | Task node별 멘탈모델/모드 적용 설계 | Deliberation, Immune |
+| `04.workflow-observability-and-evolution` | 실행 패턴 관찰/개선 제안 리포트 | record_archive, motor_cortex |
 | `playwright` | 실행 플로우 자동화/검증 | motor_cortex |
 
 ## Standard Runbook

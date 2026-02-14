@@ -1,6 +1,6 @@
 ---
 name: "AAOS-Cortex-Agora"
-version: "0.1.0"
+version: "0.1.4"
 scope: "04_Agentic_AI_OS/02_Swarm/cortex-agora"
 owner: "AAOS Swarm"
 created: "2026-01-30"
@@ -24,6 +24,33 @@ meta_doctrine_reference: "04_Agentic_AI_OS/00_METADoctrine/DNA.md"
 immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/rules/README.md"
 inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITOR_SKILL/"
 audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md"
+
+downstream_consumption:
+  role: "workspace_observer"
+  output_priority: "cortex_agora_output_first"
+  transfer_mode: "pull_download"
+  primary_consumer: "02_Swarm/context-orchestrated-workflow-intelligence"
+  reusable_consumers:
+    - "01_Nucleus/deliberation_chamber"
+    - "02_Swarm/context-orchestrated-filesystem"
+    - "02_Swarm/agentic-workflow-topology"
+  required_source_snapshot_fields:
+    - "agora_ref"
+    - "captured_at"
+
+change_archive:
+  enabled: true
+  append_only: true
+  optional_critique_gate: true
+  bridge_mode: "stage_then_seal"
+  paths:
+    root: "02_Swarm/cortex-agora/change_archive"
+    change_events: "02_Swarm/cortex-agora/change_archive/events/CHANGE_EVENTS.jsonl"
+    peer_feedback: "02_Swarm/cortex-agora/change_archive/events/PEER_FEEDBACK.jsonl"
+    improvement_decisions: "02_Swarm/cortex-agora/change_archive/events/IMPROVEMENT_DECISIONS.jsonl"
+    change_index: "02_Swarm/cortex-agora/change_archive/indexes/CHANGE_INDEX.md"
+  bridge_script: "02_Swarm/cortex-agora/scripts/change_archive_bridge.py"
+  record_archive_target: "01_Nucleus/record_archive/_archive/operations/<timestamp>__swarm-observability__cortex-agora-change-review/"
 
 natural_dissolution:
   purpose: "Swarm 행동(Behavior Trace)을 관찰·요약하고 개선 제안을 생성하는 관찰/제안 군체"
@@ -51,14 +78,15 @@ observability:
       - event_id
       - ts
       - swarm_id
+      - group_id
       - actor
       - kind
       - context
       - outcome
-      - trace_id
+      - trace_id   # optional; backward compatibility
     retention_days: 365
     schema_version: "v1"
-    sink: "01_Nucleus/record_archive"
+    sink: "02_Swarm/cortex-agora/change_archive (stage_then_seal -> 01_Nucleus/record_archive)"
 
 inquisitor:
   required: true
@@ -70,6 +98,7 @@ inquisitor:
 
 cortex-agora는 Swarm들이 실제로 “어떻게 행동했는지”를 관찰하고,
 반복되는 흐름을 **언어화된 제안**(자동화/룰화 후보)으로 만든다.
+또한 workspace 중심 관찰자로서, downstream 계층(COWI 포함)의 재사용 가능한 출력 기준점을 제공한다.
 
 ## Hard Prohibitions (Non-Execution / Non-Enforcement)
 
@@ -84,6 +113,7 @@ cortex-agora는 Swarm들이 실제로 “어떻게 행동했는지”를 관찰�
 ### Behavior Feed (Behavior Trace)
 
 cortex-agora의 입력은 “기록(증빙)”이 아니라 “행동(흐름)”이다.
+Behavior Feed는 Agora-First 경로를 통해 수집하며, direct record_archive sink를 허용하지 않는다.
 
 #### Standard Location (권장)
 
@@ -108,6 +138,11 @@ behavior_event:
     human_intervention: boolean
 ```
 
+스키마 정렬 원칙:
+
+- canonical grouping key는 `group_id`를 사용한다.
+- `trace_id`는 하위 호환(backward compatibility) 목적으로만 병행 허용한다.
+
 ## Outputs
 
 cortex-agora의 출력은 항상 “관찰 → 해석 → 제안” 순서로만 산출한다.
@@ -116,7 +151,28 @@ cortex-agora의 출력은 항상 “관찰 → 해석 → 제안” 순서로만
 - 해석(Interpretation): 자동화/룰화 후보일 가능성(가설)
 - 제안(Proposal): 고려할 수 있는 선택지(조건부 자동 호출, 예산 제한, 인간介入 기준 등)
 
+### Consumption Contract (downstream)
+
+- downstream 계층은 cortex-agora 출력 참조(`agora_ref`)를 source-of-truth로 취급한다.
+- `context-orchestrated-workflow-intelligence`는 위 출력을 우선 입력으로 사용해
+  `skill_usage_adaptation_report.source_snapshot`을 구성한다.
+- cortex-agora는 출력만 제공하며, COF/AWT 실행/자동반영은 수행하지 않는다.
+
+## Change Archive Policy
+
+- cortex-agora는 변경/비판/개선 이벤트를 로컬 append-only로 기록한다.
+- 비판은 optional이며 상태 전환의 필수 차단 게이트가 아니다.
+- 장기 immutable 보존은 Nucleus `record_archive`가 담당하고,
+  cortex-agora는 `change_archive_bridge.py`로 stage package를 봉인 요청한다.
+- 기록 이벤트의 source snapshot은 `agora_ref`, `captured_at`를 포함해야 한다.
+- `stage_then_seal`이 완료된 `record_archive` 엔트리만 장기 immutable SoT로 간주한다.
+
 ## Escalation Path
 
 제안이 규칙/스킬/기관 DNA 변경을 요구하면, cortex-agora는 직접 반영하지 않고
 Deliberation Chamber로 승격 입력을 제출한다.
+
+## Version Note
+
+- v0.1.3 : Agora-First 입력/봉인 정책 명문화 및 observability sink를 `change_archive -> record_archive seal` 경로로 정렬
+- v0.1.4 : Behavior Feed canonical 필드를 `group_id`로 정렬하고 `trace_id`를 호환 필드로 격하

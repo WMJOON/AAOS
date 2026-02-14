@@ -1,0 +1,80 @@
+$schema: "https://json-schema.org/draft/2020-12/schema"
+title: relation_context_map
+type: object
+required:
+  - workflow_id
+  - ticket_context_id
+  - topology_nodes
+  - context_links
+  - handoff_rules
+  - conflict_resolution_rule
+properties:
+  workflow_id:
+    type: string
+    minLength: 1
+  ticket_context_id:
+    type: string
+    minLength: 1
+  topology_nodes:
+    type: array
+    items:
+      type: object
+      required:
+        - node_id
+      properties:
+        node_id:
+          type: string
+        role:
+          type: string
+        purpose:
+          type: string
+      additionalProperties: true
+  context_links:
+    type: array
+    items:
+      type: object
+      required:
+        - from
+        - to
+        - relation
+      properties:
+        from:
+          type: string
+        to:
+          type: string
+        relation:
+          type: string
+        note:
+          type: string
+      additionalProperties: true
+  handoff_rules:
+    type: array
+    items:
+      type: object
+      required:
+        - source
+        - destination
+        - condition
+      properties:
+        source:
+          type: string
+        destination:
+          type: string
+        condition:
+          type: string
+        payload_contract:
+          type: string
+      additionalProperties: true
+  conflict_resolution_rule:
+    type: object
+    required:
+      - strategy
+    properties:
+      strategy:
+        type: string
+      escalation_path:
+        type: string
+      owner:
+        type: string
+    additionalProperties: true
+additionalProperties: false
