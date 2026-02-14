@@ -17,7 +17,7 @@ collaborates_with:
 NN.agents-task-context/ 노드 생성, 티켓 관리, 검증, 아카이빙을 수행하는 **Orchestrator Agent**. (legacy: task-manager/)
 
 > **상위 Skill**: `cof-task-manager-node`
-> **설계 스펙**: [../../skills/02.cof-task-manager-node/SPEC.md](../../skills/02.cof-task-manager-node/SPEC.md)
+> **설계 스펙**: [../../skills/03.cof-task-manager-node/SPEC.md](../../skills/03.cof-task-manager-node/SPEC.md)
 
 ---
 
@@ -338,10 +338,10 @@ NN.agents-task-context/ 노드 생성, 티켓 관리, 검증, 아카이빙을 �
 
 | 문서 | 설명 |
 |------|------|
-| [SPEC.md](../../skills/02.cof-task-manager-node/SPEC.md) | 상세 설계 스펙 |
+| [SPEC.md](../../skills/03.cof-task-manager-node/SPEC.md) | 상세 설계 스펙 |
 | [sub-agents/](sub-agents/) | Sub-Agent 정의들 |
 | [references/](references/) | Normative 해석 문서들 |
-| [templates/](../../skills/02.cof-task-manager-node/templates/) | 문서 템플릿 |
+| [templates/](../../skills/03.cof-task-manager-node/templates/) | 문서 템플릿 |
 | `cof-task-manager-node` | 상위 Skill |
 | `cof-task-qa-agent` | QA Agent (아카이브 전 품질 검토) |
 | `cof-environment-set.md` | COF Rule Genome |

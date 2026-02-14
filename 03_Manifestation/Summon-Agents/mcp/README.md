@@ -2,7 +2,7 @@
 name: aaos-manifestation-summon-agents-mcp
 description: Manifestation bindings for Model Context Protocol (MCP) servers.
 ---
-# MCP (Summon-Agents)
+# MCP (summon-agents)
 
 Model Context Protocol (MCP) 서버를 호출(summon)하기 위한 Manifestation 바인딩들이 위치하는 디렉토리이다.
 

@@ -2,7 +2,7 @@
 name: aaos-manifestation-summon-agents
 description: Manifestation group for agent instantiation/execution bindings that "summon" external agent runtimes or CLIs.
 ---
-# Summon-Agents (Manifestation)
+# summon-agents (Manifestation)
 
 외부 에이전트/CLI/런타임을 호출(summon)하는 Manifestation 컴포넌트들을 묶는 그룹이다.
 

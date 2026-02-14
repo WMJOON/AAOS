@@ -1,0 +1,416 @@
+{
+  "timestamp": "2026-02-14T07:13:42Z",
+  "aaos_root": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS",
+  "critical_ok": true,
+  "required_paths": [
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus",
+      "exists": true,
+      "is_dir": true
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/immune_system",
+      "exists": true,
+      "is_dir": true
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive",
+      "exists": true,
+      "is_dir": true
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/deliberation_chamber",
+      "exists": true,
+      "is_dir": true
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/motor_cortex",
+      "exists": true,
+      "is_dir": true
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/motor_cortex/README.md",
+      "exists": true,
+      "is_dir": false
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/motor_cortex/DNA.md",
+      "exists": true,
+      "is_dir": false
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/immune_system/skills/core/auto_inquisitor.py",
+      "exists": true,
+      "is_dir": false
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/immune_system/skills/core/audit.py",
+      "exists": true,
+      "is_dir": false
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md",
+      "exists": true,
+      "is_dir": false
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/meta-audit-log/META_AUDIT_LOG.md",
+      "exists": true,
+      "is_dir": false
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive/indexes/HASH_LEDGER.md",
+      "exists": true,
+      "is_dir": false
+    }
+  ],
+  "missing_required": [],
+  "scan": {
+    "ok": true,
+    "counts": {
+      "Container": 1,
+      "Canonical": 4
+    }
+  },
+  "audit_checks": [
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md",
+      "ok": true,
+      "output": "🔍 Verifying: /Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md\n✅ Audit log integrity verified. No tampering detected."
+    },
+    {
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/meta-audit-log/META_AUDIT_LOG.md",
+      "ok": true,
+      "output": "🔍 Verifying: /Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/meta-audit-log/META_AUDIT_LOG.md\n✅ Audit log integrity verified. No tampering detected."
+    }
+  ],
+  "ledger": {
+    "ok": true,
+    "error": ""
+  },
+  "sqlite": {
+    "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/motor_cortex/context/agent_log.db",
+    "exists": true,
+    "audit_logs_count": 1
+  },
+  "governance_checks": [
+    {
+      "name": "01_Nucleus/README.md:priority_stack",
+      "ok": true,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/README.md:termination_or_context",
+      "ok": true,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/README.md:consensus_fields",
+      "ok": true,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/README.md:archive_chain",
+      "ok": true,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/README.md:governance_voice",
+      "ok": true,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/immune_system/README.md:priority_stack",
+      "ok": true,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/immune_system/README.md:termination_or_context",
+      "ok": true,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/immune_system/README.md:consensus_fields",
+      "ok": false,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/immune_system/README.md:archive_chain",
+      "ok": false,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/immune_system/README.md:governance_voice",
+      "ok": true,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/immune_system/DNA.md:priority_stack",
+      "ok": true,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/immune_system/DNA.md:termination_or_context",
+      "ok": true,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/immune_system/DNA.md:consensus_fields",
+      "ok": true,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/immune_system/DNA.md:archive_chain",
+      "ok": false,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/immune_system/DNA.md:governance_voice",
+      "ok": false,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/record_archive/README.md:priority_stack",
+      "ok": true,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/record_archive/README.md:termination_or_context",
+      "ok": false,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/record_archive/README.md:consensus_fields",
+      "ok": true,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/record_archive/README.md:archive_chain",
+      "ok": true,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/record_archive/README.md:governance_voice",
+      "ok": true,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/record_archive/DNA.md:priority_stack",
+      "ok": false,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/record_archive/DNA.md:termination_or_context",
+      "ok": false,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/record_archive/DNA.md:consensus_fields",
+      "ok": true,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/record_archive/DNA.md:archive_chain",
+      "ok": true,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/record_archive/DNA.md:governance_voice",
+      "ok": true,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/README.md:priority_stack",
+      "ok": false,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/README.md:termination_or_context",
+      "ok": true,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/README.md:consensus_fields",
+      "ok": true,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/README.md:archive_chain",
+      "ok": false,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/README.md:governance_voice",
+      "ok": true,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/DNA.md:priority_stack",
+      "ok": false,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/DNA.md:termination_or_context",
+      "ok": true,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/DNA.md:consensus_fields",
+      "ok": true,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/DNA.md:archive_chain",
+      "ok": false,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/deliberation_chamber/DNA.md:governance_voice",
+      "ok": false,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/README.md:priority_stack",
+      "ok": true,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/README.md:termination_or_context",
+      "ok": true,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/README.md:consensus_fields",
+      "ok": false,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/README.md:archive_chain",
+      "ok": false,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/README.md:governance_voice",
+      "ok": true,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/DNA.md:priority_stack",
+      "ok": false,
+      "detail": "상위 규범 우선순위 명시"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/DNA.md:termination_or_context",
+      "ok": true,
+      "detail": "종료/보존 또는 다음 컨텍스트 경로"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/DNA.md:consensus_fields",
+      "ok": true,
+      "detail": "합의 메타데이터(최소 model_id/model_family 또는 multi-agent-consensus)"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/DNA.md:archive_chain",
+      "ok": true,
+      "detail": "증빙 체인(MANIFEST+HASH_LEDGER) 참조"
+    },
+    {
+      "name": "01_Nucleus/motor_cortex/DNA.md:governance_voice",
+      "ok": false,
+      "detail": "governance 용어(decree/homing_instinct) 일치"
+    }
+  ],
+  "agent_policy": {
+    "ok": true,
+    "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/01_Nucleus/AGENT.md",
+    "detail": "AGENT.md is deprecated; AGENTS.md is canonical"
+  },
+  "skills_policy": {
+    "ok": true,
+    "total_skills": 14,
+    "violations": [],
+    "policy_source": "https://code.claude.com/docs/en/skills"
+  },
+  "frontmatter_hygiene": {
+    "ok": true,
+    "violations": []
+  },
+  "path_hygiene": {
+    "ok": true,
+    "disallowed_dirs": [],
+    "disallowed_blueprint_files": []
+  },
+  "immune_naming": {
+    "ok": true,
+    "missing_required_dirs": [],
+    "legacy_dirs_present": []
+  },
+  "lowercase_subdirs": {
+    "ok": true,
+    "violations": []
+  },
+  "institution_topfiles": {
+    "ok": true,
+    "violations": []
+  },
+  "lower_layer_supervision": {
+    "ok": false,
+    "roots": {
+      "02_Swarm": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm",
+      "03_Manifestation": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/03_Manifestation"
+    },
+    "modules": [
+      {
+        "layer": "02_Swarm",
+        "module": "02_Swarm/context-orchestrated-filesystem",
+        "readme": true,
+        "dna": true,
+        "required_issues": [],
+        "recommendations": []
+      },
+      {
+        "layer": "02_Swarm",
+        "module": "02_Swarm/context-orchestrated-ontology",
+        "readme": false,
+        "dna": false,
+        "required_issues": [
+          "missing README.md",
+          "missing DNA.md"
+        ],
+        "recommendations": []
+      },
+      {
+        "layer": "02_Swarm",
+        "module": "02_Swarm/cortex-agora",
+        "readme": true,
+        "dna": true,
+        "required_issues": [],
+        "recommendations": []
+      },
+      {
+        "layer": "03_Manifestation",
+        "module": "03_Manifestation/summon-agents",
+        "readme": true,
+        "dna": false,
+        "required_issues": [],
+        "recommendations": [
+          "missing DNA.md (recommended)"
+        ]
+      }
+    ],
+    "required_issues": [
+      "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-ontology: missing README.md, missing DNA.md"
+    ],
+    "recommendations": [
+      "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/03_Manifestation/summon-agents: missing DNA.md (recommended)"
+    ],
+    "blueprint_files": [],
+    "summary": {
+      "modules_checked": 4,
+      "required_issue_count": 1,
+      "recommendation_count": 1
+    },
+    "timestamp": "2026-02-14T07:13:42Z",
+    "aaos_root": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS"
+  }
+}

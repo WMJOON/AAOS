@@ -1,0 +1,1 @@
+{"event_id":"baseline:cortex:init","ts":"2026-02-14T00:00:00Z","swarm_id":"cortex-agora","actor":"system","kind":"observation","task_id":"cortex-bootstrap","session_id":"seed","trace_id":"bootstrap","context":{"path":"02_Swarm/cortex-agora","goal":"behavior observation startup"},"outcome":{"status":"success","human_intervention":false},"scope":"observation"}

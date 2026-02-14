@@ -32,11 +32,11 @@ COPY src/ ./src/
 RUN pip install --no-cache-dir -e .
 
 # Create workspace directory structure
-RUN mkdir -p /workspace/02_Swarm/Context-Orchestrated-Filesystem/skills
+RUN mkdir -p /workspace/02_Swarm/context-orchestrated-filesystem/skills
 
 # Environment variables
 ENV AAOS_ROOT=/workspace
-ENV COF_ROOT=/workspace/02_Swarm/Context-Orchestrated-Filesystem
+ENV COF_ROOT=/workspace/02_Swarm/context-orchestrated-filesystem
 
 # API keys must be provided at runtime via:
 #   -e ANTHROPIC_API_KEY=sk-ant-...

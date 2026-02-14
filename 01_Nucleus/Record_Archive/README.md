@@ -1,166 +1,137 @@
 ---
 name: aaos-record-archive
-description: AAOS Record Archive System. 감사/합의/승인/해체 기록을 장기 보존하고 재현 가능한 근거를 제공하는 아카이빙 기관.
+scope: "04_Agentic_AI_OS/01_Nucleus/record_archive"
+version: "0.2.6"
+status: canonical
+updated: "2026-02-14"
 ---
+
 # AAOS Record Archive System
 
 > AIVarium.Nucleus 구성 요소: “기억(증빙) 보존”을 담당한다.
 
-- DNA (canonical): `04_Agentic_AI_OS/01_Nucleus/Record_Archive/DNA.md`
-- DNA Blueprint (change proposal): `04_Agentic_AI_OS/01_Nucleus/Record_Archive/DNA_BLUEPRINT.md`
-- 상위 규범: `04_Agentic_AI_OS/README.md` → `04_Agentic_AI_OS/METADoctrine.md` → `04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md`
+Record Archive는 판정/합의/승인/해체 이력을 **append-only**로 보존하고,
+정통성 분쟁 시 재현 가능한 근거를 제공한다.
 
-## 역할
+## 운영 정렬
 
-- Immune System의 판정/승인/합의 기록을 “장기 보존 가능한 형태”로 아카이빙
-- 정통성 분쟁 시 증빙 재현(근거 스냅샷/인덱스/해시)
-- Natural Dissolution 실행 결과의 요약본을 보존
+- 상위 규범은 Canon 및 META Doctrine이 우선한다.
+- 문헌 규칙은 `homing_instinct`를 따른다. 충돌/권한 경계 불명확 시 즉시 중단하고 상위기관으로 귀속한다.
+- 증빙 패키지는 `_archive/<bucket>/<timestamp>__<type>__<slug>/` 규격을 사용한다.
 
-## 원칙
+## 구성
 
-- Append-only (수정 금지, 추가만 허용)
-- Homing Instinct (충돌 시 Immune System으로 귀속)
-
-## 디렉토리 구조 (운영 표준)
-
-```
-01_Nucleus/Record_Archive/
+```text
+01_Nucleus/record_archive/
 ├── README.md
-├── DNA_BLUEPRINT.md
-├── _archive/                        # 실제 패키지(append-only)
-│   ├── README.md
-│   ├── audit-log/                   # 5년 보존
-│   ├── meta-audit-log/              # 10년 보존
-│   ├── deliberation/                # 3년 보존
-│   ├── approvals/                   # 10년 보존
-│   ├── snapshots/                   # 10년 보존 (필요 시 요약 패키지로 갱신)
-│   └── disputed/                    # 분쟁/격리 (해결시까지)
-├── indexes/                         # 인덱스/해시 원장(append-only)
+├── DNA.md
+├── _archive/
+│   ├── audit-log/
+│   ├── meta-audit-log/
+│   ├── deliberation/
+│   ├── approvals/
+│   ├── snapshots/
+│   └── disputed/
+├── indexes/
 │   ├── README.md
 │   ├── ARCHIVE_INDEX.md
 │   └── HASH_LEDGER.md
-└── templates/                       # 패키지/매니페스트 템플릿
-    ├── ARCHIVE_PACKAGE_TEMPLATE.md
-    ├── MANIFEST_SHA256_TEMPLATE.txt
-    ├── DELIBERATION_PACKET_TEMPLATE.md
-    ├── DELIBERATION_TO_ARCHIVE_PROCEDURE.md
-    └── VERIFY_LEDGER_CHECKLIST.md
+├── templates/
+└── scripts/
 ```
 
-## 운영 규칙 (요약)
+## 핵심 규칙
 
-- **아카이브 단위는 “패키지 폴더 1개”** 이다. 패키지는 `_archive/<bucket>/<timestamp>__<type>__<slug>/` 형식으로 생성한다.
-- 패키지는 최소한 `PACKAGE.md`(메타데이터) + `MANIFEST.sha256`(무결성 목록) + `payload/`(증빙 파일들)을 포함한다.
-- `indexes/HASH_LEDGER.md`는 **반드시 자동화 스크립트(`scripts/ledger_keeper.py`)를 통해서만 업데이트해야 한다.** 수동 편집은 금지된다.
-- 충돌/불명확/권한 경계 감지 시: **추가 작업을 중단**하고 `01_Nucleus/Immune_system/`에 심판(혹은 보류)을 요청한다.
+1. `HASH_LEDGER.md`는 `scripts/ledger_keeper.py`로만 갱신한다(수동 편집 금지).
+2. 패키지는 `PACKAGE.md` + `MANIFEST.sha256` + `payload/` 최소 구성을 반드시 갖춘다.
+3. 정합성 상의 의심이 있으면 작업을 중단하고 Inquisitor로 귀속한다.
+4. 상위기관 변경 또는 DNA 변경은 증빙 패키지 1개 이상을 의무 봉인한다.
+5. 모든 증빙은 `ARCHIVE_INDEX.md`와 `HASH_LEDGER.md` 체인에서 추적 가능해야 한다.
+6. record_archive에 `pending/`, `working/` 등 작업용 디렉토리를 생성하지 않는다. 활성 작업 산출물은 `deliberation_chamber`에서 관리하며, 봉인 완료된 증빙만 `_archive/`로 수용한다.
 
-## Critic 기록 규칙
+## 상위 변경 게이트 및 합의 추적
 
-- Critic(비평/사후 분석)은 루트 파일로 두지 않고 **`_archive/` 패키지로만** 보존한다(append-only).
+- Canon, META, 기관 DNA, Swarm 루트 DNA 등 상위 변경은 `Record Archive` 봉인 의무를 가진다.
+- 최소 산출물: Deliberation packet, Immune 판정/승인 근거, 원본/요약 본문, `MANIFEST.sha256`, 체인 엔트리.
+- model_id/model_family/provider/rationale를 포함한 다중 합의 항목을 함께 보관한다.
 
-## 언제 무엇을 아카이빙하나 (최소 요구)
+## 빠른 패키지 절차
 
-- **상위기관 변경 게이트**(Canon/META/기관 DNA/Swarm 루트 DNA):
-  - 변경 전/후 스냅샷(대상 파일)
-  - Deliberation 산출물(합의 요약 + 근거 링크)
-  - Immune System 판정 기록(AUDIT_LOG/META_AUDIT_LOG 관련 엔트리 참조)
-  - 패키지 매니페스트 해시 + 원장(HASH_LEDGER) 체인 업데이트
+1. `_archive/<bucket>/`에 패키지 폴더 생성
+2. `templates/ARCHIVE_PACKAGE_TEMPLATE.md` 기반 `PACKAGE.md` 작성
+3. `payload/`에 증빙 저장, `MANIFEST.sha256` 생성
+4. `ledger_keeper.py`로 봉인 (아래 CLI 참조)
+5. `indexes/ARCHIVE_INDEX.md`와 `indexes/HASH_LEDGER.md`가 자동 갱신됩니다.
 
-- **Record Archive DNA 승격/변경**(본 기관 자체의 DNA/스크립트/운영 규칙):
-  - 플래그십 Agent 2종 이상 합의(Deliberation Packet)
-  - `_archive/` 패키지로 증빙 고정 + `HASH_LEDGER` 체인 연결
+## ledger_keeper.py CLI
 
-## 빠른 절차 (수동)
+```bash
+# 권장 CLI (seal command)
+python3 scripts/ledger_keeper.py seal <package_path> \
+  --summary "ARCHIVE_INDEX에 표시할 요약" \
+  --targets "대상파일1.md,대상파일2.md" \
+  --notes "HASH_LEDGER notes 필드"
 
-## 빠른 절차 (수동 + 자동)
+# 무결성 검증
+python3 scripts/ledger_keeper.py verify
+# 또는 (하위 호환)
+python3 scripts/ledger_keeper.py --verify
 
-1. `_archive/<bucket>/`에 새 패키지 폴더 생성
-2. `templates/ARCHIVE_PACKAGE_TEMPLATE.md`를 `PACKAGE.md`로 복사해 메타데이터 작성
-3. 증빙 파일을 `payload/`에 넣고, `MANIFEST.sha256`를 생성(템플릿 참고)
-4. **Script 실행**: `python3 scripts/ledger_keeper.py <package_path> "<notes>"`
-   - 이 스크립트가 `HASH_LEDGER.md`에 해시 체인을 연결하고, `ARCHIVE_INDEX.md` 업데이트용 스니펫을 출력한다.
-5. 출력된 스니펫을 `indexes/ARCHIVE_INDEX.md`에 추가한다.
-6. `templates/VERIFY_LEDGER_CHECKLIST.md`로 prev_hash 연결 검증 (스크립트가 수행하지만 교차 검증 권장)
-
-## Sibling 기관 간 표준 워크플로우
-
-```
-┌─────────────────────────────────────────────────────────────────────────────┐
-│                        상위기관 변경 게이트 워크플로우                          │
-├─────────────────────────────────────────────────────────────────────────────┤
-│                                                                             │
-│  [1] 변경 제안 발생                                                          │
-│       │                                                                     │
-│       ▼                                                                     │
-│  ┌─────────────────────────────────────────┐                               │
-│  │      DELIBERATION CHAMBER               │                               │
-│  │  ─────────────────────────────────────  │                               │
-│  │  • 변경 제안 수집                         │                               │
-│  │  • Multi-Agent 합의 진행                 │                               │
-│  │  • 위험/영향 분석                         │                               │
-│  │  • verdict/rationale 정리               │                               │
-│  │                                         │                               │
-│  │  Output: Deliberation Packet            │                               │
-│  └─────────────────┬───────────────────────┘                               │
-│                    │                                                        │
-│                    ▼                                                        │
-│  ┌─────────────────────────────────────────┐                               │
-│  │         IMMUNE SYSTEM                   │                               │
-│  │  ─────────────────────────────────────  │                               │
-│  │  • 합의 결과 검토                         │                               │
-│  │  • 정통성/권한 판정                       │                               │
-│  │  • 승인/거부/수정요청 결정                 │                               │
-│  │  • AUDIT_LOG / META_AUDIT_LOG 기록       │                               │
-│  │                                         │                               │
-│  │  Output: Judgment + Audit Entry         │                               │
-│  └─────────────────┬───────────────────────┘                               │
-│                    │                                                        │
-│          ┌────────┴────────┐                                               │
-│          │                 │                                                │
-│          ▼                 ▼                                                │
-│     [승인됨]           [거부/분쟁]                                           │
-│          │                 │                                                │
-│          ▼                 ▼                                                │
-│  ┌─────────────────────────────────────────┐                               │
-│  │         RECORD ARCHIVE                  │                               │
-│  │  ─────────────────────────────────────  │                               │
-│  │  • 패키지 생성 (PACKAGE.md + payload)    │                               │
-│  │  • MANIFEST.sha256 생성                 │                               │
-│  │  • ARCHIVE_INDEX 엔트리 추가             │                               │
-│  │  • HASH_LEDGER 체인 연결                │                               │
-│  │  • prev_hash 검증                       │                               │
-│  │                                         │                               │
-│  │  승인 → _archive/snapshots/ 또는 해당 버킷│                               │
-│  │  분쟁 → _archive/disputed/              │                               │
-│  └─────────────────────────────────────────┘                               │
-│                                                                             │
-└─────────────────────────────────────────────────────────────────────────────┘
+# 드라이런
+python3 scripts/ledger_keeper.py seal <package_path> --summary "test" --dry-run
 ```
 
-### 책임 경계
+**주요 파라미터:**
 
-| 기관 | 역할 | 하지 않는 것 |
-|------|------|-------------|
-| **Deliberation Chamber** | 합의 정리, 근거 수집 | 판정, 집행, 보존 |
-| **Immune System** | 판정, 승인/거부, 감사 기록 | 합의 진행, 장기 보존 |
-| **Record Archive** | 증빙 패키징, 해시 체인, 장기 보존 | 판정, 합의 |
+| 파라미터 | 설명 | 기본값 |
+|----------|------|--------|
+| `--summary` | ARCHIVE_INDEX `summary` 필드 | notes 또는 "auto-recorded package" |
+| `--targets` | 쉼표 구분 대상 파일 경로 → ARCHIVE_INDEX `targets` | 패키지 경로 자체 |
+| `--notes` | HASH_LEDGER `notes` 필드 | (빈 문자열) |
+| `--dry-run` | 실제 기록 없이 결과 확인 | false |
 
-### 상호작용 프로토콜
+## 검증 규칙
 
-1. **Deliberation → Immune**: Deliberation Packet 제출 (`multi_agent_consensus` 포함)
-2. **Immune → Archive**: 판정 완료 후 `audit_refs` 제공
-3. **Deliberation → Archive**: 합의 산출물을 `templates/DELIBERATION_TO_ARCHIVE_PROCEDURE.md` 절차로 이관
-4. **Archive → Immune**: 체인 파손/분쟁 시 Inquisitor 심판 요청
+- `HASH_LEDGER.md`는 `CHAIN_MIGRATION.marker`(2026-02-14T00:00:00Z)를 경계로, 이전은 `manifest-only`, 이후는 `prev_hash + manifest` 체인 방식으로 검증합니다.
+- 검증기는 다음 케이스를 **WARN**으로 허용합니다:
+  - `pre-migration chain hash`: CHAIN_MIGRATION 이전에 이미 chain 방식으로 해시된 엔트리
+  - `repair entry`: 동일 `package_path`에 repair 엔트리가 존재하여 MANIFEST 수정이 기록된 경우
 
-### 분쟁 발생 시
-
+```bash
+# 검증 예시 (pass with warnings)
+python3 scripts/ledger_keeper.py verify
+#   WARN: 8) pre-migration chain hash detected for ... (accepted)
+#   WARN: 12) hash mismatch for ... (repair entry, accepted)
+# OK: HASH_LEDGER verification passed (15 entries, 4 warnings)
 ```
-분쟁 감지 → Archive 작업 중단 → disputed/ 격리 → Immune 심판 요청
-                                                    │
-                     ┌──────────────────────────────┴──────────────────────────────┐
-                     ▼                              ▼                              ▼
-                  [승인]                         [거부]                        [수정요청]
-                     │                              │                              │
-                     ▼                              ▼                              ▼
-              원래 버킷 복원                    폐기 (기록 보존)                Deliberation 재회부
+
+## Repair 엔트리 규칙
+
+MANIFEST.sha256가 봉인 후 수정된 경우:
+1. 원본 엔트리의 해시 불일치는 불가피 (append-only 원칙)
+2. repair 엔트리를 추가하여 새 MANIFEST 해시를 체인에 반영
+3. 동일 `package_path`가 2회 이상 등록된 경우 검증기가 repair로 인식하여 WARN 처리
+
+```mermaid
+flowchart TD
+  D["Deliberation Chamber: 제안/근거 정리"]
+  I["Immune System: 판정/승인/거부"]
+  A["Record Archive: 패키지 봉인 + hash chain"]
+  C["Archive Index/Hash Ledger"]
+
+  D --> I --> A --> C
+```
+
+## 운영 예시
+
+```bash
+# 봉인 (새 CLI)
+python3 scripts/ledger_keeper.py seal \
+  _archive/approvals/2026-02-14T...__approval__example/ \
+  --summary "approval for DNA v0.3.0" \
+  --targets "01_Nucleus/record_archive/DNA.md" \
+  --notes "approval packet sealed"
+
+# 봉인 (하위 호환 CLI)
+python3 scripts/ledger_keeper.py _archive/approvals/2026-02-14T...__approval__example/ "approval packet sealed"
 ```

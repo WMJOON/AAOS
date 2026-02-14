@@ -19,7 +19,7 @@ manifestation:
     command: "sa-call-cli-agents-mcp"
     args: []
     env:
-      COF_ROOT: "${AAOS_ROOT}/02_Swarm/Context-Orchestrated-Filesystem"
+      COF_ROOT: "${AAOS_ROOT}/02_Swarm/context-orchestrated-filesystem"
       AAOS_ROOT: "${AAOS_ROOT}"
 ---
 

@@ -27,7 +27,7 @@ uvx --from . sa-call-cli-agents-mcp
       "command": "sa-call-cli-agents-mcp",
       "env": {
         "AAOS_ROOT": "/path/to/04_Agentic_AI_OS",
-        "COF_ROOT": "/path/to/04_Agentic_AI_OS/02_Swarm/Context-Orchestrated-Filesystem"
+        "COF_ROOT": "/path/to/04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem"
       }
     }
   }
@@ -66,7 +66,7 @@ docker build -t sa-call-cli-agents-mcp .
 docker run -i --rm \
   -v /path/to/04_Agentic_AI_OS:/workspace:rw \
   -e AAOS_ROOT=/workspace \
-  -e COF_ROOT=/workspace/02_Swarm/Context-Orchestrated-Filesystem \
+  -e COF_ROOT=/workspace/02_Swarm/context-orchestrated-filesystem \
   -e ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY} \
   -e OPENAI_API_KEY=${OPENAI_API_KEY} \
   -e GOOGLE_API_KEY=${GOOGLE_API_KEY} \
@@ -99,7 +99,7 @@ docker-compose up
         "run", "-i", "--rm",
         "-v", "/path/to/04_Agentic_AI_OS:/workspace:rw",
         "-e", "AAOS_ROOT=/workspace",
-        "-e", "COF_ROOT=/workspace/02_Swarm/Context-Orchestrated-Filesystem",
+        "-e", "COF_ROOT=/workspace/02_Swarm/context-orchestrated-filesystem",
         "-e", "ANTHROPIC_API_KEY",
         "-e", "OPENAI_API_KEY",
         "-e", "GOOGLE_API_KEY",

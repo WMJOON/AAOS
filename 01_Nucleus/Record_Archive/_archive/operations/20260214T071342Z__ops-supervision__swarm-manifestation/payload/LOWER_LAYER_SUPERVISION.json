@@ -1,0 +1,60 @@
+{
+  "ok": false,
+  "roots": {
+    "02_Swarm": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm",
+    "03_Manifestation": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/03_Manifestation"
+  },
+  "modules": [
+    {
+      "layer": "02_Swarm",
+      "module": "02_Swarm/context-orchestrated-filesystem",
+      "readme": true,
+      "dna": true,
+      "required_issues": [],
+      "recommendations": []
+    },
+    {
+      "layer": "02_Swarm",
+      "module": "02_Swarm/context-orchestrated-ontology",
+      "readme": false,
+      "dna": false,
+      "required_issues": [
+        "missing README.md",
+        "missing DNA.md"
+      ],
+      "recommendations": []
+    },
+    {
+      "layer": "02_Swarm",
+      "module": "02_Swarm/cortex-agora",
+      "readme": true,
+      "dna": true,
+      "required_issues": [],
+      "recommendations": []
+    },
+    {
+      "layer": "03_Manifestation",
+      "module": "03_Manifestation/summon-agents",
+      "readme": true,
+      "dna": false,
+      "required_issues": [],
+      "recommendations": [
+        "missing DNA.md (recommended)"
+      ]
+    }
+  ],
+  "required_issues": [
+    "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-ontology: missing README.md, missing DNA.md"
+  ],
+  "recommendations": [
+    "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/03_Manifestation/summon-agents: missing DNA.md (recommended)"
+  ],
+  "blueprint_files": [],
+  "summary": {
+    "modules_checked": 4,
+    "required_issue_count": 1,
+    "recommendation_count": 1
+  },
+  "timestamp": "2026-02-14T07:13:42Z",
+  "aaos_root": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS"
+}

@@ -11,8 +11,8 @@ targets:
   - "path/or/id"
 
 audit_refs:
-  - "04_Agentic_AI_OS/01_Nucleus/Immune_system/AUDIT_LOG.md#<entry-hash-or-timestamp>"
-  - "04_Agentic_AI_OS/01_Nucleus/Immune_system/META_AUDIT_LOG.md#<entry-id>"
+  - "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md#<entry-hash-or-timestamp>"
+  - "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/meta-audit-log/META_AUDIT_LOG.md#<entry-id>"
 
 related_packages:
   - "_archive/<bucket>/<timestamp>__<type>__<slug>/"

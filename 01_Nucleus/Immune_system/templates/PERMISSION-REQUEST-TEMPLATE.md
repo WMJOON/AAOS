@@ -8,7 +8,7 @@ risk_level: low # low, medium, high
 justification: "<why needed>"
 governance:
   voice: homing_instinct
-  mother_ref: "04_Agentic_AI_OS/01_Nucleus/Immune_system/"
+  mother_ref: "04_Agentic_AI_OS/01_Nucleus/immune_system/"
 emergency:
   is_emergency_security_patch: false
   cve: "<optional>"

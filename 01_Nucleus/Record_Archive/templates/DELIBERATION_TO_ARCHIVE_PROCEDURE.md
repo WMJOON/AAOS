@@ -16,7 +16,8 @@ Deliberation Chamber가 합의를 완료하면, 그 산출물은 Record Archive�
 변환을 시작하기 전 다음을 확인:
 
 - [ ] Deliberation Packet의 `status`가 `submitted` 이상
-- [ ] `multi_agent_consensus`에 최소 1개 이상의 verdict 기록 존재
+- [ ] `multi_agent_consensus`에 최소 2개 모델 계열의 verdict 기록 존재
+- [ ] 각 참여 항목에 `model_id`, `model_family`, `org/provider`가 기록되어 있음
 - [ ] Immune System 판정이 필요한 경우, 판정 완료 여부 확인
 
 ---
@@ -52,7 +53,8 @@ _archive/deliberation/<YYYY-MM-DDTHHMMSSZ>__deliberation-consensus__<slug>/
 | 변경 전 스냅샷 | `BEFORE_<target>.md` | 상위기관 변경 시 필수 |
 | 변경 후 스냅샷 | `AFTER_<target>.md` | 상위기관 변경 시 필수 |
 | 위험/영향 분석 | `RISK_ANALYSIS.md` | 권장 |
-| Agent별 rationale 상세 | `AGENT_RATIONALES.md` | 선택 |
+| Agent별 rationale 상세 | `AGENT_RATIONALES.md` | 필수 |
+| Open Agent Council 기록 | `OPEN_AGENT_COUNCIL.md` | 필수 |
 
 ### Step 4: PACKAGE.md 작성
 
@@ -66,13 +68,13 @@ type: "deliberation-consensus"
 status: "sealed"
 
 source_refs:
-  - "04_Agentic_AI_OS/01_Nucleus/Deliberation_Chamber/<원본 경로>"
+  - "04_Agentic_AI_OS/01_Nucleus/deliberation_chamber/<원본 경로>"
 
 targets:
   - "<합의 대상 경로 또는 ID>"
 
 audit_refs:
-  - "04_Agentic_AI_OS/01_Nucleus/Immune_system/AUDIT_LOG.md#<entry>"
+  - "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md#<entry>"
   # Immune System 판정이 있는 경우
 
 integrity:
@@ -102,6 +104,7 @@ deliberation_summary:
 - `payload/DELIBERATION_PACKET.md`: 원본 숙의 패킷
 - `payload/BEFORE_*.md`: 변경 전 스냅샷 (해당 시)
 - `payload/AFTER_*.md`: 변경 후 스냅샷 (해당 시)
+- `payload/OPEN_AGENT_COUNCIL.md`: Claim/Counterclaim/Synthesis 로그
 - `MANIFEST.sha256`: 무결성 해시 목록
 ```
 

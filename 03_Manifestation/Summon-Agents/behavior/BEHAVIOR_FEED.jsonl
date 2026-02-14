@@ -1,0 +1,1 @@
+{"event_id":"baseline:summon:init","ts":"2026-02-14T00:00:00Z","swarm_id":"summon-agents","actor":"system","kind":"handoff","task_id":"manifestation-bootstrap","session_id":"seed","severity":"info","context":{"path":"03_Manifestation/summon-agents","goal":"runtime binding bootstrap"},"outcome":{"status":"success","result":"initialized"},"group_id":"bootstrap"}

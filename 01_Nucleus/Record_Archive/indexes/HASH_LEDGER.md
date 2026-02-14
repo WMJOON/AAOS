@@ -104,3 +104,66 @@ prev_hash: "b2c7d0430f2eae40cbaba9caaf94c75ada4022395b555246ff4bbd5e11003898"
 hash: "8ca43b65a5caab37687e2f711acb09b8c4dc7c49a4aa46f3490aac80bc4cf787"
 notes: "Immune System META_AUDIT_LOG snapshot"
 ---
+
+---
+timestamp: "2026-02-14T00:00:00Z"
+package_path: "_archive/"
+artifact: "CHAIN_MIGRATION.marker"
+prev_hash: "8ca43b65a5caab37687e2f711acb09b8c4dc7c49a4aa46f3490aac80bc4cf787"
+hash: "209a8f26daf7eb5fea2a6a3669494c1f0c4e2a5a9707599995c8e9ec215440bc"
+notes: "CHAIN MIGRATION: legacy manifest-only hashes prior to this entry; chain hashes (prev_hash + manifest) apply from here."
+---
+
+---
+timestamp: "2026-02-14T04:54:43Z"
+package_path: "_archive/deliberation/2026-02-14T144100Z__governance__workflow-orchestration-promotion/"
+artifact: "MANIFEST.sha256"
+prev_hash: "209a8f26daf7eb5fea2a6a3669494c1f0c4e2a5a9707599995c8e9ec215440bc"
+hash: "6b94ea889fc4f0ab5138c90809a0afdbd23a1aef6374744ab2be6e018e388fa3"
+notes: "promote AGENTIC_WORKFLOW_ORCHESTRATION_BLUEPRINT.md to canonical AGENTIC_WORKFLOW_ORCHESTRATION.md"
+---
+
+---
+timestamp: "2026-02-14T04:55:30Z"
+package_path: "_archive/deliberation/2026-02-14T144100Z__governance__workflow-orchestration-promotion/"
+artifact: "MANIFEST.sha256"
+prev_hash: "6b94ea889fc4f0ab5138c90809a0afdbd23a1aef6374744ab2be6e018e388fa3"
+hash: "0b741460168d5ebabd6a466b03e7598158ea241e2c54654319e42e0da458b02e"
+notes: "repair manifest hash consistency after correction"
+---
+
+---
+timestamp: "2026-02-14T05:16:17Z"
+package_path: "_archive/deliberation/2026-02-14T160700Z__governance__nucleus-provider-agnostic-workflow-enforcement/"
+artifact: "MANIFEST.sha256"
+prev_hash: "0b741460168d5ebabd6a466b03e7598158ea241e2c54654319e42e0da458b02e"
+hash: "ca16ecb5b233dc5edbb3df047de01212a3b06bbdba0442276a5cb96deada5aec"
+notes: "seal issue governance package: ISSUE-NUC-20260214-0001"
+---
+
+---
+timestamp: "2026-02-14T05:53:28Z"
+package_path: "_archive/audit-log/2026-02-14T142200Z__audit-snapshot__immune-audit-log/"
+artifact: "MANIFEST.sha256"
+prev_hash: "ca16ecb5b233dc5edbb3df047de01212a3b06bbdba0442276a5cb96deada5aec"
+hash: "524d7c05254352e6e977c4473763e0dd260814182f3518aa30ee182b81490397"
+notes: "periodic snapshot after Nucleus path consolidation"
+---
+
+---
+timestamp: "2026-02-14T07:13:42Z"
+package_path: "_archive/operations/20260214T071342Z__ops-supervision__swarm-manifestation/"
+artifact: "MANIFEST.sha256"
+prev_hash: "524d7c05254352e6e977c4473763e0dd260814182f3518aa30ee182b81490397"
+hash: "37c4669ea79de8c5c6dda68d8492e5ebe7ba22aae9a72db98bc573cd712c4712"
+notes: "required_issues=1,recommendations=1,workflow_ok=True"
+---
+
+---
+timestamp: "2026-02-14T07:29:24Z"
+package_path: "_archive/deliberation/20260214T072907Z__governance__nucleus-outward-supervision-loop-deficit/"
+artifact: "MANIFEST.sha256"
+prev_hash: "37c4669ea79de8c5c6dda68d8492e5ebe7ba22aae9a72db98bc573cd712c4712"
+hash: "a36592d0a6ed0932f15015cfd8d8e3423d62d7e898682b4718761c55a3a022ab"
+notes: "seal issue-issue: ISSUE-NUC-20260214-0002"
+---

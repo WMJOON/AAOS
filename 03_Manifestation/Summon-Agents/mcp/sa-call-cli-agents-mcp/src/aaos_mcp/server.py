@@ -23,6 +23,7 @@ from mcp.types import (
 from .tools.glob_indexing import GlobIndexingTool
 from .tools.task_manager import TaskManagerTool
 from .tools.task_solver import TaskSolverTool
+from .utils.paths import resolve_cof_root, resolve_skills_path, get_script_path
 
 # Configure logging
 logging.basicConfig(level=logging.INFO)
@@ -35,6 +36,32 @@ server = Server("aaos-mcp-server")
 glob_indexing = GlobIndexingTool()
 task_manager = TaskManagerTool()
 task_solver = TaskSolverTool()
+
+
+def _log_cof_health_check() -> None:
+    cof_root = resolve_cof_root()
+    skills_path = resolve_skills_path(cof_root)
+    logger.info("COF health check: cof_root=%s skills_path=%s", cof_root, skills_path)
+
+    required_scripts = [
+        ("cof-glob-indexing", "cof_glob_indexing.py"),
+        ("cof-task-manager-node", "create_ticket.py"),
+        ("cof-task-solver-agent-group", "solve_ticket.py"),
+    ]
+    missing: list[str] = []
+    for skill_name, script_name in required_scripts:
+        script_path = get_script_path(skill_name, script_name)
+        if script_path is None:
+            missing.append(f"{skill_name}/{script_name}")
+
+    if missing:
+        logger.warning(
+            "COF health check: missing required scripts: %s. "
+            "Set COF_ROOT to the COF directory (e.g. .../02_Swarm/context-orchestrated-filesystem).",
+            ", ".join(missing),
+        )
+    else:
+        logger.info("COF health check: all required scripts are resolvable")
 
 
 @server.list_tools()
@@ -265,6 +292,7 @@ async def call_tool(name: str, arguments: dict[str, Any]) -> CallToolResult:
 def main():
     """Run the AAOS MCP server."""
     logger.info("Starting AAOS MCP Server...")
+    _log_cof_health_check()
     asyncio.run(run_server())
 
 

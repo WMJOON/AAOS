@@ -2,6 +2,7 @@
 
 import subprocess
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Literal
@@ -154,7 +155,7 @@ This tool follows the COF pointer model for task management."""
                     continue
 
                 try:
-                    content = ticket_file.read_text()
+                    content = ticket_file.read_text(encoding="utf-8", errors="replace")
                     fm, body = parse_frontmatter(content)
 
                     tickets.append(TicketInfo(
@@ -207,7 +208,7 @@ This tool follows the COF pointer model for task management."""
             )
 
         args = [
-            "python3", str(script),
+            sys.executable, str(script),
             "--target-dir", target_dir,
             "--title", title,
             "--priority", priority
@@ -253,7 +254,7 @@ This tool follows the COF pointer model for task management."""
 
         try:
             result = subprocess.run(
-                ["python3", str(script), "--target-dir", target_dir],
+                [sys.executable, str(script), "--target-dir", target_dir],
                 capture_output=True,
                 text=True,
                 timeout=60

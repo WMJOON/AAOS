@@ -242,6 +242,6 @@ Skill Doc Validation:
 
 ## 8. References
 
-- **Anthropic Official**: `03_AgentsTools/Skill-authoring-best-practices.md`
+- [Anthropic 공식 문서: Prompt Engineering](https://docs.anthropic.com/kr/docs/build-with-claude/overview/)
 - **COF Skill Normative**: `../../skills/00.cof-pointerical-tool-creator/references/skill-normative-interpretation.md`
 - **COF Rule Genome**: `../../rules/cof-environment-set.md`

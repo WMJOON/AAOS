@@ -2,6 +2,7 @@
 
 import subprocess
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 
@@ -87,7 +88,7 @@ Returns NODE_INDEX.md and ROLE_EVIDENCE.md paths if successful."""
         try:
             result = subprocess.run(
                 [
-                    "python3",
+                    sys.executable,
                     str(self._script_path),
                     "--target-dir", str(target_path),
                     "--max-depth", str(max_depth),

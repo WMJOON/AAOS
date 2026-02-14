@@ -1,7 +1,6 @@
 ---
 name: cof-pointerical-tool-creator
 description: Creates pointer-safe COF Skill/Rule/Workflow/Sub-Agent documents. Use when creating or updating COF docs.
-version: "0.2"
 ---
 
 # COF Pointerical Tool Creator

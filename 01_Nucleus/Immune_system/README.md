@@ -1,141 +1,120 @@
 ---
 name: aaos-immune-system
-version: "0.3.0"
-description: AAOS 구조의 자기보존·정화·정통성(Canonicality) 유지를 담당하는 계층. Doctrine(RULE)에 의해 해석되고 Inquisitor(SKILL)에 의해 집행된다.
-canon_reference: "AAOS Canon Section 4, 5, 7"
+scope: "04_Agentic_AI_OS/01_Nucleus/immune_system"
+version: "0.3.1"
+status: canonical
+updated: "2026-02-14"
 ---
+
 # AAOS Immune System
 
 > AIVarium.Nucleus 구성 요소: “판정/집행/정통성 유지”를 담당한다.
 
-AAOS Immune System은 AAOS가 **Self-Preserving / Self-Limiting** 시스템으로 유지되기 위한 최소 면역 계층이다.
-이 폴더는 "무엇이 정통(Canonical)인가"를 판정하고, 오염/과증식/비정상 구조를 **감지·차단·기록**하는 규칙과 스킬을 포함한다.
+Immune System은 AAOS가 **Self-Preserving / Self-Limiting** 시스템으로 유지되기 위한 면역 계층이다.  
+이 폴더는 “무엇이 정통(Canonical)인가”를 판정하고, 오염/과증식/비정상 구조를 감지·차단·기록한다.
 
----
+## 정렬 규칙
+
+- 우선순위: `AAOS Canon > META Doctrine > Immune Doctrine > 이 문서`.
+- `decree` 문체를 따른다. 하위구조 충돌/불명확 시 판정/증거를 남기고 즉시 상위 기관으로 귀속한다.
+- 스스로를 완전 무비판적으로 검증하지 않는다. 본 구조는 Canon 직접 보증(bootstrap 예외) 대상이다.
+- 디렉토리 네이밍 규칙은 `rules/08-naming-patterns.md`를 따른다.
 
 ## 구성
 
-```
-01_Nucleus/Immune_system/
-├── DNA.md                     # Immune System 정식 DNA (승격된 DNA)
-├── AAOS_DNA_DOCTRINE_RULE.md  # 핵심 교리 규칙 (v0.2.0)
-├── AUDIT_LOG.md               # 일반 판정 감사 로그 (해시 체인)
-├── META_AUDIT_LOG.md          # META 수준 변경 감사 로그
+``` 
+01_Nucleus/immune_system/
+├── DNA.md                     # Immune System 정식 DNA
+├── rules/                     # 상세 교리 규칙(모듈 분할)
+│   └── README.md
 ├── README.md                  # 본 문서
-├── templates/                 # Blueprint, Permission Request 템플릿
-│   ├── DNA-BLUEPRINT-TEMPLATE.md
+├── _archive/
+│   └── legacy/
+│       ├── AAOS_IDENTITY_DNA_BLUEPRINT.md # 레거시 정체성 제안 문서(참고용)
+│       └── templates/
+│           └── DNA-BLUEPRINT-TEMPLATE.md  # 레거시 템플릿(신규 작성 비권장)
+├── templates/
 │   └── PERMISSION-REQUEST-TEMPLATE.md
-└── SWARM_INQUISITOR_SKILL/    # Inquisitor 스킬 및 자동화 도구
-    ├── blueprint-judgment/
-    │   ├── SKILL.md
-    │   └── scripts/verify_blueprint.py
-    ├── permission-judgment/
-    │   ├── SKILL.md
-    │   └── scripts/judge_permission.py
-    ├── skill-governance/
-    │   ├── SKILL.md
-    │   ├── scripts/verify_skill.py
-    │   └── templates/SKILL-TEMPLATE.md
-    ├── context-lineage/
-    │   └── SKILL.md
-    └── _shared/
-        ├── SKILL.md              # inquisitor-core (공유 런타임 스킬)
-        ├── yaml_validator.py      # YAML 파싱 및 값 검증
-        ├── auto_inquisitor.py     # 자동 검증, Hook 생성
-        ├── dissolution_monitor.py # Natural Dissolution 모니터링/실행
-        ├── audit.py               # 감사 로그, 무결성 검증
-        ├── lineage.py             # 파일→DNA 계보 참조 체인 해석
-        └── frontmatter.py         # (레거시) 간이 frontmatter 파싱
+└── skills/
+    ├── judgment-dna/   # 변경 제안 판정 모듈
+    ├── judgment-permission/
+    ├── governance-skill/
+    ├── lineage-context/
+    └── core/
 ```
 
----
+## 핵심 운영 원칙
 
-## 운용 원칙 (요약)
+> Blueprint 제도는 사람의 2차 점검 병목을 제거하기 위해 독립 제도 단계로는 폐지되었고, 동일 목적은 `record`/`audit` 루프의 비동기적 검증으로 수행한다.
+1. `DNA.md` 없이 새 구조를 생성/확장할 수 없다.
+2. Natural Dissolution은 목적·종료조건·해체절차가 반드시 있어야 한다.
+3. Tool/API 접근, 장기 유지, 구조 변경은 Permission 판정 전제로 한다.
+4. 모든 판정은 감사 기록으로 고정된다.
+5. Pre-Commit/Agent wrapper/주기적 스캔은 Inquisitor 자동강제의 기본 채널이다.
+6. Multi-Agent Consensus(최소 2 model family)는 Immune System DNA 변경에 적용한다.
+7. `canonical` 결과만 구조 승격 조건을 만족한다.
 
-1. **Blueprint 없는 생성/확장 금지**: DNA Blueprint가 없으면 Non-Canonical.
-2. **Natural Dissolution 필수**: "언제/어떻게 사라지는가"가 명시되지 않은 구조는 오염으로 간주.
-3. **Permission Principal**: Tool/API 접근, 저장/장기 유지, 구조 생성/확장 같은 행위는 Inquisitor 심판을 전제.
-4. **모든 판정은 기록된다**: 최소한의 감사 로그를 남기고, 판정 근거를 재현 가능하게 유지.
-5. **자동 강제 (v0.2.0)**: Pre-commit hook, Agent wrapper, 주기적 스캔으로 규칙 위반을 자동 차단.
-6. **감사 무결성 (v0.2.0)**: 해시 체인으로 Audit Log 변조를 감지.
-7. **다중 합의 (v0.3.0)**: Immune System DNA 변경은 플래그십 Agent 2종 이상 합의 + 인간 승인.
+## 상위 변경 게이트(요약)
 
----
+다음은 상위기관 변경으로 간주한다.
 
-## 이식(Transplant) 원칙
+- `DNA.md` 갱신
+- Inquisitor 규칙/도구의 정합성에 영향 주는 변경
+- 감사 로그 무결성 정책의 핵심 변경
 
-- `SWARM_INQUISITOR_SKILL/_shared/`는 여러 judgment 스킬이 공유하는 코어 런타임이며, **`inquisitor-core` 스킬로 취급**한다.
-- 따라서 “그대로 이식”하려면 단일 judgment 스킬만 떼어내지 말고 `SWARM_INQUISITOR_SKILL/` 트리(특히 `_shared/`)를 함께 복사하는 것이 안전하다.
+통과 조건:
 
----
+1. 변경 사유와 리스크를 `01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md`에 기록
+2. 다중 모델 합의 또는 예외 규칙(긴급보안/형식적 수정) 이행
+3. Canon Guardian 승인 및 META 승인 경로 연결
+4. `context_for_next` 제공
 
-## Quick Start
+## 실행 루틴
 
-### 1. Blueprint 검증
+### 1. 변경 제안 산출물 검증
 
 ```bash
-# 새 구조의 Blueprint 검증
-python3 SWARM_INQUISITOR_SKILL/_shared/yaml_validator.py /path/to/DNA.md
-
-# 또는 기존 스크립트 사용
-python3 SWARM_INQUISITOR_SKILL/blueprint-judgment/scripts/verify_blueprint.py /path/to/structure
+python3 skills/core/yaml_validator.py /path/to/DNA.md
+python3 skills/judgment-dna/scripts/verify_blueprint.py /path/to/structure  # 변경 제안 산출물 점검
 ```
 
 ### 2. 권한 요청 검증
 
 ```bash
-python3 SWARM_INQUISITOR_SKILL/_shared/yaml_validator.py /path/to/request.md --type permission
+python3 skills/core/yaml_validator.py /path/to/request.md --type permission
 ```
 
 ### 3. 자동 검증 설정
 
 ```bash
-# Git pre-commit hook 생성
-python3 SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --gen-hook /path/to/aaos_root > .git/hooks/pre-commit
+python3 skills/core/auto_inquisitor.py --gen-hook /path/to/aaos_root > .git/hooks/pre-commit
 chmod +x .git/hooks/pre-commit
-
-# 전체 구조 스캔
-python3 SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --scan /path/to/aaos_root
+python3 skills/core/auto_inquisitor.py --scan /path/to/aaos_root
 ```
 
 ### 4. Natural Dissolution 모니터링
 
 ```bash
-# 해체 후보 스캔
-python3 SWARM_INQUISITOR_SKILL/_shared/dissolution_monitor.py --scan /path/to/aaos_root
-
-# 자원 상한 검사
-python3 SWARM_INQUISITOR_SKILL/_shared/dissolution_monitor.py --check-limits /path/to/structure
-
-# 해체 실행 (dry-run)
-python3 SWARM_INQUISITOR_SKILL/_shared/dissolution_monitor.py --dissolve /path/to/structure --reason "목적 완료" --dry-run
+python3 skills/core/dissolution_monitor.py --scan /path/to/aaos_root
+python3 skills/core/dissolution_monitor.py --check-limits /path/to/structure
+python3 skills/core/dissolution_monitor.py --dissolve /path/to/structure --reason "목적 완료" --dry-run
 ```
 
-### 5. Audit Log 무결성 검증
+### 5. 감사 무결성
 
 ```bash
-python3 SWARM_INQUISITOR_SKILL/_shared/audit.py verify AUDIT_LOG.md
-python3 SWARM_INQUISITOR_SKILL/_shared/audit.py stats AUDIT_LOG.md
+python3 skills/core/audit.py verify 01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md
+python3 skills/core/audit.py stats 01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md
 ```
 
----
+## 아카이브 병합 규약
+
+- `AUDIT_LOG.md`의 정식 보관은 `01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md`에서 수행한다.
+- `META_AUDIT_LOG.md`의 정식 보관은 `01_Nucleus/record_archive/_archive/meta-audit-log/META_AUDIT_LOG.md`에서 수행한다.
+- 기존 구경로 스냅샷은 과거 증적으로 함께 보존하고, 신규 규약 문서에서 경로 기준은 `record_archive/_archive`를 사용한다.
 
 ## Bootstrap Exception
 
 Immune System은 Canon에 의해 직접 보증되는 META 수준 구조이다.
-따라서 일반 Inquisitor 검증 대신 다음 규칙이 적용된다:
-
-- **DNA.md**: 자기 검증 면제(bootstrap), Canon Section 4, 5에 의해 정당성 부여된 정식 DNA
-- **변경 시**: META_AUDIT_LOG.md에 기록, Canon 수호자(인간) 승인 필요
-- **무결성**: 자체 파일 해시로 변조 감지
-
-변경 제안은 `DNA_BLUEPRINT.md`로 작성하고, 승인/승격 시 `DNA.md`로 rename한다.
-자세한 내용은 [DNA.md](./DNA.md)와 [AAOS_DNA_DOCTRINE_RULE.md](./AAOS_DNA_DOCTRINE_RULE.md) Section 6 참조.
-
----
-
-## Version History
-
-- **v0.1.0**: 최초 Immune System 구성
-- **v0.2.0**: Auto-Enforcement, Audit Integrity, Bootstrap Exception, Dissolution Monitor 추가
-- **v0.3.0**: Multi-Agent Consensus 교리 반영, Blueprint/validator 정합성 보강
+따라서 `Immune System` 자체는 `DNA.md`의 자기검증을 면제한다.  
+변경 제안은 `DNA.md` 단일 문서에서 버전/합의 메타데이터로 관리한다.

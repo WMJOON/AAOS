@@ -11,7 +11,7 @@ lifetime: persistent
 This template defines the standard for binding Model Context Protocol (MCP) servers within the AAOS Manifestation layer. 
 
 > [!NOTE]
-> This template follows the **Manifestation 최소 계약(권장 스키마)** defined in [METADoctrine.md#5.2](file:///Users/wmjoon/Library/Mobile%20Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/METADoctrine.md#L439).
+> This template follows the **Manifestation 최소 계약(권장 스키마)** defined in [DNA.md#5.2](file:///Users/wmjoon/Library/Mobile%20Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/00_METADoctrine/DNA.md#L439).
 
 ## Manifest Configuration
 
@@ -48,4 +48,3 @@ List the available resources (if any).
 
 ### Constraints
 Describe any specific usage constraints or safety boundaries (Rate limits, Privacy, Verification).
-

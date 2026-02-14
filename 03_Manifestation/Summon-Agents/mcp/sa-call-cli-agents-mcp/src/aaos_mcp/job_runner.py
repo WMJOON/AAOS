@@ -12,6 +12,7 @@ import os
 import signal
 import subprocess
 import sys
+import time
 from pathlib import Path
 from typing import Any
 
@@ -23,6 +24,8 @@ class _Cancelled(Exception):
 
 
 _cancel_requested = False
+_CANCEL_GRACE_SECONDS = 5.0
+_JSON_PARSE_MAX_BYTES = 1_000_000
 
 
 def _handle_signal(_signum: int, _frame: Any) -> None:
@@ -65,6 +68,13 @@ def _extract_last_json(text: str) -> Any | None:
         last = value
 
     return last
+
+
+def _read_tail_utf8(path: Path, *, max_bytes: int) -> str:
+    data = path.read_bytes()
+    if len(data) > max_bytes:
+        data = data[-max_bytes:]
+    return data.decode("utf-8", errors="replace")
 
 
 def main(argv: list[str] | None = None) -> int:
@@ -129,16 +139,23 @@ def main(argv: list[str] | None = None) -> int:
 
             _update_job(job_file, {"child_pid": proc.pid})
 
+            cancel_sent_at: float | None = None
             while True:
-                if _cancel_requested:
-                    try:
-                        proc.terminate()
-                    except Exception:
-                        pass
-                    break
                 rc = proc.poll()
                 if rc is not None:
                     break
+                if _cancel_requested:
+                    if cancel_sent_at is None:
+                        try:
+                            proc.terminate()
+                        except Exception:
+                            pass
+                        cancel_sent_at = time.monotonic()
+                    elif time.monotonic() - cancel_sent_at >= _CANCEL_GRACE_SECONDS:
+                        try:
+                            proc.kill()
+                        except Exception:
+                            pass
                 try:
                     proc.wait(timeout=0.25)
                 except subprocess.TimeoutExpired:
@@ -150,7 +167,7 @@ def main(argv: list[str] | None = None) -> int:
         parse_error: str | None = None
         stdout_text = ""
         try:
-            stdout_text = stdout_file.read_text(encoding="utf-8", errors="replace")
+            stdout_text = _read_tail_utf8(stdout_file, max_bytes=_JSON_PARSE_MAX_BYTES)
             extracted = _extract_last_json(stdout_text)
             if isinstance(extracted, dict):
                 parsed = extracted
@@ -158,6 +175,16 @@ def main(argv: list[str] | None = None) -> int:
                 parsed = {"result": extracted} if extracted is not None else None
             if parsed is not None:
                 result_file.write_text(json.dumps(parsed, indent=2, ensure_ascii=False), encoding="utf-8")
+            else:
+                parse_error = "No JSON payload found in stdout tail"
+                result_file.write_text(
+                    json.dumps(
+                        {"parse_error": parse_error, "raw_stdout_tail": stdout_text[-32_000:]},
+                        indent=2,
+                        ensure_ascii=False,
+                    ),
+                    encoding="utf-8",
+                )
         except Exception:
             parsed = None
             parse_error = "Failed to parse JSON from stdout"

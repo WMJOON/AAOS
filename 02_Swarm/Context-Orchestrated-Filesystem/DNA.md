@@ -1,17 +1,35 @@
 ---
 name: "AAOS-COF"
 version: "0.1.3"
-scope: "04_Agentic_AI_OS/02_Swarm/Context-Orchestrated-Filesystem"
+scope: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem"
 owner: "AAOS Swarm"
 created: "2026-01-22"
 status: canonical
 
 # Normative References (inherit Immune System)
 canon_reference: "04_Agentic_AI_OS/README.md"
-meta_doctrine_reference: "04_Agentic_AI_OS/METADoctrine.md"
-immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_rules/cof-environment-set.md"
-inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/"
-audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AUDIT_LOG.md"
+meta_doctrine_reference: "04_Agentic_AI_OS/00_METADoctrine/DNA.md"
+immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/rules/cof-environment-set.md"
+observability:
+  behavior_feed:
+    enabled: true
+    required: true
+    source: "swarm_runtime"
+    path: "02_Swarm/context-orchestrated-filesystem/behavior/BEHAVIOR_FEED.jsonl"
+    min_required_fields:
+      - event_id
+      - ts
+      - swarm_id
+      - actor
+      - kind
+      - context
+      - outcome
+      - scope
+    retention_days: 180
+    schema_version: "v1"
+    sink: "01_Nucleus/record_archive"
+inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITOR_SKILL/"
+audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md"
 
 natural_dissolution:
   purpose: "트리 기반 파일 워크스페이스에서 노드 구조/맥락/기록 규칙을 표준화하여 작업 연속성을 유지한다"
@@ -33,16 +51,16 @@ resource_limits:
 
 inquisitor:
   required: true
-  audit_log: "../../01_Nucleus/Immune_system/AUDIT_LOG.md"
+  audit_log: "../../01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md"
 ---
 
 # AAOS-COF DNA (v0.1.3)
 
 본 DNA는 `COF v0.1.3` 군체(Swarm) 구조를 정의하는 핵심 유전체(Genome)이다.
-META Doctrine(METADoctrine.md) 및 **COF Doctrine**에 의거하여 작성되었다.
+META Doctrine(DNA.md) 및 **COF Doctrine**에 의거하여 작성되었다.
 
 ## 0. Doctrine Genome
-- **Pointer**: `COF_DOCTRINE.md`
+- **Pointer**: `core-docs/COF_DOCTRINE.md`
 - **Desc**: 4 Pillars of COF Philosophy (Locality, Self-Desc, Agent-First, Lifecycle)
 
 ## 1. Rule Genome
@@ -54,7 +72,7 @@ META Doctrine(METADoctrine.md) 및 **COF Doctrine**에 의거하여 작성되었
 - **Desc**: `cof-task-manager-node` (creation, ticket, archive, validate)
 
 ## 3. Lifecycle Genome
-- **Pointer**: `DNA_BLUEPRINT.md`
+- **Pointer**: `DNA.md`
 - **Desc**: Natural Dissolution & Resource Limits
 
 ---

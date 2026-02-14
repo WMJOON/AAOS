@@ -1,7 +1,7 @@
 [project]
 name = "sa-call-cli-agents-mcp"
 version = "0.1.0"
-description = "Summon-Agents MCP Server - CLI agents dispatcher for COF task solving"
+description = "summon-agents MCP Server - CLI agents dispatcher for COF task solving"
 readme = "README.md"
 requires-python = ">=3.10"
 license = { text = "MIT" }

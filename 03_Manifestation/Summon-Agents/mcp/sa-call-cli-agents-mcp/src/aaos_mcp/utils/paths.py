@@ -3,28 +3,48 @@
 import os
 from pathlib import Path
 
+_CANONICAL_COF_SUBPATH = Path("02_Swarm") / "context-orchestrated-filesystem"
+
+
+def _canonical_cof_from_aaos_root(aaos_root: Path | None) -> Path | None:
+    if aaos_root is None:
+        return None
+    candidate = (aaos_root / _CANONICAL_COF_SUBPATH).resolve()
+    return candidate if candidate.exists() else None
+
 
 def resolve_cof_root(start_path: str | None = None) -> Path | None:
     """Resolve the COF root directory.
 
     Priority:
     1. COF_ROOT environment variable (for Docker)
-    2. Search upward for markers
+    2. Canonical AAOS path: 02_Swarm/context-orchestrated-filesystem
+    3. Search upward for markers
     """
     # Priority 1: Environment variable (Docker-friendly)
     env_root = os.environ.get('COF_ROOT')
     if env_root:
-        env_path = Path(env_root)
+        env_path = Path(env_root).expanduser().resolve()
         if env_path.exists():
             return env_path
 
-    # Priority 2: Search upward for markers
+    # Priority 2: Canonical location under AAOS root
+    canonical = _canonical_cof_from_aaos_root(resolve_aaos_root(start_path))
+    if canonical is not None:
+        return canonical
+
+    # Priority 3: Search upward for markers
     if start_path:
         current = Path(start_path).resolve()
     else:
         current = Path.cwd()
 
-    markers = ['COF_DOCTRINE.md', '.cof-root', 'DNA_BLUEPRINT.md']
+    markers = [
+        str(Path("core-docs") / "COF_DOCTRINE.md"),
+        'COF_DOCTRINE.md',
+        '.cof-root',
+        'DNA.md',
+    ]
 
     while current != current.parent:
         for marker in markers:
@@ -49,15 +69,28 @@ def resolve_cof_root(start_path: str | None = None) -> Path | None:
 
 def resolve_skills_path(cof_root: Path | None = None) -> Path | None:
     """Resolve the skills directory path."""
+    aaos_root = resolve_aaos_root()
+
     if cof_root is None:
         cof_root = resolve_cof_root()
 
-    if cof_root is None:
-        return None
+    candidates: list[Path] = []
+    if cof_root is not None:
+        candidates.append(cof_root)
 
-    skills_path = cof_root / 'skills'
-    if skills_path.exists():
-        return skills_path
+    canonical = _canonical_cof_from_aaos_root(aaos_root)
+    if canonical is not None:
+        candidates.append(canonical)
+
+    seen: set[Path] = set()
+    for candidate in candidates:
+        resolved = candidate.resolve()
+        if resolved in seen:
+            continue
+        seen.add(resolved)
+        skills_path = resolved / 'skills'
+        if skills_path.exists():
+            return skills_path
 
     return None
 
@@ -85,7 +118,8 @@ def resolve_aaos_root(start_path: str | None = None) -> Path | None:
     while current != current.parent:
         if current.name == '04_Agentic_AI_OS':
             return current
-        if (current / 'METADoctrine.md').exists():
+        has_aaos_meta = (current / '00_METADoctrine' / 'DNA.md').exists()
+        if has_aaos_meta:
             return current
         current = current.parent
 

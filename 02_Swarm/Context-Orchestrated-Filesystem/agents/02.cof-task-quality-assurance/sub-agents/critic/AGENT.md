@@ -169,8 +169,8 @@ final_score = (completeness * 0.3) + (quality * 0.25) + (correctness * 0.25) + (
 
 ```markdown
 ## Deliverables
-- [feature.ts](../../../working/feature.ts)
-- [README.md](../../../reference/README.md)
+- `../../../working/feature.ts`
+- `../../../reference/README.md`
 ```
 
 ### 4.2 분석 수행

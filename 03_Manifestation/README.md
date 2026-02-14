@@ -20,9 +20,9 @@ Manifestation은 AAOS의 **현현과 접속(Manifestation & Interface)** 계층�
 ## Canonical References
 
 - Canon: `04_Agentic_AI_OS/README.md`
-- META Doctrine: `04_Agentic_AI_OS/METADoctrine.md`
-- Immune Doctrine: `04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md`
+- META Doctrine: `04_Agentic_AI_OS/00_METADoctrine/DNA.md`
+- Immune Doctrine: `04_Agentic_AI_OS/01_Nucleus/immune_system/rules/README.md`
 
 ## Components
 
-- Call CLI Agents: `Summon-Agents/skill/sa-call-cli-agents/` (external AI CLI execution binding; a.k.a. AI Collaborator)
+- Call CLI Agents: `summon-agents/skill/sa-call-cli-agents/` (external AI CLI execution binding; a.k.a. AI Collaborator)

@@ -24,6 +24,12 @@ from ..jobs import (
 )
 
 _JOB_ID_RE = re.compile(r"^[0-9a-f]{32}$")
+_ALLOWED_PROVIDERS = {"claude", "codex", "gemini"}
+_ALLOWED_BILLING_MODES = {"subscription_only", "allow_api"}
+_MIN_TIMEOUT = 1
+_MAX_TIMEOUT = 86_400
+_MIN_CONTEXT_DEPTH = 1
+_MAX_CONTEXT_DEPTH = 100
 
 
 @dataclass
@@ -78,6 +84,25 @@ The tool will:
             'cof-task-solver-agent-group',
             'solve_ticket.py'
         )
+
+    @staticmethod
+    def _validate_inputs(
+        provider: str | None,
+        timeout: int,
+        context_depth: int,
+        billing_mode: str,
+    ) -> str | None:
+        if provider and provider not in _ALLOWED_PROVIDERS:
+            allowed = ", ".join(sorted(_ALLOWED_PROVIDERS))
+            return f"Invalid provider '{provider}'. Allowed: {allowed}"
+        if not (_MIN_TIMEOUT <= timeout <= _MAX_TIMEOUT):
+            return f"timeout must be between {_MIN_TIMEOUT} and {_MAX_TIMEOUT} seconds"
+        if not (_MIN_CONTEXT_DEPTH <= context_depth <= _MAX_CONTEXT_DEPTH):
+            return f"context_depth must be between {_MIN_CONTEXT_DEPTH} and {_MAX_CONTEXT_DEPTH}"
+        if billing_mode not in _ALLOWED_BILLING_MODES:
+            allowed = ", ".join(sorted(_ALLOWED_BILLING_MODES))
+            return f"Invalid billing_mode '{billing_mode}'. Allowed: {allowed}"
+        return None
 
     @property
     def input_schema(self) -> dict:
@@ -151,6 +176,19 @@ The tool will:
                 execution_time=None,
                 output="",
                 error="solve_ticket.py script not found"
+            )
+
+        input_error = self._validate_inputs(provider, timeout, context_depth, billing_mode)
+        if input_error:
+            return SolveTicketResult(
+                success=False,
+                ticket_path=ticket_path,
+                original_status="unknown",
+                final_status="unknown",
+                agent_group={},
+                execution_time=None,
+                output="",
+                error=input_error,
             )
 
         ticket_file = Path(ticket_path).resolve()
@@ -304,6 +342,16 @@ The tool will:
                 job_id="",
                 job_paths=make_job_paths("invalid"),
                 message="solve_ticket.py script not found",
+                stripped_env_vars=[],
+            )
+
+        input_error = self._validate_inputs(provider, timeout, context_depth, billing_mode)
+        if input_error:
+            return StartSolveJobResult(
+                success=False,
+                job_id="",
+                job_paths=make_job_paths("invalid"),
+                message=input_error,
                 stripped_env_vars=[],
             )
 

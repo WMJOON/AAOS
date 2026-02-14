@@ -10,8 +10,24 @@ status: "draft" # draft, submitted, archived
 flagship_consensus_requirement:
   required: true
   min_flagship_agents: 2
+  min_model_families: 2
+  preferred_model_families:
+    - "openai-gpt"
+    - "anthropic-claude"
+    - "google-gemini"
+    - "xai-grok"
   distinct_model_families: true
-  evidence: "Each flagship agent must record verdict+rationale with model metadata."
+  evidence: "Each flagship agent must record verdict+rationale with model metadata (model_id, model_family, org/provider)."
+  open_agent_council_protocol:
+    required_stages: ["Claim", "Counterclaim", "Synthesis"]
+
+open_agent_council:
+  - stage: "Claim"
+    responsibility: "submit hypothesis, change summary, and expected impact"
+  - stage: "Counterclaim"
+    responsibility: "submit counter evidence, risks, and failure modes"
+  - stage: "Synthesis"
+    responsibility: "summarize convergence points and open questions"
 
 multi_agent_consensus:
   - agent_id: "<agent-A>"

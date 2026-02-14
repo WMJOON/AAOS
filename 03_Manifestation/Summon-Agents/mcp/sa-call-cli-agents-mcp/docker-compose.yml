@@ -10,7 +10,7 @@ services:
       - ${AAOS_ROOT:?AAOS_ROOT must be set}:/workspace:rw
     environment:
       - AAOS_ROOT=/workspace
-      - COF_ROOT=/workspace/02_Swarm/Context-Orchestrated-Filesystem
+      - COF_ROOT=/workspace/02_Swarm/context-orchestrated-filesystem
       # API keys for each provider
       - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:?ANTHROPIC_API_KEY required}
       - OPENAI_API_KEY=${OPENAI_API_KEY:-}

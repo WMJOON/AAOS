@@ -9,24 +9,24 @@ description: AAOS 군체(Swarm) 계층. 의식적 사고/행동양식(계획/대
 
 > 실행(하드웨어/OS/네트워크/런타임 바인딩)은 Swarm이 직접 수행하지 않으며, `03_Manifestation/` 계층으로 위임한다.
 
-## 책임 경계: Record_Archive vs Cortex_Agora
+## 책임 경계: record_archive vs cortex-agora
 
-- `01_Nucleus/Record_Archive/`는 **사실/증빙**을 보존하는 Nucleus 자산이다(append-only).
-- `02_Swarm/Cortex_Agora/`는 Swarm들의 **행동(Behavior Trace)** 을 수집·요약하고 “반복되는 습관”을 **제안**으로 만든다.
-- Cortex_Agora는 실행/자동반영/룰수정/에이전트 호출을 하지 않는다.
-- Cortex_Agora는 Record_Archive를 직접 읽지 않는다(입력은 Behavior Feed).
+- `01_Nucleus/record_archive/`는 **사실/증빙**을 보존하는 Nucleus 자산이다(append-only).
+- `02_Swarm/cortex-agora/`는 Swarm들의 **행동(Behavior Trace)** 을 수집·요약하고 “반복되는 습관”을 **제안**으로 만든다.
+- cortex-agora는 실행/자동반영/룰수정/에이전트 호출을 하지 않는다.
+- cortex-agora는 record_archive를 직접 읽지 않는다(입력은 Behavior Feed).
 
 ## Swarm Observability Standard (Behavior Feed) — 권장/필수
 
-Swarm은 “증빙(Record_Archive)”이 아니라 “행동(Behavior Trace)”을 남긴다.
-이 로그는 Cortex_Agora가 관찰하기 위한 입력이며, Nucleus의 Record_Archive로 직접 흘리지 않는다.
+Swarm은 “증빙(record_archive)”이 아니라 “행동(Behavior Trace)”을 남긴다.
+이 로그는 cortex-agora가 관찰하기 위한 입력이며, Nucleus의 record_archive로 직접 흘리지 않는다.
 
 ### 권장(Recommended)
 
 - 각 Swarm은 자신의 스코프 하위에 Behavior Feed를 둔다:
   - 경로 표준(권장): `<swarm_root>/behavior/BEHAVIOR_FEED.jsonl`
   - 대안(권장): `<swarm_root>/behavior/BEHAVIOR_FEED.md` (append-only; 요약/집계 중심)
-- Swarm `DNA.md`/`DNA_BLUEPRINT.md` frontmatter에 아래를 추가(권장):
+- Swarm `DNA.md` frontmatter에 아래를 추가(권장):
 
 ```yaml
 observability:
@@ -52,25 +52,25 @@ observability:
 
 ## 필수 원칙
 
-- 군체(Swarm) 구조는 반드시 `DNA.md`(정식) 또는 `DNA_BLUEPRINT.md`(제안)를 가진다. (둘 다 없으면 Non-Canonical)
-- Blueprint에는 Natural Dissolution(종료/해체)과 Resource Limits(상한)를 명시한다.
-- Blueprint/권한 요청은 Inquisitor의 검증을 전제로 한다.
+- 군체(Swarm) 구조는 반드시 `DNA.md`를 가진다. (없으면 Non-Canonical)
+- DNA에는 Natural Dissolution(종료/해체)과 Resource Limits(상한)를 명시한다.
+- DNA/권한 요청은 Inquisitor의 검증을 전제로 한다.
 
 ## 규범 참조(계승) 표준
 
-군체(Swarm) 구조의 `DNA.md`/`DNA_BLUEPRINT.md` frontmatter에 아래 “규범 참조”를 **권장**한다.
+군체(Swarm) 구조의 `DNA.md` frontmatter에 아래 “규범 참조”를 **권장**한다.
 
 ```yaml
 canon_reference: "04_Agentic_AI_OS/README.md"
-meta_doctrine_reference: "04_Agentic_AI_OS/METADoctrine.md"
-immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AAOS_DNA_DOCTRINE_RULE.md"
-inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/"
-audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/Immune_system/AUDIT_LOG.md"
+meta_doctrine_reference: "04_Agentic_AI_OS/00_METADoctrine/DNA.md"
+immune_doctrine_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/rules/README.md"
+inquisitor_reference: "04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITOR_SKILL/"
+audit_log_reference: "04_Agentic_AI_OS/01_Nucleus/record_archive/_archive/audit-log/AUDIT_LOG.md"
 ```
 
 이 참조들은 “면역체계가 어디서부터 상속되는지”를 구조 자체에 각인한다.
 
 ## 검증
 
-- Blueprint 검증(권장): `python3 04_Agentic_AI_OS/01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/yaml_validator.py <DNA.md|DNA_BLUEPRINT.md>`
-- 전체 스캔 리포트: `python3 04_Agentic_AI_OS/01_Nucleus/Immune_system/SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --scan 04_Agentic_AI_OS --format md`
+- DNA 검증(권장): `python3 04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITOR_SKILL/_shared/yaml_validator.py <DNA.md>`
+- 전체 스캔 리포트: `python3 04_Agentic_AI_OS/01_Nucleus/immune_system/SWARM_INQUISITOR_SKILL/_shared/auto_inquisitor.py --scan 04_Agentic_AI_OS --format md`

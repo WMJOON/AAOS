@@ -88,12 +88,48 @@ class TestPaths:
         # Create a marker file
         cof_root = tmp_path / "cof"
         cof_root.mkdir()
-        (cof_root / "COF_DOCTRINE.md").touch()
+        (cof_root / "core-docs" / "COF_DOCTRINE.md").parent.mkdir(parents=True, exist_ok=True)
+        (cof_root / "core-docs" / "COF_DOCTRINE.md").touch()
 
         monkeypatch.setenv("COF_ROOT", str(cof_root))
 
         result = resolve_cof_root()
         assert result == cof_root
+
+    def test_resolve_cof_root_prefers_canonical_under_aaos(self, monkeypatch, tmp_path):
+        from aaos_mcp.utils.paths import resolve_cof_root
+
+        aaos_root = tmp_path / "04_Agentic_AI_OS"
+        canonical = aaos_root / "02_Swarm" / "context-orchestrated-filesystem"
+        canonical.mkdir(parents=True)
+        (canonical / "core-docs" / "COF_DOCTRINE.md").parent.mkdir(parents=True, exist_ok=True)
+        (canonical / "core-docs" / "COF_DOCTRINE.md").touch()
+
+        start = aaos_root / "03_Manifestation" / "summon-agents"
+        start.mkdir(parents=True)
+
+        monkeypatch.delenv("COF_ROOT", raising=False)
+        monkeypatch.setenv("AAOS_ROOT", str(aaos_root))
+
+        result = resolve_cof_root(str(start))
+        assert result == canonical.resolve()
+
+    def test_resolve_skills_path_falls_back_to_canonical(self, monkeypatch, tmp_path):
+        from aaos_mcp.utils.paths import resolve_skills_path
+
+        aaos_root = tmp_path / "04_Agentic_AI_OS"
+        canonical = aaos_root / "02_Swarm" / "context-orchestrated-filesystem"
+        skills = canonical / "skills"
+        skills.mkdir(parents=True)
+
+        wrong_cof = tmp_path / "wrong-cof"
+        wrong_cof.mkdir()
+
+        monkeypatch.setenv("AAOS_ROOT", str(aaos_root))
+        monkeypatch.delenv("COF_ROOT", raising=False)
+
+        result = resolve_skills_path(wrong_cof)
+        assert result == skills.resolve()
 
 
 def test_strip_api_billing_env():
@@ -117,3 +153,13 @@ def test_job_id_validation_is_hex32():
 
     jid = new_job_id()
     assert re.fullmatch(r"[0-9a-f]{32}", jid)
+
+
+def test_task_solver_input_validation():
+    from aaos_mcp.tools.task_solver import TaskSolverTool
+
+    assert TaskSolverTool._validate_inputs("codex", 300, 10, "subscription_only") is None
+    assert "Invalid provider" in TaskSolverTool._validate_inputs("bad", 300, 10, "subscription_only")
+    assert "timeout must be between" in TaskSolverTool._validate_inputs("codex", 0, 10, "subscription_only")
+    assert "context_depth must be between" in TaskSolverTool._validate_inputs("codex", 300, 0, "subscription_only")
+    assert "Invalid billing_mode" in TaskSolverTool._validate_inputs("codex", 300, 10, "bad")

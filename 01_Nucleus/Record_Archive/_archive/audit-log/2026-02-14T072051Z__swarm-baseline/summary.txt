@@ -1,0 +1,37 @@
+python3 01_Nucleus/immune_system/skills/core/cross_ref_validator.py --root . --check-inline-paths
+exit=0
+stdout:
+{
+  "root": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS",
+  "ok": true,
+  "broken_links": [],
+  "missing_required": [],
+  "summary": {
+    "broken_links": 0,
+    "missing_required": 0
+  }
+}
+stderr:
+
+
+python3 02_Swarm/context-orchestrated-filesystem/skills/02.cof-swarm-skill-manager/scripts/sync_swarms_skill_manager.py --swarm-root . --skip-write
+exit=0
+stdout:
+OK 00_METADoctrine: 0 skills
+OK 01_Nucleus: 0 skills
+OK 02_Swarm: 0 skills
+OK 03_Manifestation: 0 skills
+
+[DRY-RUN] registry files were not written.
+stderr:
+
+
+find . -type d \( -name 'context-orchestrated-filesystem' -o -name 'context-orchestrated-ontology' -o -name 'cortex-agora' -o -name 'summon-agents' -o -name 'SKILLS' \)
+exit=0
+stdout:
+./02_Swarm/context-orchestrated-filesystem
+./02_Swarm/cortex-agora
+./02_Swarm/cortex-agora/skills
+./02_Swarm/context-orchestrated-ontology
+./03_Manifestation/summon-agents
+stderr:

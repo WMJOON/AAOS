@@ -20,7 +20,7 @@ COF는 단순한 파일 규칙이 아니라, **"AI Agent가 물리적 공간(Fil
 | **Agent-First Design** | 에이전트가 읽기 좋아야 한다 | YAML Frontmatter 필수화, 정형화된 네이밍 |
 | **Traceable Lifecycle** | 시작과 끝이 없는 데이터는 쓰레기다 | Natural Dissolution 원칙 적용 |
 
-> 상세: [COF_DOCTRINE.md](COF_DOCTRINE.md)
+> 상세: [core-docs/COF_DOCTRINE.md](core-docs/COF_DOCTRINE.md)
 
 ---
 
@@ -69,12 +69,12 @@ lifetime: ticket | persistent | archived
 ## Directory Structure
 
 ```
-Context-Orchestrated-Filesystem/
+context-orchestrated-filesystem/
 ├── README.md                    ← 현재 문서
-├── COF_DOCTRINE.md              ← 4 Pillars 철학
+├── core-docs/COF_DOCTRINE.md              ← 4 Pillars 철학
 ├── rules/cof-environment-set.md                      ← Rule Genome (실행 지침)
 ├── DNA.md                       ← DNA 정의
-├── DNA_BLUEPRINT.md             ← Lifecycle/Resource Limits
+├── DNA.md                       ← Lifecycle/Resource Limits
 │
 └── skills/                      ← Skill Genome
     ├── 00.cof-pointerical-tool-creator/   ← 기초 레이어
@@ -110,6 +110,7 @@ Context-Orchestrated-Filesystem/
 | 01 | `cof-glob-indexing` | 가장 가까운 `[n].index/` 탐색 및 인덱싱 산출물 생성 | 00 (references) |
 | 02 | `cof-task-manager-node` | 작업 맥락 생성, 티켓 발행, 아카이브 | 00, 01 |
 | 03 | `solving-tickets` | 티켓 → 에이전트 그룹 디스패치 및 결과 통합 | 01, 02 |
+| 04 | `cof-swarm-skill-manager` | Swarm별 Skill 레지스트리 생성/검증, 과다 Skill 경고 | 00 |
 
 ### Skill Usage Mandate
 
@@ -154,6 +155,15 @@ python3 skills/01.cof-glob-indexing/scripts/cof_glob_indexing.py \
   --target "/path/to/node"
 ```
 
+### 4. Swarm Skill Registry 갱신
+
+```bash
+# cof-swarm-skill-manager 스킬 사용
+python3 skills/04.cof-swarm-skill-manager/scripts/sync_swarms_skill_manager.py \
+  --swarm-root "/path/to/04_Agentic_AI_OS/02_Swarm" \
+  --max-skills 12
+```
+
 ---
 
 ## Hard Constraints
@@ -172,10 +182,10 @@ python3 skills/01.cof-glob-indexing/scripts/cof_glob_indexing.py \
 
 | Document | Role | Description |
 |----------|------|-------------|
-| [COF_DOCTRINE.md](COF_DOCTRINE.md) | Doctrine Genome | 4 Pillars 철학 |
+| [core-docs/COF_DOCTRINE.md](core-docs/COF_DOCTRINE.md) | Doctrine Genome | 4 Pillars 철학 |
 | [rules/cof-environment-set.md](rules/cof-environment-set.md) | Rule Genome | 실행 지침 (Pointer Model, Skill Mandate) |
 | [DNA.md](DNA.md) | DNA Definition | Genome Pointers 정의 |
-| [DNA_BLUEPRINT.md](DNA_BLUEPRINT.md) | Lifecycle Genome | Natural Dissolution, Resource Limits |
+| [DNA.md](DNA.md) | Lifecycle Genome | Natural Dissolution, Resource Limits |
 
 ---
 
@@ -184,9 +194,9 @@ python3 skills/01.cof-glob-indexing/scripts/cof_glob_indexing.py \
 ```
 AAOS Canon (04_Agentic_AI_OS/README.md)
     ↓
-META Doctrine (METADoctrine.md)
+META Doctrine (DNA.md)
     ↓
-Immune System (01_Nucleus/Immune_system/)
+Immune System (01_Nucleus/immune_system/)
     ↓
 COF v0.1.3 (현재)
 ```

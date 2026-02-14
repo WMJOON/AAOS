@@ -7,16 +7,16 @@ role: RULE
 state: const
 scope: swarm
 lifetime: persistent
-version: "0.2.0"
+version: "0.2.1"
 created: "2026-01-31"
 references:
   doctrine: cof-doctrine
-  blueprint: cof-dna-blueprint
   skills:
     - cof-pointerical-tool-creator
     - cof-glob-indexing
     - cof-task-manager-node
     - cof-task-solver-agent-group
+    - cof-swarm-skill-manager
   agents:
     - cof-pointerical-tool-creator-agent
     - cof-task-manager-agent
@@ -38,8 +38,9 @@ references:
 |-------|---------|------------|
 | `cof-pointerical-tool-creator` | Skill/Rule/Workflow 문서 생성 | `@skill(cof-pointerical-tool-creator)` |
 | `cof-glob-indexing` | Node 경계 탐색, 인덱싱 | `@skill(cof-glob-indexing)` |
-| `cof-task-manager-node` | `NN.agents-task-context/` 노드 관리 (legacy: `task-manager/`) | `@skill(cof-task-manager-node)` |
+| `cof-task-manager-node` | `NN.agents-task-context/` 및 버전 브랜치 노드 관리 (legacy: `task-manager/`) | `@skill(cof-task-manager-node)` |
 | `solving-tickets` | 티켓 → 에이전트 할당 | `@skill(cof-task-solver-agent-group)` |
+| `cof-swarm-skill-manager` | Swarm 스킬 레지스트리/관리 | `@skill(cof-swarm-skill-manager)` |
 
 ### Available Agents
 
@@ -76,23 +77,36 @@ references:
 | `index/` | Context Pointer Table |
 | `reference/` | const pointer |
 | `working/` | mutable pointer |
-| `ticket/` | stack pointer |
+| `tickets/` | stack pointer |
 | `runtime/` | execution context |
 | `history/` | freed/archived pointer |
 
-### 1.3 Context Identity
+### 1.3 Agent Model Depth Strategy
 
-모든 문서는 YAML Frontmatter에 다음을 포함:
+에이전트 모델 버전이 증가하면 노드 하위 뎁스가 깊어질 수 있습니다. COF는 고정된 뎁스를 가정하지 않고, **경계 기반 탐색**으로 대응합니다.
+
+- Canonical Anchor: 각 모델 패밀리의 기본 진입점은 항상 `NN.agents-task-context/` 입니다.
+- 권장 확장: `NN.agents-task-context/<agent-family>/<version>/`
+  - 예: `01.agents-task-context/claude/4.0/tickets/`
+  - 예: `01.agents-task-context/gemini/2.5/working/`
+- 탐색 규칙: 상대 깊이 숫자 대신 `AGENT.md`, `index/`, `reference/`, `tickets/` 같은 포인터 요소로 경계를 판별합니다.
+
+
+### 1.4 Context Identity
+
+COF 거버넌스 문서(DNA, RULE, WORKFLOW)는 YAML Frontmatter에 다음을 포함:
 
 ```yaml
 ---
 context_id: cof-xxxx          # Global unique, immutable
-role: SKILL | RULE | WORKFLOW
+role: RULE | WORKFLOW
 state: const | mutable | active | frozen | archived
 scope: immune | agora | nucleus | swarm
 lifetime: ticket | persistent | archived
 ---
 ```
+
+> **SKILL.md 예외**: SKILL.md 파일은 [Claude Code Skills 표준](https://code.claude.com/docs/en/skills)을 따른다. Frontmatter는 `name`, `description`, `allowed-tools` 등 공식 필드만 사용한다.
 
 ---
 
@@ -102,14 +116,14 @@ lifetime: ticket | persistent | archived
 
 | Intent | Node | Required Skill |
 |--------|------|----------------|
-| 작업 맥락 생성 | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-manager-node` |
-| 티켓 발행 | `tickets/` | `cof-task-manager-node` |
-| 티켓 해결 | ticket → agent | `cof-task-solver-agent-group` |
+| 작업 맥락 생성 | `NN.agents-task-context/` 또는 `NN.agents-task-context/<agent-family>/<version>/` (legacy: `task-manager/`) | `cof-task-manager-node` |
+| 티켓 발행 | `NN.agents-task-context/<branch>/tickets/` | `cof-task-manager-node` |
+| 티켓 해결 | 티켓 파일 → 적절한 에이전트 | `cof-task-solver-agent-group` |
 | 완료 작업 정리 | `archive/` | `cof-task-manager-node` |
 | 문서 생성 | Skill/Rule/Workflow | `cof-pointerical-tool-creator` |
 | 컨텍스트 탐색 | Node boundary | `cof-glob-indexing` |
 
-> **Warning**: `mkdir`/`touch`로 위 구조를 직접 생성하는 것은 **금지**.
+> **Warning**: `mkdir`/`touch`로 위 구조를 직접 생성하는 것은 **금지**. 모델 분기 브랜치 생성은 `cof-task-manager-node`를 통해서만 진행합니다.
 
 ---
 
@@ -118,11 +132,16 @@ lifetime: ticket | persistent | archived
 ### 3.1 작업 시작 시
 
 ```
-1. Check: NN.agents-task-context/ 존재?
+1. Check: `NN.agents-task-context/` 존재?
    ├─ No  → cof-task-manager-node로 생성 (사용자 승인)
-   └─ Yes → tickets/ 확인
+   └─ Yes → 적용 중인 브랜치의 `tickets/` 확인
 
-2. Check: 할당된 티켓 존재?
+2. Branching strategy:
+   - 기본 브랜치: `NN.agents-task-context/tickets/`
+   - 모델 분기: `NN.agents-task-context/<agent-family>/<version>/tickets/`
+   - 브랜치는 기존 브랜치와 병행해 유지 가능
+
+3. Check: 할당된 티켓 존재?
    ├─ No  → 새 티켓 발행
    └─ Yes → solving-tickets(`@skill(cof-task-solver-agent-group)`)로 처리
 ```
@@ -144,6 +163,7 @@ ticket(todo) → cof-glob-indexing → agent selection → dispatch → result i
 3. 디렉토리 ROLE과 state 불일치
 4. 수명 전이가 명시되지 않은 Workflow
 5. 숫자 인덱스(`NN`)에 의미를 부여한 규칙
+6. 고정 노드 뎁스를 가정한 경로 하드코딩
 
 ---
 
@@ -182,7 +202,8 @@ ticket(todo) → cof-glob-indexing → agent selection → dispatch → result i
 
 1. **Local Config**: `.agent/config.yaml`의 `context_map`
 2. **Swarm Registry**: 상위 COF의 `index/` 테이블
-3. **Global Registry**: (미구현) 전역 context_id 레지스트리
+3. **Swarm Registry**: `registry/SWARM_SKILL_REGISTRY.md`와 각 Swarm의 `registry/SKILL_REGISTRY.md`
+4. **Global Registry**: 각 Swarm 레지스트리 간 정합성은 `cof-swarm-skill-manager`로 갱신
 
 ### 6.3 Config Example
 
@@ -190,9 +211,9 @@ ticket(todo) → cof-glob-indexing → agent selection → dispatch → result i
 # .agent/config.yaml
 cof_root: "@ref(context-orchestrated-filesystem)"
 context_map:
-  cof-doctrine: "${COF_ROOT}/COF_DOCTRINE.md"
-  cof-dna-blueprint: "${COF_ROOT}/DNA_BLUEPRINT.md"
-  summon-agents: "03_Manifestation/Summon-Agents/"
+  cof-doctrine: "${COF_ROOT}/core-docs/COF_DOCTRINE.md"
+  cof-dna: "${COF_ROOT}/DNA.md"
+  summon-agents: "03_Manifestation/summon-agents/"
 ```
 
 ---
@@ -202,7 +223,6 @@ context_map:
 > **Note**: 모든 참조는 `context_id` 기반. 실제 경로는 agent config에서 resolve.
 
 - **Doctrine**: `@ref(cof-doctrine)`
-- **Blueprint**: `@ref(cof-dna-blueprint)`
-- **Skills**: `@ref(cof-pointerical-tool-creator)`, `@ref(cof-glob-indexing)`, `@ref(cof-task-manager-node)`, `@ref(cof-task-solver-agent-group)`
+- **Skills**: `@ref(cof-pointerical-tool-creator)`, `@ref(cof-glob-indexing)`, `@ref(cof-task-manager-node)`, `@ref(cof-task-solver-agent-group)`, `@ref(cof-swarm-skill-manager)`
 - **Agents**: `@ref(cof-pointerical-tool-creator-agent)`, `@ref(cof-task-manager-agent)`
 - **Best Practices**: `@ref(skill-authoring-best-practices)`
