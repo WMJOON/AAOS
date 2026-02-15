@@ -1,0 +1,61 @@
+id: awt-mental-model-design
+version: 1.0.0
+owner: Woody
+created_at: 2026-02-14
+status: active
+layout_version: 4layer-v1
+
+loader_policy:
+  skill_md_max_lines: 120
+  mode: minimal_loader
+
+layers:
+  l0_core: "10.core/core.md"
+  l1_modules_dir: "20.modules/"
+  l2_references_dir: "30.references/"
+  l3_orchestrator: "40.orchestrator/orchestrator.md"
+
+required_layers:
+  - 00.meta
+  - 10.core
+  - 20.modules
+  - 30.references
+  - 40.orchestrator
+
+io_contract:
+  input:
+    - domain
+    - intent
+    - constraints (optional)
+    - workflow_profile (optional)
+  output_schema: "mental_model_bundle (JSON)"
+  output_schema_ref: "references/mental_model_bundle.schema.yaml"
+  language: ko-KR
+
+token_budget:
+  always_load_max: 1500
+  module_max: 1200
+  reference_max: 2000
+
+modules:
+  - id: module.bundle-contract
+    file: "20.modules/module.bundle-contract.md"
+    unique_axis: "번들 9키 구조 설계와 optional 확장 계약"
+  - id: module.loading-policy
+    file: "20.modules/module.loading-policy.md"
+    unique_axis: "deltaQ 기반 참조 로딩 정책 설계"
+  - id: module.routing-kpi
+    file: "20.modules/module.routing-kpi.md"
+    unique_axis: "패턴 라우팅 규칙과 운영 KPI 목표 설계"
+
+reference_packs:
+  - id: ref.mental-model-bundle-schema
+    file: "references/mental_model_bundle.schema.yaml"
+    triggers: ["스키마", "검증", "required keys"]
+  - id: ref.raci-bridge
+    file: "references/raci_bridge.md"
+    triggers: ["RACI", "워크플로우 연결", "역할 매핑"]
+
+validation:
+  phase_a: warn
+  phase_b: error

@@ -1,28 +1,36 @@
-name: awt-topology-design
-version: "2.1.0"
+id: awt-topology-design
+version: "2.2.0"
 domain: agentic-workflow-architecture
+layout_version: 4layer-v1
 description: >
   Goal → Decision Questions → RSV 추정 → Topology 선택 → Task Graph 설계.
   θ_GT × RSV 기반으로 비용/루프/hand-off를 최소화하는 Workflow Topology를 산출한다.
 
-architecture: 4-layer-with-inline-runbook
+architecture: 4-layer-minimal-loader
 design_principle: >
-  SKILL.md 단독으로 실행 가능한 self-contained runbook.
-  모듈/참조팩은 깊은 분석 시에만 추가 로딩.
+  SKILL.md는 120줄 이하 로더. 실행 규칙은 레이어 문서에 분산.
+  Core + Orchestrator를 항상 로딩하고 모듈/참조팩은 온디맨드.
+
+loader_policy:
+  skill_md_max_lines: 120
+  mode: minimal_loader
+
+required_layers:
+  - 00.meta
+  - 10.core
+  - 20.modules
+  - 30.references
+  - 40.orchestrator
 
 modules:
   - id: topology_selection
     question_axis: "어떤 Topology 구조를 선택할 것인가?"
-    inline_in_skill: true  # v2.0: 핵심 로직 SKILL.md에 인라인
   - id: node_design
     question_axis: "노드를 어떻게 분리하고 θ_GT/RSV를 설정할 것인가?"
-    inline_in_skill: true
   - id: loop_risk
     question_axis: "어떤 루프 위험이 있고 어떻게 방지할 것인가?"
-    inline_in_skill: true
   - id: handoff
     question_axis: "Hand-off 시 컨텍스트 손실을 어떻게 최소화할 것인가?"
-    inline_in_skill: partial  # 원칙+허용/금지 포맷만 인라인, 상세는 모듈
 
 reference_packs:
   - id: output_contract
@@ -34,16 +42,25 @@ scripts:
   - id: estimator
     path: scripts/estimator.py
     purpose: "Runtime θ_GT/RSV/redundancy 측정"
+  - id: validate_strategy_h1_gate
+    path: scripts/validate_strategy_h1_gate.py
+    purpose: "Strategy/high-risk H1 finalization gate 검증"
 
 token_budget:
-  skill_md_alone: ~3500     # SKILL.md만으로 대부분 실행 가능
-  always_load_max: 1500     # core.md + orchestrator.md (SKILL.md에 인라인됨)
-  module_max: 1200          # 모듈 1개 (상세 필요 시)
-  reference_max: 2000       # 참조팩 1개
+  loader: "<=120 lines"
+  core: ~1500
+  orchestrator: ~1300
+  core_orchestrator_combined: ~2800
+  module_max: 1200
+  reference_max: 2000
 
 related_skills:
-  - 02.execution-design: "노드 실행 시 멘탈모델 적용 정책 설계"
-  - 00.mental-model-design: "4-Layer 멘탈모델/로딩 정책 원본"
+  - workflow-cone-analyzer: "노드 내부 θ_GT 프로파일링 + 종료 전략 (본 스킬은 그래프 외부)"
+  - skillpack-factory: "4-Layer 패키징 원본"
 
 status: stable
 owner: Workflow Architecture / Agent Orchestration Layer
+
+validation:
+  phase_a: warn
+  phase_b: error

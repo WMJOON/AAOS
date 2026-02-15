@@ -1,0 +1,15 @@
+views:
+  - type: table
+    name: AWT Records
+    filters:
+      and:
+        - file.inFolder("02_Swarm/agentic-workflow-topology/records")
+        - file.hasProperty("record_type")
+    order:
+      - ts
+      - kind
+      - actor
+      - outcome_status
+    sort:
+      - property: ts
+        direction: DESC

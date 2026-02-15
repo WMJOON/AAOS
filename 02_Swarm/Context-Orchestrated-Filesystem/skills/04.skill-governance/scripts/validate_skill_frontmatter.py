@@ -29,6 +29,14 @@ FORBIDDEN_SKILL_MD_KEYS = {
     "created",
 }
 REQUIRED_META_KEYS = {"context_id", "role", "state", "scope", "lifetime", "created"}
+REQUIRED_LAYER_DIRS = ("00.meta", "10.core", "20.modules", "30.references", "40.orchestrator")
+REQUIRED_LOADER_HEADERS = (
+    "## Trigger",
+    "## Non-Negotiable Invariants",
+    "## Layer Index",
+    "## Quick Start",
+    "## When Unsure",
+)
 
 
 def read_frontmatter(md_path: Path) -> Tuple[Dict[str, Any], List[str]]:
@@ -67,8 +75,23 @@ def iter_skill_docs(swarm_root: Path) -> List[Path]:
     docs: List[Path] = []
     for path in sorted(swarm_root.rglob("SKILL.md")):
         if "skills" in path.parts:
+            if "_shared" in path.parts:
+                continue
             docs.append(path)
     return docs
+
+
+def append_layout_issue(
+    *,
+    phase: str,
+    message: str,
+    errors: List[str],
+    warnings: List[str],
+) -> None:
+    if phase == "phase_b":
+        errors.append(message)
+    else:
+        warnings.append(f"WARN(4layer_phase_a): {message}")
 
 
 def validate_skill_contracts(
@@ -76,6 +99,7 @@ def validate_skill_contracts(
     *,
     strict: bool = True,
     allow_legacy_frontmatter: bool = False,
+    four_layer_phase: str = "phase_a",
 ) -> Tuple[List[str], List[str]]:
     errors: List[str] = []
     warnings: List[str] = []
@@ -117,6 +141,34 @@ def validate_skill_contracts(
             else:
                 warnings.append(f"WARN(missing_skill_meta): {meta_path} not found")
 
+        content = skill_md.read_text(encoding="utf-8")
+        line_count = content.count("\n") + 1
+        if line_count > 120:
+            append_layout_issue(
+                phase=four_layer_phase,
+                message=f"{skill_md}: SKILL.md exceeds 120 lines ({line_count})",
+                errors=errors,
+                warnings=warnings,
+            )
+
+        for header in REQUIRED_LOADER_HEADERS:
+            if header not in content:
+                append_layout_issue(
+                    phase=four_layer_phase,
+                    message=f"{skill_md}: missing loader section '{header}'",
+                    errors=errors,
+                    warnings=warnings,
+                )
+
+        missing_layers = [layer for layer in REQUIRED_LAYER_DIRS if not (skill_dir / layer).is_dir()]
+        if missing_layers:
+            append_layout_issue(
+                phase=four_layer_phase,
+                message=f"{skill_dir}: missing 4-layer dirs -> {', '.join(missing_layers)}",
+                errors=errors,
+                warnings=warnings,
+            )
+
     return errors, warnings
 
 
@@ -125,6 +177,12 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--swarm-root", required=True)
     parser.add_argument("--allow-legacy-frontmatter", action="store_true")
     parser.add_argument("--strict", action="store_true", default=False)
+    parser.add_argument(
+        "--four-layer-phase",
+        choices=["phase_a", "phase_b"],
+        default="phase_a",
+        help="phase_a: warning only, phase_b: enforce as error",
+    )
     return parser.parse_args()
 
 
@@ -136,6 +194,7 @@ def main() -> int:
         swarm_root,
         strict=strict,
         allow_legacy_frontmatter=args.allow_legacy_frontmatter,
+        four_layer_phase=args.four_layer_phase,
     )
 
     if warnings:

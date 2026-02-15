@@ -1,7 +1,7 @@
 ---
+
 name: "aaos-manifestation"
 version: "0.1.0"
-scope: "04_Agentic_AI_OS/03_Manifestation"
 created: "2026-01-27"
 status: draft
 

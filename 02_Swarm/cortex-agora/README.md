@@ -28,7 +28,7 @@ description: Swarm 행동(Behavior Trace)을 관찰·요약하고 “반복되�
 - 소비 방식: downstream이 cortex-agora 산출물을 pull(download)하여 재사용한다.
 - 우선순위 원칙: downstream 개선안은 cortex-agora 출력(`agora_ref`)을 source-of-truth로 사용한다.
 - COWI pull trigger: `IMPROVEMENT_DECISIONS` 신규 이벤트 발생 시 + 일일 수동 배치 1회
-- COWI runbook: `02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py`
+- COWI runbook: `02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py`
 
 ## Change Archive Device
 

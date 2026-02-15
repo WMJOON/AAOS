@@ -1,0 +1,14 @@
+id: cowi-agora-consumption-bridge
+layout_version: 4layer-v1
+loader_policy:
+  skill_md_max_lines: 120
+  mode: minimal_loader
+required_layers:
+  - 00.meta
+  - 10.core
+  - 20.modules
+  - 30.references
+  - 40.orchestrator
+validation:
+  phase_a: warn
+  phase_b: error

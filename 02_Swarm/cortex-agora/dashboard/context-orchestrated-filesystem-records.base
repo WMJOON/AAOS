@@ -1,0 +1,16 @@
+views:
+  - type: table
+    name: COF Records
+    filters:
+      and:
+        - file.inFolder("02_Swarm/context-orchestrated-filesystem/records")
+        - file.hasProperty("record_type")
+    order:
+      - ts
+      - kind
+      - actor
+      - outcome_status
+      - scope
+    sort:
+      - property: ts
+        direction: DESC

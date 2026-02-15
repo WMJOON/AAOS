@@ -1,0 +1,10 @@
+{
+  "generated_at": "2026-02-15T08:45:09Z",
+  "source_proposal_dirs": [
+    "02_Swarm/agentic-workflow-topology/proposals",
+    "02_Swarm/context-orchestrated-filesystem/proposals",
+    "02_Swarm/context-orchestrated-workflow-intelligence/proposals"
+  ],
+  "count": 0,
+  "items": []
+}

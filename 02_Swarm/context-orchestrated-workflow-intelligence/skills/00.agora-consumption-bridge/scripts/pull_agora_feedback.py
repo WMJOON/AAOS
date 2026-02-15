@@ -10,16 +10,37 @@ import datetime as dt
 import json
 import re
 import subprocess
+import sys
 from pathlib import Path
 from typing import Any
-
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 SKILL_ROOT = SCRIPT_DIR.parent
 COWI_ROOT = SKILL_ROOT.parent.parent
 
-DEFAULT_EVENTS_ROOT = COWI_ROOT.parent / "cortex-agora" / "change_archive" / "events"
+# Import record_writer from 02_Swarm/cortex-agora/scripts/
+SWARM_SCRIPTS = Path(__file__).resolve().parents[4] / "cortex-agora" / "scripts"  # 02_Swarm/cortex-agora/scripts/
+sys.path.insert(0, str(SWARM_SCRIPTS))
+import record_writer as rw
+
+CORTEX_AGORA_ROOT = COWI_ROOT.parent / "cortex-agora"
+
+DEFAULT_EVENTS_ROOT = CORTEX_AGORA_ROOT / "change_archive" / "events"
 DEFAULT_NAMESPACE_ROOT = COWI_ROOT / "agents"
+
+# Maps record_type -> subdirectory name inside cortex-agora/records/
+SUBDIRECTORY_MAP = {
+    "change_event": "change_events",
+    "peer_feedback": "peer_feedback",
+    "improvement_decision": "improvement_decisions",
+}
+
+# Maps record_type -> legacy JSONL filename
+JSONL_NAMES = {
+    "change_event": "CHANGE_EVENTS.jsonl",
+    "peer_feedback": "PEER_FEEDBACK.jsonl",
+    "improvement_decision": "IMPROVEMENT_DECISIONS.jsonl",
+}
 
 
 def parse_iso8601(value: str) -> dt.datetime:
@@ -49,6 +70,41 @@ def load_jsonl(path: Path) -> list[dict[str, Any]]:
             raise ValueError(f"{path}:{lineno} must be a JSON object")
         rows.append(item)
     return rows
+
+
+def load_cortex_records(record_type: str, events_root: Path) -> list[dict[str, Any]]:
+    """Load cortex-agora records, preferring .md over legacy JSONL."""
+    md_dir = CORTEX_AGORA_ROOT / "records" / SUBDIRECTORY_MAP[record_type]
+    if md_dir.exists() and any(md_dir.glob("*.md")):
+        return rw.load_records_from_md(md_dir, record_type)
+    # Fallback to legacy JSONL
+    return load_jsonl(events_root / JSONL_NAMES[record_type])
+
+
+def normalize_source_snapshot(row: dict[str, Any]) -> dict[str, Any]:
+    """Ensure source_snapshot nested dict exists for backward compatibility.
+
+    In .md records the flattened frontmatter stores:
+        source_agora_ref, source_captured_at
+    In legacy JSONL records the nested dict stores:
+        source_snapshot.agora_ref, source_snapshot.captured_at
+
+    This function normalises both shapes so downstream code can use
+    either ``row["source_snapshot"]["agora_ref"]`` or
+    ``row.get("source_agora_ref")``.
+    """
+    snap = row.get("source_snapshot")
+    if isinstance(snap, dict):
+        # Legacy nested format already present — also populate flat keys
+        row.setdefault("source_agora_ref", snap.get("agora_ref", ""))
+        row.setdefault("source_captured_at", snap.get("captured_at", ""))
+    else:
+        # Flat .md format — build the nested dict for legacy consumers
+        row["source_snapshot"] = {
+            "agora_ref": str(row.get("source_agora_ref", "")),
+            "captured_at": str(row.get("source_captured_at", "")),
+        }
+    return row
 
 
 def sanitize_token(value: str) -> str:
@@ -398,9 +454,12 @@ def main() -> int:
         else (namespace_root / "registry" / "AGORA_PULL_STATE.json")
     )
 
-    change_rows = load_jsonl(events_root / "CHANGE_EVENTS.jsonl")
-    feedback_rows = load_jsonl(events_root / "PEER_FEEDBACK.jsonl")
-    decision_rows = load_jsonl(events_root / "IMPROVEMENT_DECISIONS.jsonl")
+    change_rows = load_cortex_records("change_event", events_root)
+    feedback_rows = load_cortex_records("peer_feedback", events_root)
+    decision_rows = load_cortex_records("improvement_decision", events_root)
+
+    # Normalize source_snapshot fields for .md / JSONL compatibility
+    change_rows = [normalize_source_snapshot(r) for r in change_rows]
 
     proposal_changes = [r for r in change_rows if str(r.get("proposal_id", "")) == args.proposal_id]
     proposal_feedback = [r for r in feedback_rows if str(r.get("proposal_id", "")) == args.proposal_id]

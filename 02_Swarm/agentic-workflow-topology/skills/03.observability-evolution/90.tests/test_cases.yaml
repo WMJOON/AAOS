@@ -1,0 +1,141 @@
+# Structure Verification
+- id: LAYER01
+  name: "레이어 구조 존재"
+  expected:
+    required_layers_present: true
+    layers: [00.meta, 10.core, 20.modules, 30.references, 40.orchestrator]
+
+- id: LOADER01
+  name: "SKILL.md 최소 로더 규격"
+  expected:
+    skill_md_max_lines_120: true
+
+- id: ROUTE01
+  name: "라우팅 규칙 적용"
+  expected:
+    routing_patterns: [Observe, Classify, Interact, Propose, Evolve, Report]
+
+# Functional Scenarios
+- id: TC01
+  name: "주간 리뷰 - 이상 없음"
+  input:
+    mode: scheduled
+    ow_length: 7d
+    anomaly_signals: 0
+  expected:
+    phases_executed: [1, 2, 3, 5]
+    phase_3_mode: scheduled_checkpoint
+    phase_4_skipped: true
+    output_contains: signal_summary
+
+- id: TC02
+  name: "주간 리뷰 - retry_spike 감지"
+  input:
+    mode: scheduled
+    ow_length: 7d
+    anomaly_signals:
+      - type: retry_spike
+        severity: warning
+  expected:
+    phases_executed: [1, 2, 3, 4, 5]
+    delta_q: ">= 2"
+    proposals_generated: ">= 1"
+    target_skill: "01.topology-design"
+
+- id: TC03
+  name: "Critical failure_cluster 이벤트 트리거"
+  input:
+    mode: event
+    anomaly_signals:
+      - type: failure_cluster
+        severity: critical
+        count: 5
+  expected:
+    phase_3_mode: event_checkpoint
+    immediate_alert: true
+    proposals_generated: ">= 1"
+
+- id: TC04
+  name: "복합 이상 - 다중 AS 유형"
+  input:
+    mode: scheduled
+    anomaly_signals:
+      - type: failure_cluster
+        severity: critical
+      - type: bottleneck
+        severity: warning
+  expected:
+    delta_q: ">= 4"
+    pack_anomaly_profiles_loaded: true
+    proposals_multiple_targets: true
+
+- id: TC05
+  name: "사용자가 signal_validity=disputed"
+  input:
+    mode: scheduled
+    user_feedback:
+      signal_validity: disputed
+  expected:
+    confidence_lowered: true
+    when_unsure_triggered: true
+    re_examination_queued: true
+
+- id: TC06
+  name: "제안 agora 제출 - 전체 Evolution Cycle"
+  input:
+    mode: scheduled
+    proposal_approved: true
+    confidence: medium
+  expected:
+    agora_format_used: true
+    change_id_format: "P-AWT-OE-*"
+    lifecycle_state: submitted_to_agora
+    evolution_metrics_present: true
+
+- id: TC07
+  name: "Event checkpoint 48h 무응답 에스컬레이션"
+  input:
+    mode: event
+    severity: critical
+    user_response: none
+    elapsed_hours: 49
+  expected:
+    escalation: halt_and_escalate_to_audit
+    behavior_feed_event: escalation
+
+- id: TC08
+  name: "격주 리뷰 + evolution 메트릭 산출"
+  input:
+    mode: scheduled
+    ow_length: 14d
+  expected:
+    evolution_metrics:
+      - closure_rate_30d
+      - avg_cycle_days
+      - stale_proposals
+    review_template: biweekly_review.template.md
+
+- id: TC09
+  name: "사용자 on-demand 리뷰 요청"
+  input:
+    mode: on_demand
+    user_request: "지난 3일 리뷰해줘"
+    custom_ow:
+      start: "2026-02-12"
+      end: "2026-02-15"
+  expected:
+    phase_3_mode: scheduled_checkpoint
+    ow_respected: true
+
+- id: TC10
+  name: "theta_GT 재보정 제안"
+  input:
+    mode: scheduled
+    anomaly_signals:
+      - type: performance_drift
+        severity: warning
+        affected_node: T2
+  expected:
+    proposal_action: recalibrate_theta
+    target_skill: "02.execution-design"
+    rollback_rule_present: true

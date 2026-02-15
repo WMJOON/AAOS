@@ -1,0 +1,72 @@
+id: awt-observability-evolution
+version: "2.0.0"
+domain: workflow-observability-and-continuous-improvement
+layout_version: 4layer-v1
+
+description: >
+  SQLite SoT + behavior feed에서 이상 신호를 관찰하고,
+  HITL 체크포인트와 이벤트 트리거로 사용자와 상호작용하며,
+  구조화된 개선 제안을 형제 스킬로 환류한다.
+
+architecture: 4-layer-minimal-loader
+design_principle: >
+  SKILL.md는 120줄 이하 로더. 실행 규칙은 레이어 문서에 분산.
+  Core + Orchestrator를 항상 로딩하고 모듈/참조팩은 온디맨드.
+
+loader_policy:
+  skill_md_max_lines: 120
+  mode: minimal_loader
+
+required_layers:
+  - 00.meta
+  - 10.core
+  - 20.modules
+  - 30.references
+  - 40.orchestrator
+
+modules:
+  - id: observation_policy
+    question_axis: "어떤 신호를 어떤 소스에서 언제 관찰할 것인가?"
+  - id: hitl_interaction
+    question_axis: "관찰 결과를 사용자에게 어떻게 제시하고 피드백을 수집할 것인가?"
+  - id: improvement_proposal
+    question_axis: "어떤 구체적 개선안을 어떤 근거로 제안할 것인가?"
+  - id: evolution_tracking
+    question_axis: "제안이 설계 스킬로 어떻게 환류되고 피드백 루프가 어떻게 추적되는가?"
+
+reference_packs:
+  - id: sql_queries
+    trigger: "항상: 신호 수집 시 SQL 템플릿 참조"
+  - id: anomaly_profiles
+    trigger: "ΔQ >= 2: 이상 신호 상세 프로파일 참조 필요 시"
+  - id: proposal_templates
+    trigger: "ΔQ >= 2: 개선 제안 생성 시 템플릿 필요"
+  - id: agora_format
+    trigger: "ΔQ >= 3: cortex-agora 제출 포맷 필요 시"
+
+scripts:
+  - id: export_behavior_feed
+    path: scripts/export_behavior_feed.py
+    purpose: "SQLite SoT -> Behavior Feed JSONL 수동 export"
+
+token_budget:
+  loader: "<=120 lines"
+  core: ~1500
+  orchestrator: ~1500
+  core_orchestrator_combined: ~3000
+  module_max: 1200
+  reference_max: 2000
+
+related_skills:
+  - id: topology-design
+    role: "개선 제안의 주요 타깃. topology 재설계/노드 분할 제안 수신"
+  - id: execution-design
+    role: "mode/model/fallback 개선 제안 수신"
+  - id: skill-governance
+    role: "정책 수준 개선 제안 수신"
+  - id: cowi-agora-consumption-bridge
+    role: "cortex-agora를 통한 제안 물질화 경로"
+
+validation:
+  phase_a: warn
+  phase_b: error

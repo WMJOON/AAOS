@@ -1,11 +1,6 @@
 ---
-context_id: mcp-manifestation-template
-role: SCHEMA
-state: const
-scope: swarm
-lifetime: persistent
----
 
+---
 # MCP Manifestation Template
 
 This template defines the standard for binding Model Context Protocol (MCP) servers within the AAOS Manifestation layer. 

@@ -80,19 +80,20 @@ Workflow, Rule, Skill, Sub-Agent 문서를 생성하기 위한 메타 생성기
 | WORKFLOW | `WORKFLOW` | 상태 전이 및 수명 관리 정의 |
 | SUB-AGENT | `SKILL` + `agent_kind: sub-agent` | 하위 에이전트 역할 선언 |
 
-### 2.5 Context Identity Model
+### 2.5 Context Identity Model (Sidecar Pattern)
 
-`RULE`/`WORKFLOW`/`SUB-AGENT` 문서는 YAML Frontmatter에 다음을 포함해야 한다.
+모든 문서 유형(`SKILL`/`RULE`/`WORKFLOW`/`SUB-AGENT`)의 COF 식별 메타데이터는 **사이드카 파일**(`SKILL.meta.yaml` 또는 상위 manifest)에 저장한다. 문서 본문의 YAML Frontmatter에는 런타임 인터페이스 필드(`name`, `description` 등)만 포함한다.
+
+**사이드카 파일 (`SKILL.meta.yaml`):**
 
 ```yaml
----
 context_id: cof-xxxx
 role: SKILL | RULE | WORKFLOW
 state: const | mutable | active | frozen | archived
-scope: immune | agora | nucleus | swarm
-lifetime: ticket | persistent | archived
 created: "YYYY-MM-DD"
----
+trigger: always_on | model_decision | using_instruction | data_state_change   # optional
+consumers: []                                                                  # optional
+notes: ""                                                                      # optional
 ```
 
 | Field | Mutability | Description |
@@ -100,24 +101,15 @@ created: "YYYY-MM-DD"
 | `context_id` | 불변 | 전역 유일 식별자, 변경 불가 |
 | `role` | 불변 | 문서 타입 선언 |
 | `state` | 가변 | 현재 포인터 상태 |
-| `scope` | 가변 | 가시성 범위 |
-| `lifetime` | 가변 | 수명 정책 |
 | `created` | 불변 | 생성일 |
 
-### 2.6 SKILL Sidecar Metadata (`SKILL.meta.yaml`)
-
-`SKILL.md`는 최소 frontmatter만 사용하고, COF 식별 메타는 sidecar 파일에 저장한다.
+**문서 Frontmatter (런타임 전용):**
 
 ```yaml
-context_id: cof-xxxx
-role: SKILL
-state: const | mutable | active | frozen | archived
-scope: immune | agora | nucleus | swarm
-lifetime: ticket | persistent | archived
-created: "YYYY-MM-DD"
-trigger: always_on | model_decision | using_instruction | data_state_change   # optional
-consumers: []                                                                  # optional
-notes: ""                                                                      # optional
+---
+name: "[document-name]"
+description: "[3rd person description. Use when...]"
+---
 ```
 
 ---

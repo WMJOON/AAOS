@@ -17,11 +17,17 @@ description: 워크플로우 구조/토폴로지 설계를 담당하는 Swarm. �
 
 ### Active Skills (5)
 
-1. `00.workflow-skill-manager`
-2. `01.mental-model-loader`
-3. `02.workflow-topology-scaffolder`
-4. `03.workflow-mental-model-execution-designer`
-5. `04.workflow-observability-and-evolution`
+1. `04.skill-governance`
+2. `00.mental-model-design`
+3. `01.topology-design`
+4. `02.execution-design`
+5. `03.observability-evolution`
+
+### 4-Layer Loader Policy
+
+- 모든 active skill은 `SKILL.md`를 초경량 로더(최대 120줄)로 유지한다.
+- 상세 실행 규칙은 `00.meta/10.core/20.modules/30.references/40.orchestrator`로 분리한다.
+- self-contained `SKILL.md` 정책은 폐기한다.
 
 ## 포함 범위
 
@@ -52,7 +58,7 @@ description: 워크플로우 구조/토폴로지 설계를 담당하는 Swarm. �
 - backward compatibility: `trace_id` 병행 기록
 
 ```bash
-python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-observability-and-evolution/scripts/export_behavior_feed.py \
+python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/03.observability-evolution/scripts/export_behavior_feed.py \
   --db-path 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/00.context/agent_log.db \
   --out-path 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/behavior/BEHAVIOR_FEED.jsonl
 ```
@@ -66,7 +72,7 @@ python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-o
   - `skill_usage_adaptation_report`
 
 ```bash
-python3 02_Swarm/agentic-workflow-topology/skills/02.workflow-topology-scaffolder/scripts/validate_strategy_h1_gate.py \
+python3 02_Swarm/agentic-workflow-topology/skills/01.topology-design/scripts/validate_strategy_h1_gate.py \
   --workflow-spec /path/to/workflow_topology_spec.json \
   --agent-family claude \
   --agent-version 4.0 \

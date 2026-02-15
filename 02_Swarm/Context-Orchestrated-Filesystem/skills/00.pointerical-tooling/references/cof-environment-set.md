@@ -2,23 +2,9 @@
 name: cof-environment-set
 description: COF 환경 설정 및 실행 지침. 에이전트가 COF 환경에서 작업할 때 반드시 참조해야 하는 규칙과 스킬 목록을 정의한다. Use when working in COF directories or creating/managing COF nodes.
 trigger: always_on
-context_id: cof-environment-set
-role: RULE
-state: const
-scope: swarm
-lifetime: persistent
-version: "0.2.1"
+version: "0.3.0"
 created: "2026-01-31"
-references:
-  doctrine: cof-doctrine
-  skills:
-    - cof-pointerical-tooling
-    - cof-glob-indexing
-    - cof-task-context-management
-    - cof-ticket-solving
-    - cof-skill-governance
-  external:
-    - summon-agents
+updated: "2026-02-15"
 ---
 
 # COF Environment Set
@@ -78,25 +64,6 @@ references:
   - 예: `01.agents-task-context/claude/4.0/tickets/`
   - 예: `01.agents-task-context/gemini/2.5/working/`
 - 탐색 규칙: 상대 깊이 숫자 대신 `AGENT.md`, `index/`, `reference/`, `tickets/` 같은 포인터 요소로 경계를 판별합니다.
-
-
-### 1.4 Context Identity
-
-COF 거버넌스 문서(DNA, RULE, WORKFLOW)는 YAML Frontmatter에 다음을 포함:
-
-```yaml
----
-context_id: cof-xxxx          # Global unique, immutable
-role: RULE | WORKFLOW
-state: const | mutable | active | frozen | archived
-scope: immune | agora | nucleus | swarm
-lifetime: ticket | persistent | archived
----
-```
-
-> **SKILL.md 예외**: SKILL.md 파일은 [Claude Code Skills 표준](https://code.claude.com/docs/en/skills)을 따른다. Frontmatter는 `name`, `description`, `allowed-tools` 등 공식 필드만 사용한다.
-> COF 식별 메타(`context_id`, `role`, `state`, `scope`, `lifetime`, `created`, `trigger`)는 `SKILL.meta.yaml`에 저장한다.
-> precedence: 실행 인터페이스는 `SKILL.md`, COF 식별 SoT는 `SKILL.meta.yaml`을 따른다.
 
 ---
 
@@ -169,12 +136,11 @@ ticket(todo) → cof-glob-indexing → agent selection → dispatch → result i
 
 다음을 위반하는 문서는 **생성 불가**:
 
-1. `context_id` 없는 문서 (단, `SKILL.md`는 `SKILL.meta.yaml`로 대체 가능)
-2. `history` context를 `active`로 참조
-3. 디렉토리 ROLE과 state 불일치
-4. 수명 전이가 명시되지 않은 Workflow
-5. 숫자 인덱스(`NN`)에 의미를 부여한 규칙
-6. 고정 노드 뎁스를 가정한 경로 하드코딩
+1. `history` context를 `active`로 참조
+2. 디렉토리 ROLE과 state 불일치
+3. 수명 전이가 명시되지 않은 Workflow
+4. 숫자 인덱스(`NN`)에 의미를 부여한 규칙
+5. 고정 노드 뎁스를 가정한 경로 하드코딩
 
 ---
 
@@ -212,8 +178,8 @@ ticket(todo) → cof-glob-indexing → agent selection → dispatch → result i
 
 1. **Local Config**: `.agent/config.yaml`의 `context_map`
 2. **Swarm Registry**: 상위 COF의 `index/` 테이블
-3. **Swarm Registry**: `registry/SWARM_SKILL_REGISTRY.md`와 각 Swarm의 `registry/SKILL_REGISTRY.md`
-4. **Global Registry**: `02_Swarm/registry/SWARM_SKILL_REGISTRY.md` + `02_Swarm/registry/GLOBAL_SKILL_REGISTRY.json`
+3. **Swarm Registry**: `02_Swarm/cortex-agora/registry/SWARM_SKILL_REGISTRY.md`와 각 Swarm의 `registry/SKILL_REGISTRY.md`
+4. **Global Registry**: `02_Swarm/cortex-agora/registry/SWARM_SKILL_REGISTRY.md` + `02_Swarm/cortex-agora/registry/GLOBAL_SKILL_REGISTRY.json`
 
 ### 6.3 Config Example
 

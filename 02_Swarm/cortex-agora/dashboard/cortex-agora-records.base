@@ -1,0 +1,60 @@
+views:
+  - type: table
+    name: All Records
+    filters:
+      and:
+        - file.inFolder("02_Swarm/cortex-agora/records")
+        - file.hasProperty("record_type")
+    order:
+      - ts
+      - record_type
+      - proposal_id
+      - status
+      - actor
+      - sealed
+    sort:
+      - property: ts
+        direction: DESC
+  - type: table
+    name: Change Events
+    filters:
+      and:
+        - file.inFolder("02_Swarm/cortex-agora/records/change_events")
+    order:
+      - ts
+      - proposal_id
+      - change_type
+      - status
+      - actor
+    sort:
+      - property: ts
+        direction: DESC
+  - type: table
+    name: Peer Feedback
+    filters:
+      and:
+        - file.inFolder("02_Swarm/cortex-agora/records/peer_feedback")
+    order:
+      - ts
+      - proposal_id
+      - reviewer
+      - stance
+      - summary
+    sort:
+      - property: ts
+        direction: DESC
+    group_by: proposal_id
+  - type: table
+    name: Decisions
+    filters:
+      and:
+        - file.inFolder("02_Swarm/cortex-agora/records/improvement_decisions")
+    order:
+      - ts
+      - proposal_id
+      - decision
+      - rationale
+      - next_action
+    sort:
+      - property: ts
+        direction: DESC

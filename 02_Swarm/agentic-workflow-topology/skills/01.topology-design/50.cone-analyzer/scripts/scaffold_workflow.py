@@ -29,7 +29,7 @@ Usage:
 import argparse
 import os
 import sys
-from datetime import datetime
+from datetime import datetime, timezone
 
 # ── θ_GT 레벨 → 기본값 매핑 ──
 
@@ -171,6 +171,10 @@ def detect_topology(edges):
     return "linear"
 
 
+def iso_now_z() -> str:
+    return datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+
+
 def is_strategy_or_high_risk(workflow_class, risk_tolerance):
     cls = (workflow_class or "").strip().lower()
     risk = (risk_tolerance or "").strip().lower()
@@ -245,7 +249,16 @@ def gen_mermaid(nodes, edges):
     return "\n".join(lines)
 
 
-def gen_workflow_md(wf_name, nodes, edges, d_min_override, cooldown, strategy_gate_enabled):
+def gen_workflow_md(
+    wf_name,
+    nodes,
+    edges,
+    d_min_override,
+    cooldown,
+    strategy_gate_enabled,
+    proposal_id,
+    visibility_tier,
+):
     """workflow.md 생성."""
     today = datetime.now().strftime("%Y.%m.%d")
     topology = detect_topology(edges)
@@ -298,7 +311,16 @@ def gen_workflow_md(wf_name, nodes, edges, d_min_override, cooldown, strategy_ga
 - H1 finalization 전 web evidence + COWI artifacts 검증 필요
 """
 
-    return f"""# {wf_name}
+    return f"""---
+artifact_type: workflow_topology_spec
+owner_swarm: agentic-workflow-topology
+proposal_id: "{proposal_id}"
+visibility_tier: "{visibility_tier}"
+generated_at: "{iso_now_z()}"
+workflow_name: "{wf_name}"
+---
+
+# {wf_name}
 
 > Convergence Cone v1.1 기반 워크플로우 정의서
 > Generated: {today}
@@ -611,6 +633,8 @@ def scaffold(args):
                 args.d_min,
                 args.cooldown,
                 strategy_gate_enabled,
+                args.proposal_id,
+                args.visibility_tier,
             )
         )
 
@@ -699,6 +723,17 @@ Examples:
         choices=["low", "medium", "high"],
         default="medium",
         help="리스크 허용도 (기본: medium)",
+    )
+    parser.add_argument(
+        "--proposal-id",
+        default="UNASSIGNED",
+        help="proposal identifier for workflow artifacts",
+    )
+    parser.add_argument(
+        "--visibility-tier",
+        choices=["must_show", "optional", "internal"],
+        default="internal",
+        help="visibility tier metadata for workflow artifacts",
     )
 
     args = parser.parse_args()

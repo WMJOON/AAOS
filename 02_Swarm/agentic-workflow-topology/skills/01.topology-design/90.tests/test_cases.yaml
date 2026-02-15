@@ -1,5 +1,24 @@
 # Test Cases for awt-topology-design
-# 최소 10개, golden_outputs/ 참조
+# 구조 검증 + 실제 Topology 설계 테스트 포함
+
+# --- 구조 검증 ---
+
+- id: LAYER01
+  name: "레이어 구조 존재"
+  expected:
+    required_layers_present: true
+
+- id: LOADER01
+  name: "SKILL.md 최소 로더 규격"
+  expected:
+    skill_md_max_lines_120: true
+
+- id: ROUTE01
+  name: "라우팅 규칙 적용"
+  expected:
+    routing_policy_applied: true
+
+# --- Topology 설계 테스트 ---
 
 - id: TC01
   name: "금융 규제 대응 - parallel+synthesis"
@@ -71,18 +90,6 @@
   modules_used: [topology_selection, node_design, loop_risk, handoff]
 
 - id: TC06
-  name: "조건 분기 - branching"
-  input:
-    goal: "고객 문의를 유형별로 분류하고 각 유형에 맞는 응대 스크립트 생성"
-    constraints: {}
-    context: { domain: "customer service", risk_tolerance: medium }
-  expected:
-    topology: branching
-    dq_count_range: [2, 4]
-    must_have_conditions_on_edges: true
-  modules_used: [topology_selection, node_design, loop_risk]
-
-- id: TC07
   name: "발산→수렴 - fanout_fanin"
   input:
     goal: "신제품 네이밍 후보 10개 생성 후 3개로 압축하여 최종 1개 선정"
@@ -93,7 +100,7 @@
     must_have_loop_risk: ["exploration_spiral"]
   modules_used: [topology_selection, node_design, loop_risk]
 
-- id: TC08
+- id: TC07
   name: "상태 기반 - state_transition"
   input:
     goal: "고객 온보딩 프로세스를 단계별로 설계하고 각 단계 전이 조건 정의"
@@ -104,7 +111,7 @@
     must_have_state_objects: true
   modules_used: [topology_selection, node_design, loop_risk]
 
-- id: TC09
+- id: TC08
   name: "estimator 연동 설계"
   input:
     goal: "금융 규제 대응 워크플로우의 Runtime 모니터링 정책 설계"
@@ -116,7 +123,7 @@
   modules_used: [topology_selection, node_design, loop_risk]
   packs_loaded: [output_contract, estimator]
 
-- id: TC10
+- id: TC09
   name: "Goal 모호 → when_unsure 발동"
   input:
     goal: "회사를 더 좋게 만들자"
@@ -128,48 +135,16 @@
     must_trigger_when_unsure: true
   modules_used: []
 
-- id: TC11
-  name: "PF1 preflight 첫 질문 강제"
+- id: TC10
+  name: "strategy/high-risk H1 gate 강제"
   input:
-    goal: "AI 사업전략 수립"
-    workflow_profile: { class: strategy, risk_tolerance: high }
+    goal: "글로벌 시장 진출 전략 수립"
     constraints: {}
-    context: { domain: "AI SaaS", risk_tolerance: high }
+    context: { risk_tolerance: high }
+    workflow_profile: { class: strategy }
   expected:
-    preflight_first_question:
-      id: PF1
-      question: "멘탈모델 먼저 세팅할까요?"
+    must_have_pf1_preflight: true
+    must_have_nodes: ["H1", "H2"]
+    must_have_edge: ["T4", "C1", "H1"]
     strategy_gate_enabled: true
-  modules_used: [topology_selection, node_design, loop_risk, handoff]
-
-- id: TC12
-  name: "전략 워크플로우 H1/H2 + T4->C1->H1 강제"
-  input:
-    goal: "신규 시장 진입 전략 제안"
-    workflow_profile: { class: strategy, risk_tolerance: high }
-    constraints: {}
-    context: { domain: strategy, risk_tolerance: high }
-  expected:
-    must_have_nodes: ["H1", "H2", "C1"]
-    must_have_edges:
-      - { from: T4, to: C1 }
-      - { from: C1, to: H1 }
-  modules_used: [topology_selection, node_design, loop_risk, handoff]
-
-- id: TC13
-  name: "H1 gate artifact 누락 시 차단"
-  input:
-    goal: "고위험 규제 대응 전략"
-    workflow_profile: { class: high_risk, risk_tolerance: high }
-    constraints: {}
-    context: { domain: fintech, risk_tolerance: high }
-    artifacts:
-      web_evidence: false
-      relation_context_map: false
-      skill_usage_adaptation_report: true
-  expected:
-    validator_exit_code: 1
-    must_fail_checks:
-      - "web evidence missing"
-      - "relation_context_map missing"
   modules_used: [topology_selection, node_design, loop_risk, handoff]

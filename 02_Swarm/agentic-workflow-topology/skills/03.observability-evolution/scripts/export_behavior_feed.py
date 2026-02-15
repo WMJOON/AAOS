@@ -1,6 +1,9 @@
 #!/usr/bin/env python3
 """
-Export AWT SQLite SoT logs into append-only Behavior Feed JSONL.
+Export AWT SQLite SoT logs into append-only Behavior Feed records (.md).
+
+Output uses the unified record_writer (Obsidian Bases format).
+Legacy JSONL mode is preserved when --out-path ends in .jsonl.
 """
 
 from __future__ import annotations
@@ -10,11 +13,17 @@ import datetime as dt
 import json
 import re
 import sqlite3
+import sys
 from pathlib import Path
 from typing import Any
 
 SCRIPT_DIR = Path(__file__).resolve().parent
 DEFAULT_AWT_ROOT = SCRIPT_DIR.parent.parent.parent.parent
+
+# record_writer lives at 02_Swarm/cortex-agora/scripts/record_writer.py
+SWARM_SCRIPTS = Path(__file__).resolve().parents[4] / "cortex-agora" / "scripts"  # 02_Swarm/cortex-agora/scripts/
+sys.path.insert(0, str(SWARM_SCRIPTS))
+import record_writer as rw  # noqa: E402
 
 
 def sanitize_namespace_token(value: str) -> str:
@@ -61,14 +70,39 @@ def resolve_agent_namespace(
     raise ValueError("cannot resolve agent namespace from --out-path or args")
 
 
-def resolve_out_path(raw_out_path: str, awt_root: Path, agent_family: str, agent_version: str) -> Path:
+def _is_jsonl_path(raw: str) -> bool:
+    """Return True if the user explicitly requested legacy JSONL output."""
+    return raw.strip().lower().endswith(".jsonl")
+
+
+def resolve_out_path(
+    raw_out_path: str,
+    awt_root: Path,
+    agent_family: str,
+    agent_version: str,
+) -> tuple[Path, bool]:
+    """Resolve the output destination.
+
+    Returns:
+        (path, is_jsonl) -- *path* is either a JSONL file (legacy) or
+        the records root directory (new .md mode).
+    """
     if raw_out_path.strip():
         out_path = Path(raw_out_path).expanduser().resolve()
-        parsed = parse_namespace_from_path(out_path)
-        if parsed is None:
-            raise ValueError("--out-path must include namespace segment 'agents/<agent-family>/<version>'")
-        return out_path
-    return awt_root / "agents" / agent_family / agent_version / "behavior" / "BEHAVIOR_FEED.jsonl"
+        if _is_jsonl_path(raw_out_path):
+            # Legacy JSONL mode
+            parsed = parse_namespace_from_path(out_path)
+            if parsed is None:
+                raise ValueError(
+                    "--out-path must include namespace segment "
+                    "'agents/<agent-family>/<version>'"
+                )
+            return out_path, True
+        # New directory mode -- treat as records root
+        return out_path, False
+
+    # Default: records root inside the AWT swarm
+    return awt_root / "records", False
 
 
 def parse_iso8601(value: str) -> dt.datetime:
@@ -102,7 +136,8 @@ def parse_row_timestamp(created_at: str | None, date_value: str | None) -> dt.da
     return parsed_date.replace(tzinfo=dt.timezone.utc)
 
 
-def load_existing_event_ids(path: Path) -> set[str]:
+def load_existing_event_ids_jsonl(path: Path) -> set[str]:
+    """Load event IDs from a legacy JSONL file."""
     if not path.exists():
         return set()
     ids: set[str] = set()
@@ -115,6 +150,19 @@ def load_existing_event_ids(path: Path) -> set[str]:
             event_id = str(row.get("event_id", ""))
             if event_id:
                 ids.add(event_id)
+    return ids
+
+
+def load_existing_event_ids_md(records_root: Path) -> set[str]:
+    """Load event IDs from .md records in records_root/behavior/."""
+    behavior_dir = records_root / "behavior"
+    if not behavior_dir.exists():
+        return set()
+    ids: set[str] = set()
+    for rec in rw.load_records_from_md(behavior_dir, record_type="behavior_event"):
+        event_id = str(rec.get("event_id", ""))
+        if event_id:
+            ids.add(event_id)
     return ids
 
 
@@ -150,10 +198,58 @@ def detect_human_intervention(notes: str, continuation_hint: str) -> bool:
     return any(token in note_probe for token in keywords)
 
 
+SWARM_ID = "agentic-workflow-topology"
+
+
+def _build_event(
+    row: sqlite3.Row,
+    agent_family: str,
+    agent_version: str,
+) -> dict[str, Any]:
+    """Build a behavior event dict from a SQLite row (unchanged logic)."""
+    audit_id = str(row["id"])
+    timestamp = parse_row_timestamp(row["created_at"], row["date"])
+
+    mode = str(row["mode"] or "")
+    action = str(row["action"] or "")
+    status = str(row["status"] or "")
+    notes = str(row["notes"] or "")
+    continuation_hint = str(row["continuation_hint"] or "")
+    transition_repeated = int(row["transition_repeated"] or 0)
+
+    group_id = f"{mode or 'default'}:{str(row['date'] or 'undated')}"
+    event = {
+        "event_id": f"awt:{audit_id}",
+        "ts": to_iso_z(timestamp),
+        "swarm_id": SWARM_ID,
+        "group_id": group_id,
+        "trace_id": group_id,  # backward compatibility
+        "actor": "agent:awt",
+        "kind": map_kind(mode, action, transition_repeated),
+        "context": {
+            "task_id": audit_id,
+            "session_id": f"awt-{str(row['date'] or 'session')}",
+            "task_name": str(row["task_name"] or ""),
+            "mode": mode,
+            "action": action,
+            "agent_namespace": {
+                "agent_family": agent_family,
+                "agent_version": agent_version,
+            },
+        },
+        "outcome": {
+            "status": map_outcome_status(status),
+            "human_intervention": detect_human_intervention(notes, continuation_hint),
+        },
+    }
+    return event
+
+
 def export_behavior_feed(
     *,
     db_path: Path,
     out_path: Path,
+    is_jsonl: bool,
     agent_family: str,
     agent_version: str,
     from_ts: str,
@@ -196,7 +292,12 @@ def export_behavior_feed(
     finally:
         conn.close()
 
-    existing_ids = load_existing_event_ids(out_path)
+    # Load existing IDs for deduplication
+    if is_jsonl:
+        existing_ids = load_existing_event_ids_jsonl(out_path)
+    else:
+        existing_ids = load_existing_event_ids_md(out_path)
+
     to_append: list[dict[str, Any]] = []
     skipped_duplicates = 0
     skipped_before_from_ts = 0
@@ -213,38 +314,7 @@ def export_behavior_feed(
             skipped_duplicates += 1
             continue
 
-        mode = str(row["mode"] or "")
-        action = str(row["action"] or "")
-        status = str(row["status"] or "")
-        notes = str(row["notes"] or "")
-        continuation_hint = str(row["continuation_hint"] or "")
-        transition_repeated = int(row["transition_repeated"] or 0)
-
-        group_id = f"{mode or 'default'}:{str(row['date'] or 'undated')}"
-        event = {
-            "event_id": event_id,
-            "ts": to_iso_z(timestamp),
-            "swarm_id": "agentic-workflow-topology",
-            "group_id": group_id,
-            "trace_id": group_id,  # backward compatibility
-            "actor": "agent:awt",
-            "kind": map_kind(mode, action, transition_repeated),
-            "context": {
-                "task_id": audit_id,
-                "session_id": f"awt-{str(row['date'] or 'session')}",
-                "task_name": str(row["task_name"] or ""),
-                "mode": mode,
-                "action": action,
-                "agent_namespace": {
-                    "agent_family": agent_family,
-                    "agent_version": agent_version,
-                },
-            },
-            "outcome": {
-                "status": map_outcome_status(status),
-                "human_intervention": detect_human_intervention(notes, continuation_hint),
-            },
-        }
+        event = _build_event(row, agent_family, agent_version)
         to_append.append(event)
 
     print(
@@ -255,24 +325,55 @@ def export_behavior_feed(
             skipped_before_from_ts,
         )
     )
-    print(f"out_path={out_path}")
+    print(f"out_path={out_path}  mode={'jsonl' if is_jsonl else 'md'}")
 
     if dry_run:
         print("[DRY-RUN] no file changes")
         return 0
 
-    out_path.parent.mkdir(parents=True, exist_ok=True)
-    with out_path.open("a", encoding="utf-8") as f:
-        for row in to_append:
-            f.write(json.dumps(row, ensure_ascii=False) + "\n")
-    print(f"appended_events={len(to_append)}")
+    if is_jsonl:
+        # Legacy JSONL append mode
+        out_path.parent.mkdir(parents=True, exist_ok=True)
+        with out_path.open("a", encoding="utf-8") as f:
+            for ev in to_append:
+                f.write(json.dumps(ev, ensure_ascii=False) + "\n")
+        print(f"appended_events={len(to_append)}")
+    else:
+        # New .md record mode via record_writer
+        written = 0
+        for ev in to_append:
+            flat = rw.flatten_nested(ev)
+            rw.write_record(
+                records_root=out_path,
+                record_type="behavior_event",
+                record=flat,
+                swarm_id=SWARM_ID,
+                dry_run=False,
+            )
+            written += 1
+        print(f"written_records={written}")
+
     return 0
 
 
 def build_parser() -> argparse.ArgumentParser:
-    parser = argparse.ArgumentParser(description="Export AWT SQLite logs to Behavior Feed JSONL")
+    parser = argparse.ArgumentParser(
+        description=(
+            "Export AWT SQLite logs to Behavior Feed records. "
+            "Default output is .md (Obsidian Bases). "
+            "Use --out-path *.jsonl for legacy JSONL mode."
+        ),
+    )
     parser.add_argument("--db-path", required=True)
-    parser.add_argument("--out-path", default="")
+    parser.add_argument(
+        "--out-path",
+        default="",
+        help=(
+            "Output destination. If a .jsonl file path, uses legacy append mode. "
+            "If a directory path, uses as records root for .md output. "
+            "Defaults to <awt-root>/records/."
+        ),
+    )
     parser.add_argument("--awt-root", default=str(DEFAULT_AWT_ROOT))
     parser.add_argument("--agent-family", default="")
     parser.add_argument("--agent-version", default="")
@@ -286,16 +387,29 @@ def main() -> int:
     args = build_parser().parse_args()
     try:
         awt_root = Path(args.awt_root).expanduser().resolve()
-        candidate_out_path = Path(args.out_path).expanduser().resolve() if args.out_path.strip() else None
-        family, version = resolve_agent_namespace(
-            out_path=candidate_out_path,
-            agent_family=args.agent_family,
-            agent_version=args.agent_version,
+        is_jsonl = _is_jsonl_path(args.out_path) if args.out_path.strip() else False
+
+        if is_jsonl:
+            # Legacy JSONL mode requires agent namespace resolution
+            candidate_out_path = Path(args.out_path).expanduser().resolve()
+            family, version = resolve_agent_namespace(
+                out_path=candidate_out_path,
+                agent_family=args.agent_family,
+                agent_version=args.agent_version,
+            )
+        else:
+            # .md mode -- agent namespace is still useful for the record context
+            # but we don't require it from the path
+            family = args.agent_family or "awt"
+            version = args.agent_version or "default"
+
+        out_path, out_is_jsonl = resolve_out_path(
+            args.out_path, awt_root, family, version,
         )
-        out_path = resolve_out_path(args.out_path, awt_root, family, version)
         return export_behavior_feed(
             db_path=Path(args.db_path).expanduser().resolve(),
             out_path=out_path,
+            is_jsonl=out_is_jsonl,
             agent_family=family,
             agent_version=version,
             from_ts=args.from_ts,

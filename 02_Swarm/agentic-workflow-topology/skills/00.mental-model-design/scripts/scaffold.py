@@ -11,8 +11,6 @@ Examples:
 """
 
 import argparse
-import os
-import sys
 from pathlib import Path
 from datetime import date
 
@@ -36,31 +34,67 @@ def scaffold(domain, output, modules, packs):
 
     # ── 디렉토리 구조 ──
     dirs = [
-        "00_meta",
-        "10_core",
-        "20_modules",
-        "20_modules/examples",
-        "30_references",
-        "30_references/packs",
-        "30_references/sources",
-        "30_references/sources/snapshots",
-        "40_orchestrator",
-        "90_tests",
-        "90_tests/golden_outputs",
-        "99_archive",
-        "99_archive/deprecated",
+        "00.meta",
+        "10.core",
+        "20.modules",
+        "20.modules/examples",
+        "30.references",
+        "30.references/packs",
+        "30.references/sources",
+        "30.references/sources/snapshots",
+        "40.orchestrator",
+        "90.tests",
+        "90.tests/golden_outputs",
+        "99.archive",
+        "99.archive/deprecated",
     ]
     for d in dirs:
         create_dir(base / d)
 
     print(f"\n📁 디렉토리 구조 생성 완료: {base}\n")
 
-    # ── 00_meta/manifest.yaml ──
+    # ── SKILL.md (초경량 로더 템플릿) ──
+    write_file(base / "SKILL.md", f"""\
+---
+name: {domain}-skill
+description: Minimal 4-Layer loader for {domain}. Detailed procedures live in layer files.
+---
+
+# {domain} skill loader
+
+## Purpose
+- 이 문서는 최소 로더다.
+- 상세 규칙/런북은 4-Layer 하위 문서를 참조한다.
+
+## Trigger
+- 이 도메인에 대한 판단/설계/검증 요청이 들어왔을 때
+
+## Non-Negotiable Invariants
+- `SKILL.md`는 120줄 이하를 유지한다.
+- 상세 절차는 `20.modules/`로 분리한다.
+- 참조팩 로딩은 `30.references/loading_policy.md`를 따른다.
+
+## Layer Index
+- `00.meta/manifest.yaml`
+- `10.core/core.md`
+- `20.modules/modules_index.md`
+- `30.references/loading_policy.md`
+- `40.orchestrator/orchestrator.md`
+
+## Quick Start
+- `20.modules/modules_index.md`에서 모듈을 선택한다.
+- `40.orchestrator/routing_rules.md`로 패턴 라우팅을 고정한다.
+
+## When Unsure
+- 가정/불확실성을 명시하고 필요한 입력을 요청한다.
+""")
+
+    # ── 00.meta/manifest.yaml ──
     modules_yaml = ""
     if modules:
         lines = []
         for m in modules:
-            lines.append(f'  - id: module.{m}\n    file: "20_modules/module.{m}.md"\n    unique_axis: "(고유 질문 축 작성)"')
+            lines.append(f'  - id: module.{m}\n    file: "20.modules/module.{m}.md"\n    unique_axis: "(고유 질문 축 작성)"')
         modules_yaml = "\n".join(lines)
     else:
         modules_yaml = "[]"
@@ -69,7 +103,7 @@ def scaffold(domain, output, modules, packs):
     if packs:
         lines = []
         for p in packs:
-            lines.append(f'  - id: pack.{p}\n    file: "30_references/packs/pack.{p}.md"\n    triggers: ["키워드"]')
+            lines.append(f'  - id: pack.{p}\n    file: "30.references/packs/pack.{p}.md"\n    triggers: ["키워드"]')
         packs_yaml = "\n".join(lines)
     else:
         packs_yaml = "[]"
@@ -77,7 +111,7 @@ def scaffold(domain, output, modules, packs):
     mod_block = f"modules:\n{modules_yaml}" if modules else "modules: []"
     pack_block = f"reference_packs:\n{packs_yaml}" if packs else "reference_packs: []"
 
-    write_file(base / "00_meta/manifest.yaml", f"""\
+    write_file(base / "00.meta/manifest.yaml", f"""\
 id: skillpack.{domain}.orchestrator
 version: 0.1.0
 owner: (작성자)
@@ -85,10 +119,10 @@ created_at: {today}
 status: scaffolding
 
 layers:
-  l0_core: "10_core/core.md"
-  l1_modules_dir: "20_modules/"
-  l2_references_dir: "30_references/"
-  l3_orchestrator: "40_orchestrator/orchestrator.md"
+  l0_core: "10.core/core.md"
+  l1_modules_dir: "20.modules/"
+  l2_references_dir: "30.references/"
+  l3_orchestrator: "40.orchestrator/orchestrator.md"
 
 io_contract:
   output_schema: "{{판단, 근거, 트레이드오프, 확신도}}"
@@ -104,18 +138,18 @@ token_budget:
 {pack_block}
 """)
 
-    # ── 00_meta/changelog.md ──
-    write_file(base / "00_meta/changelog.md", f"""\
+    # ── 00.meta/changelog.md ──
+    write_file(base / "00.meta/changelog.md", f"""\
 # Changelog
 
 ## v0.1.0 ({today})
 ### Added
-- 초기 스캐폴딩 생성 (01.mental-model-loader)
+- 초기 스캐폴딩 생성 (00.mental-model-design)
 - 도메인: {domain}
 """)
 
-    # ── 00_meta/token_budget.md ──
-    write_file(base / "00_meta/token_budget.md", """\
+    # ── 00.meta/token_budget.md ──
+    write_file(base / "00.meta/token_budget.md", """\
 # Token Budget
 
 ## 원칙
@@ -137,8 +171,8 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 ```
 """)
 
-    # ── 00_meta/glossary.md ──
-    write_file(base / "00_meta/glossary.md", """\
+    # ── 00.meta/glossary.md ──
+    write_file(base / "00.meta/glossary.md", """\
 # Glossary
 
 ## 도메인 공통 용어
@@ -179,8 +213,8 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 | α (직교성 계수) | 모듈 간 간섭도 (0.5~0.9) |
 """)
 
-    # ── 10_core/core.md ──
-    write_file(base / "10_core/core.md", """\
+    # ── 10.core/core.md ──
+    write_file(base / "10.core/core.md", """\
 <core>
   <purpose>
     모든 모듈에서 공유하는 공리, 어휘, 출력 형식, 운영 정책을 정의한다.
@@ -222,8 +256,8 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 </core>
 """)
 
-    # ── 20_modules/examples/module.example.md ──
-    write_file(base / "20_modules/examples/module.example.md", """\
+    # ── 20.modules/examples/module.example.md ──
+    write_file(base / "20.modules/examples/module.example.md", """\
 <module id="module.example">
   <!-- 이 파일은 모듈 작성 예시입니다. 실전에서는 module.<name>.md로 생성하세요. -->
 
@@ -251,7 +285,7 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 
     # ── 각 모듈 파일 생성 ──
     for m in (modules or []):
-        write_file(base / f"20_modules/module.{m}.md", f"""\
+        write_file(base / f"20.modules/module.{m}.md", f"""\
 <module id="module.{m}">
   <meta>
     name: {m}
@@ -287,7 +321,7 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
     if not mod_rows:
         mod_rows = "| (모듈 등록 필요) | | | | | |\n"
 
-    write_file(base / "20_modules/modules_index.md", f"""\
+    write_file(base / "20.modules/modules_index.md", f"""\
 # Modules Index
 
 > 등록된 모듈의 메타 정보. Orchestrator가 라우팅 시 참조한다.
@@ -309,8 +343,8 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 | Simulate | 2~3개 모듈 페르소나 | 병렬 시뮬레이션 |
 """)
 
-    # ── 40_orchestrator/orchestrator.md ──
-    write_file(base / "40_orchestrator/orchestrator.md", """\
+    # ── 40.orchestrator/orchestrator.md ──
+    write_file(base / "40.orchestrator/orchestrator.md", """\
 <orchestrator>
   <purpose_detection>
     사용자 입력에서 목적 신호를 감지하고 패턴을 판정한다.
@@ -344,8 +378,8 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 </orchestrator>
 """)
 
-    # ── 40_orchestrator/routing_rules.md ──
-    write_file(base / "40_orchestrator/routing_rules.md", """\
+    # ── 40.orchestrator/routing_rules.md ──
+    write_file(base / "40.orchestrator/routing_rules.md", """\
 # Routing Rules
 
 ## 패턴 우선순위 규칙
@@ -362,8 +396,8 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 - 종합 판단 섹션에서 조건부 결론을 제시한다.
 """)
 
-    # ── 30_references/loading_policy.md ──
-    write_file(base / "30_references/loading_policy.md", """\
+    # ── 30.references/loading_policy.md ──
+    write_file(base / "30.references/loading_policy.md", """\
 <loading_policy>
   <principle>
     Reference는 항상 로드하지 않는다.
@@ -395,7 +429,7 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 
     # ── 각 참조팩 파일 생성 ──
     for p in (packs or []):
-        write_file(base / f"30_references/packs/pack.{p}.md", f"""\
+        write_file(base / f"30.references/packs/pack.{p}.md", f"""\
 # Reference Pack: {p}
 
 > **로딩 조건**: ΔQ ≥ 2 이고, 관련 키워드 매칭 시
@@ -415,8 +449,8 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 - [ ] (검증 항목 3)
 """)
 
-    # ── 30_references/sources/sources.bib.md ──
-    write_file(base / "30_references/sources/sources.bib.md", f"""\
+    # ── 30.references/sources/sources.bib.md ──
+    write_file(base / "30.references/sources/sources.bib.md", f"""\
 # Sources Bibliography
 
 | ID | 유형 | 제목 | 출처 | 날짜 |
@@ -424,11 +458,11 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 | SPEC-001 | architecture | 4-Layer Orchestrator SPEC | (내부 문서) | {today} |
 """)
 
-    # ── 90_tests ──
+    # ── 90.tests ──
     tc_modules = modules[:2] if modules and len(modules) >= 2 else ["example_a", "example_b"]
     tc_pack = packs[0] if packs else "example"
 
-    write_file(base / "90_tests/test_cases.yaml", f"""\
+    write_file(base / "90.tests/test_cases.yaml", f"""\
 # Test Cases for {domain}
 # 최소 10개 이상의 케이스를 포함할 것.
 
@@ -495,7 +529,7 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
   must_include_fields: [판단, 근거, 트레이드오프, 확신도]
 """)
 
-    write_file(base / "90_tests/eval_rubric.md", """\
+    write_file(base / "90.tests/eval_rubric.md", """\
 # Evaluation Rubric
 
 ## 1. 패턴 감지 정확도 (목표: ≥ 90%)
@@ -510,7 +544,7 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 목표: ≥ 0.85
 """)
 
-    write_file(base / "90_tests/judge_prompt.md", """\
+    write_file(base / "90.tests/judge_prompt.md", """\
 # Judge Prompt (Self-Evaluation)
 
 아래 기준으로 출력 품질을 자체 평가한다.
@@ -525,9 +559,9 @@ Cᵢ = Ω + L₀ + Dᵢ·L₁ + mᵢ·L₂ + P + O
 """)
 
     # ── .gitkeep for empty dirs ──
-    write_file(base / "90_tests/golden_outputs/.gitkeep", "")
-    write_file(base / "30_references/sources/snapshots/.gitkeep", "")
-    write_file(base / "99_archive/deprecated/.gitkeep", "")
+    write_file(base / "90.tests/golden_outputs/.gitkeep", "")
+    write_file(base / "30.references/sources/snapshots/.gitkeep", "")
+    write_file(base / "99.archive/deprecated/.gitkeep", "")
 
     print(f"\n🎉 스킬팩 스캐폴딩 완료: {base}")
     print(f"   도메인: {domain}")

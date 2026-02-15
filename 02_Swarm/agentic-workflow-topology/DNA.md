@@ -1,6 +1,6 @@
 ---
 name: "AAOS-Agentic-Workflow-Topology"
-version: "0.2.0"
+version: "0.2.1"
 scope: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology"
 owner: "AAOS Swarm"
 created: "2026-02-14"
@@ -33,12 +33,17 @@ observability:
   behavior_feed_export:
     enabled: true
     mode: "manual_summary_export"
+    format: "md_with_frontmatter"
+    format_version: "v2"
     trigger_policy:
       on_new_review_batch: "manual_run"
       daily_manual_batch: true
-    script: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-observability-and-evolution/scripts/export_behavior_feed.py"
-    path: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/agents/<agent-family>/<version>/behavior/BEHAVIOR_FEED.jsonl"
-    format: "jsonl"
+    script: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/03.observability-evolution/scripts/export_behavior_feed.py"
+    path: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/records/behavior/"
+    legacy_path: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/agents/<agent-family>/<version>/behavior/BEHAVIOR_FEED.jsonl"
+    legacy_frozen: true
+    record_writer: "04_Agentic_AI_OS/02_Swarm/cortex-agora/scripts/record_writer.py"
+    bases_view: "02_Swarm/cortex-agora/dashboard/agentic-workflow-topology-records.base"
     append_only: true
     canonical_group_field: "group_id"
     backward_compatibility_field: "trace_id"
@@ -58,8 +63,42 @@ strategy_gate:
     cowi_artifacts:
       - relation_context_map
       - skill_usage_adaptation_report
-  validator_script: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/02.workflow-topology-scaffolder/scripts/validate_strategy_h1_gate.py"
+  validator_script: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/01.topology-design/scripts/validate_strategy_h1_gate.py"
   enforcement: "block_h1_finalization_if_missing"
+
+proposal_operations:
+  enabled: true
+  proposal_root: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/proposals"
+  proposal_template: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/proposals/_TEMPLATE.md"
+  owner_swarm: "agentic-workflow-topology"
+  required_frontmatter:
+    - proposal_id
+    - parent_proposal_id
+    - proposal_status
+    - hitl_required
+    - hitl_stage
+    - checked
+    - user_action_required
+    - visibility_tier
+    - owner_swarm
+    - linked_reports
+    - linked_artifacts
+  status_enum:
+    - draft
+    - review_pending
+    - approval_required
+    - in_progress
+    - done
+    - closed
+  visibility_enum:
+    - must_show
+    - optional
+    - internal
+  artifact_metadata_policy:
+    workflow_generation_outputs:
+      - proposal_id
+      - visibility_tier
+    scaffold_script: "04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/01.topology-design/50.cone-analyzer/scripts/scaffold_workflow.py"
 
 natural_dissolution:
   purpose: "워크플로우 토폴로지 설계 표준을 제공하고 COF/실행 계층과 경계를 유지"
@@ -95,10 +134,18 @@ inquisitor:
 - 실행 로그 SoT는 SQLite로 유지하고, behavior feed는 필요 시 요약 export만 허용한다.
 - 전략/고위험 워크플로우에는 PF1/H1/H2/H1 gate를 강제한다.
 
+## Proposal Operations Contract
+
+- AWT는 workflow 생성/관리 산출물을 proposal 단위로 추적한다.
+- proposal 문서는 `proposals/` 경로에서 운영하며, frontmatter는 `proposal_operations.required_frontmatter`를 따른다.
+- workflow 스캐폴드 산출물은 `proposal_id`, `visibility_tier` 메타를 포함해야 한다.
+- 사용자 기본 노출 대상은 `visibility_tier=must_show` 항목으로 제한한다.
+- proposal 산출 포맷은 표준 Markdown 기반이며 Obsidian 전용 포맷을 요구하지 않는다.
+
 ## Behavior Feed Export Runbook
 
 ```bash
-python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-observability-and-evolution/scripts/export_behavior_feed.py \
+python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/03.observability-evolution/scripts/export_behavior_feed.py \
   --db-path 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/00.context/agent_log.db \
   --agent-family claude \
   --agent-version 4.0
@@ -114,11 +161,11 @@ python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-o
 
 ## Seed Skills
 
-- `00.workflow-skill-manager`
-- `01.mental-model-loader`
-- `02.workflow-topology-scaffolder`
-- `03.workflow-mental-model-execution-designer`
-- `04.workflow-observability-and-evolution`
+- `04.skill-governance`
+- `00.mental-model-design`
+- `01.topology-design`
+- `02.execution-design`
+- `03.observability-evolution`
 
 ## Version Note
 
@@ -126,3 +173,4 @@ python3 04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.workflow-o
 - v0.1.3 : Behavior Feed 수동 export 활성화(`enabled: true`) 및 group_id canonical 필드 명시
 - v0.1.4 : Behavior Feed 기본 출력 경로를 `agents/<agent-family>/<version>/behavior/` 네임스페이스로 전환
 - v0.2.0 : 전략/고위험 PF1/H1/H2 강제 및 web evidence + COWI artifact 기반 H1 finalization gate 도입
+- v0.2.1 : Production proposal 운영 계약(frontmatter/status/visibility) 및 workflow 산출물 proposal 메타 부착 정책 추가

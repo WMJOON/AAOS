@@ -1,0 +1,59 @@
+formulas:
+  report_kind: if(!report_type.isEmpty(), report_type, if(file.name.contains("baseline"), "baseline", if(file.name.contains("governance-check"), "governance_check", if(file.name.contains("closure-summary"), "closure_summary", "other"))))
+  proposal_hint: if(!proposal_id.isEmpty(), proposal_id, if(file.name.contains("p-swarm-v014-batch"), "P-SWARM-V014-BATCH", "unknown"))
+views:
+  - type: table
+    name: All Reports
+    filters:
+      and:
+        - file.folder.contains("change_archive/reports")
+        - "!linked_proposal.isEmpty()"
+        - status_snapshot != "closed"
+    order:
+      - file.name
+      - status_snapshot
+      - decision_snapshot
+      - report_type
+      - linked_proposal
+    sort:
+      - property: linked_proposal
+        direction: DESC
+      - property: formula.report_kind
+        direction: ASC
+      - property: file.name
+        direction: DESC
+    group_by: formula.report_kind
+    columnSize:
+      file.name: 192
+      formula.proposal_hint: 166
+      formula.report_kind: 235
+  - type: table
+    name: Governance Checks
+    filters:
+      and:
+        - file.folder.contains("change_archive/reports")
+        - report_type == "governance_check"
+        - "!linked_proposal.isEmpty()"
+    order:
+      - file.name
+      - linked_proposal
+      - proposal_id
+      - formula.proposal_hint
+    sort:
+      - property: file.name
+        direction: DESC
+  - type: table
+    name: Closure Summaries
+    filters:
+      and:
+        - file.folder.contains("change_archive/reports")
+        - report_type == "closure_summary"
+        - "!linked_proposal.isEmpty()"
+    order:
+      - file.name
+      - linked_proposal
+      - proposal_id
+      - formula.proposal_hint
+    sort:
+      - property: file.name
+        direction: DESC

@@ -7,24 +7,14 @@ Skill 문서는 "무엇을 할 수 있는가(capability)"를 선언하는 문서
 
 ---
 
-## 2. Document Identity (Pointer Model)
+## 2. Document Identity
 
 Skill 문서는 COF 포인터 모델의 "Context Pointer"로 해석한다.
 
-1. Skill 문서는 YAML Frontmatter에 최소한 다음 필드를 포함해야 한다.
-
-   ```yaml
-   ---
-   context_id: cof-xxxx
-   role: SKILL
-   state: const | mutable | active | frozen | archived
-   scope: immune | agora | nucleus | swarm
-   lifetime: ticket | persistent | archived
-   ---
-   ```
-
-2. `context_id`는 전역 유일이며 변경 불가로 해석해야 한다.
-3. 파일 경로/파일명 변경은 `context_id`의 동일성을 변경하지 않는 것으로 해석해야 한다.
+1. Skill의 식별 메타데이터(`context_id`, `role`, `state` 등)는 `SKILL.meta.yaml` 사이드카 파일에 저장한다.
+2. `SKILL.md` 본문의 YAML Frontmatter는 런타임 인터페이스 필드(`name`, `description`, `trigger` 등)만 포함한다.
+3. `context_id`는 전역 유일이며 변경 불가로 해석해야 한다.
+4. 파일 경로/파일명 변경은 `context_id`의 동일성을 변경하지 않는 것으로 해석해야 한다.
 
 ---
 
@@ -73,8 +63,8 @@ Glob 해석의 상세 규범은 아래 문서를 우선한다.
 
 ```
 Skill Doc Validation:
-- [ ] YAML Frontmatter에 context_id/role/state/scope/lifetime가 있다
-- [ ] role이 SKILL이다
+- [ ] SKILL.meta.yaml에 context_id/role/state 등 식별 메타가 있다
+- [ ] SKILL.md Frontmatter에는 런타임 필드(name/description/trigger)만 있다
 - [ ] capability(allowed/forbidden/consumers)가 명시되어 있다
 - [ ] 정책 강제/위반 처리 로직을 포함하지 않는다
 - [ ] Glob은 Read Scope로만 해석되며 루트 무제한 패턴을 기본값으로 사용하지 않는다

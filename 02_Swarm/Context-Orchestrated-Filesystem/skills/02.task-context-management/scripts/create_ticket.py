@@ -21,6 +21,10 @@ type: task-ticket
 status: todo # todo, in-progress, done, blocked
 priority: {priority} # P0 (Urgent), P1 (High), P2 (Normal), P3 (Low)
 dependencies: {dependencies} # List of dependent ticket file stems (no .md)
+proposal_id: "{proposal_id}"
+user_action_required: {user_action_required}
+visibility_tier: "{visibility_tier}"
+owner_swarm: "context-orchestrated-filesystem"
 created: "{created}"
 tags: []
 ---
@@ -122,6 +126,9 @@ def create_ticket(
     priority: str = "P2",
     agent_family: str = "",
     agent_version: str = "",
+    proposal_id: str = "UNASSIGNED",
+    user_action_required: bool = False,
+    visibility_tier: str = "internal",
 ) -> bool:
     target_path = Path(target_dir).resolve()
     node_root = resolve_node_root(target_path)
@@ -189,6 +196,9 @@ def create_ticket(
         title=title,
         priority=priority,
         dependencies=deps_str,
+        proposal_id=proposal_id,
+        user_action_required=str(user_action_required).lower(),
+        visibility_tier=visibility_tier,
         created=datetime.now().strftime("%Y-%m-%d")
     )
 
@@ -208,6 +218,18 @@ def main():
     parser.add_argument("--priority", default="P2", choices=["P0", "P1", "P2", "P3"], help="Priority level")
     parser.add_argument("--agent-family", default="", help="Agent family namespace key")
     parser.add_argument("--agent-version", default="", help="Agent version namespace key")
+    parser.add_argument("--proposal-id", default="UNASSIGNED", help="proposal identifier for generated ticket")
+    parser.add_argument(
+        "--visibility-tier",
+        default="internal",
+        choices=["must_show", "optional", "internal"],
+        help="visibility metadata for generated ticket",
+    )
+    parser.add_argument(
+        "--user-action-required",
+        action="store_true",
+        help="mark ticket as requiring explicit user action",
+    )
 
     args = parser.parse_args()
 
@@ -218,6 +240,9 @@ def main():
         priority=args.priority,
         agent_family=args.agent_family,
         agent_version=args.agent_version,
+        proposal_id=args.proposal_id,
+        user_action_required=args.user_action_required,
+        visibility_tier=args.visibility_tier,
     )
 
     if not success:

@@ -16,6 +16,8 @@ COF는 단순한 파일 규칙이 아니라, **"AI Agent가 물리적 공간(Fil
 - COF는 로컬 티켓 운영/실행 맥락 관리를 담당하는 운영 계층이다.
 - 관찰/패턴 개선 제안은 `cortex-agora`(관찰)와 `context-orchestrated-workflow-intelligence`(중재) 경유를 따른다.
 - `record_archive`는 봉인 대상 SoT이며, COF의 직접 관찰 입력 경로가 아니다.
+- Immune reference는 의도적으로 `01_Nucleus/immune_system/rules/cof-environment-set.md`를 사용한다.
+  (COF 운영 규칙을 직접 적용하기 위한 분기이며, generic `rules/README.md` 대체가 아니다.)
 
 ---
 
@@ -73,8 +75,10 @@ lifetime: ticket | persistent | archived
 `SKILL.md`는 표준 스킬 frontmatter(`name`, `description`, `allowed-tools`)만 사용하며,
 COF 식별 메타는 같은 디렉토리의 `SKILL.meta.yaml`에 저장한다.
 우선순위는 `SKILL.md`(실행 인터페이스) → `SKILL.meta.yaml`(COF 식별 SoT)로 분리한다.
+또한 active skill은 `SKILL.md`를 **초경량 로더(<=120 lines)** 로 유지하고,
+상세 규칙은 `00.meta/10.core/20.modules/30.references/40.orchestrator` 문서로 분리한다.
 
-> 상세: [skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md](skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md) § 0. COF Pointer Model Baseline
+> 상세: [skills/00.pointerical-tooling/references/cof-environment-set.md](skills/00.pointerical-tooling/references/cof-environment-set.md) § 0. COF Pointer Model Baseline
 
 ---
 
@@ -84,27 +88,27 @@ COF 식별 메타는 같은 디렉토리의 `SKILL.meta.yaml`에 저장한다.
 context-orchestrated-filesystem/
 ├── README.md                    ← 현재 문서
 ├── core-docs/COF_DOCTRINE.md              ← 4 Pillars 철학
-├── skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md   ← Skill-based Governance Guide
+├── skills/00.pointerical-tooling/references/cof-environment-set.md   ← Skill-based Governance Guide
 ├── DNA.md                       ← DNA 정의
 ├── DNA.md                       ← Lifecycle/Resource Limits
 │
 └── skills/                      ← Skill Genome
-    ├── 00.cof-pointerical-tool-creator/   ← 기초 레이어
+    ├── 00.pointerical-tooling/   ← 기초 레이어
     │   ├── SPEC.md              ← 설계 스펙
     │   ├── SKILL.md             ← Quick Reference
     │   ├── references/          ← Normative 해석 문서
     │   └── templates/           ← 문서 타입별 템플릿
     │
-    ├── 01.cof-glob-indexing/              ← 인덱싱 스킬
+    ├── 01.glob-indexing/              ← 인덱싱 스킬
     │   ├── SPEC.md
     │   ├── SKILL.md
     │   └── scripts/
     │
-    ├── 02.cof-task-manager-node/          ← 작업 관리 스킬
+    ├── 02.task-context-management/          ← 작업 관리 스킬
     │   ├── SKILL.md
     │   └── templates/
     │
-    └── 03.cof-task-solver-agent-group/    ← 티켓 해결(에이전트 디스패치)
+    └── 03.ticket-solving/    ← 티켓 해결(에이전트 디스패치)
         ├── SPEC.md
         ├── SKILL.md
         └── scripts/
@@ -118,11 +122,11 @@ context-orchestrated-filesystem/
 
 | # | Skill | Purpose | Depends On |
 |---|-------|---------|------------|
-| 00 | `cof-pointerical-tool-creator` | 포인터 안전한 SKILL/RULE/WORKFLOW/SUB-AGENT 문서 생성 | - |
+| 00 | `cof-pointerical-tooling` | 포인터 안전한 SKILL/RULE/WORKFLOW/SUB-AGENT 문서 생성 | - |
 | 01 | `cof-glob-indexing` | 가장 가까운 `[n].index/` 탐색 및 인덱싱 산출물 생성 | 00 (references) |
-| 02 | `cof-task-manager-node` | 작업 맥락 생성, 티켓 발행, 아카이브 | 00, 01 |
-| 03 | `solving-tickets` | 티켓 → 에이전트 그룹 디스패치 및 결과 통합 | 01, 02 |
-| 04 | `cof-swarm-skill-manager` | Swarm별 Skill 레지스트리 생성/검증, 과다 Skill 경고 | 00 |
+| 02 | `cof-task-context-management` | 작업 맥락 생성, 티켓 발행, 아카이브 | 00, 01 |
+| 03 | `cof-ticket-solving` | 티켓 → 에이전트 그룹 디스패치 및 결과 통합 | 01, 02 |
+| 04 | `cof-skill-governance` | Swarm별 Skill 레지스트리 생성/검증, 과다 Skill 경고 | 00 |
 
 ### Skill Usage Mandate
 
@@ -130,9 +134,9 @@ context-orchestrated-filesystem/
 
 | Intent | Target Node | Required Skill |
 |--------|-------------|----------------|
-| 작업 맥락 생성/초기화 | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-manager-node` |
-| 작업 티켓 발행 | `tickets/` | `cof-task-manager-node` |
-| 완료 작업 정리 | `archive/` | `cof-task-manager-node` |
+| 작업 맥락 생성/초기화 | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-context-management` |
+| 작업 티켓 발행 | `tickets/` | `cof-task-context-management` |
+| 완료 작업 정리 | `archive/` | `cof-task-context-management` |
 
 > **Warning**: `mkdir`나 `touch`로 위 구조를 직접 생성하는 것은 **금지**된다.
 
@@ -143,16 +147,16 @@ context-orchestrated-filesystem/
 ### 1. 작업 맥락 생성
 
 ```bash
-# cof-task-manager-node 스킬 사용
-python3 skills/02.cof-task-manager-node/scripts/create_node.py \
+# cof-task-context-management 스킬 사용
+python3 skills/02.cof-task-context-management/scripts/create_node.py \
   --path "/target/directory"
 ```
 
 ### 2. 새 Skill/Rule/Workflow 문서 생성
 
 ```bash
-# cof-pointerical-tool-creator 스킬 사용
-python3 skills/00.cof-pointerical-tool-creator/scripts/create_pointerical_doc.py \
+# cof-pointerical-tooling 스킬 사용
+python3 skills/00.pointerical-tooling/scripts/create_pointerical_doc.py \
   --type skill \
   --title "My New Skill" \
   --out "/path/to/SKILL.md" \
@@ -163,15 +167,15 @@ python3 skills/00.cof-pointerical-tool-creator/scripts/create_pointerical_doc.py
 
 ```bash
 # cof-glob-indexing 스킬 사용
-python3 skills/01.cof-glob-indexing/scripts/cof_glob_indexing.py \
+python3 skills/01.glob-indexing/scripts/cof_glob_indexing.py \
   --target "/path/to/node"
 ```
 
 ### 4. Swarm Skill Registry 갱신
 
 ```bash
-# cof-swarm-skill-manager 스킬 사용
-python3 skills/04.cof-swarm-skill-manager/scripts/sync_swarms_skill_manager.py \
+# cof-skill-governance 스킬 사용
+python3 skills/04.cof-skill-governance/scripts/sync_swarms_skill_manager.py \
   --swarm-root "/path/to/04_Agentic_AI_OS/02_Swarm" \
   --max-skills 12
 ```
@@ -195,7 +199,7 @@ python3 skills/04.cof-swarm-skill-manager/scripts/sync_swarms_skill_manager.py \
 | Document | Role | Description |
 |----------|------|-------------|
 | [core-docs/COF_DOCTRINE.md](core-docs/COF_DOCTRINE.md) | Doctrine Genome | 4 Pillars 철학 |
-| [skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md](skills/00.cof-pointerical-tool-creator/references/cof-environment-set.md) | Skill Governance | 실행 지침 (Pointer Model, Skill Mandate) |
+| [skills/00.pointerical-tooling/references/cof-environment-set.md](skills/00.pointerical-tooling/references/cof-environment-set.md) | Skill Governance | 실행 지침 (Pointer Model, Skill Mandate) |
 | [DNA.md](DNA.md) | DNA Definition | Genome Pointers 정의 |
 | [DNA.md](DNA.md) | Lifecycle Genome | Natural Dissolution, Resource Limits |
 

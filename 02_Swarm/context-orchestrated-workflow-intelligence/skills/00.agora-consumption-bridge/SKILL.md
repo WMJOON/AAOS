@@ -3,74 +3,37 @@ name: cowi-agora-consumption-bridge
 description: Pulls cortex-agora change_archive decisions by agora_ref and materializes relation_context_map plus skill_usage_adaptation_report artifacts for COWI manual mediation, including strategy/high-risk H1 gate support.
 ---
 
-# COWI Agora Consumption Bridge
-
-`00.agora-consumption-bridge`는 `cortex-agora/change_archive`를 pull해서
-`relation_context_map`와 `skill_usage_adaptation_report` 초안을 생성한다.
+# cowi-agora-consumption-bridge
 
 ## Purpose
+- Agora 개선 결정을 pull해 COWI 산출물로 물질화한다.
+- 로더는 최소화하고 소비/산출/H1-guard 절차는 모듈 문서에서 실행한다.
 
-- `cortex-agora output first` 원칙을 COWI 운영 루틴으로 고정
-- `source_snapshot.agora_ref` 기준으로 feedback/decision 이벤트를 소비
-- 수동 실행 기반 일일 배치(runbook) 제공
-- 전략/고위험 워크플로우의 `T4 -> C1 -> H1` 구간에서 consumption step(`C1`)을 강제
+## Trigger
+- `IMPROVEMENT_DECISIONS` 신규 이벤트를 반영할 때
+- `relation_context_map`/`skill_usage_adaptation_report`를 생성해야 할 때
+- strategy/high_risk H1 finalization 증빙이 필요할 때
 
-## Inputs
+## Non-Negotiable Invariants
+- source-of-truth 키는 `source_snapshot.agora_ref`.
+- 자동 집행/자동 차단은 수행하지 않는다.
+- COWI 산출물 누락 시 H1 finalization 허용 금지.
+- cursor 상태(`registry/AGORA_PULL_STATE.json`)를 일관 유지.
 
-- `02_Swarm/cortex-agora/change_archive/events/CHANGE_EVENTS.jsonl`
-- `02_Swarm/cortex-agora/change_archive/events/PEER_FEEDBACK.jsonl`
-- `02_Swarm/cortex-agora/change_archive/events/IMPROVEMENT_DECISIONS.jsonl`
-- conversation source: `remembering-conversations` (optional, via `episodic-memory search`)
+## Layer Index
+| Layer | File | Role |
+|---|---|---|
+| 00.meta | `00.meta/manifest.yaml` | 소비 계약 메타 |
+| 10.core | `10.core/core.md` | 공통 소비 규칙 |
+| 20.modules | `20.modules/modules_index.md` | pull/materialize/h1-guard 모듈 |
+| 30.references | `30.references/loading_policy.md` | 참조 로딩 규칙 |
+| 40.orchestrator | `40.orchestrator/orchestrator.md` | 소비 라우팅 |
 
-## Outputs
-
-- `agents/<agent-family>/<version>/artifacts/relation_context_map/*.yaml`
-- `agents/<agent-family>/<version>/artifacts/skill_usage_adaptation_report/*.md`
-- `agents/<agent-family>/<version>/conversation_snapshots/*.md`
-
-## Script
-
+## Quick Start
 ```bash
-python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py \
-  --proposal-id P-SWARM-V014-BATCH \
-  --agent-family claude \
-  --agent-version 4.0 \
-  --conversation-source remembering-conversations \
-  --conversation-session-id chat-2026-02-14 \
-  --remembering-query "COWI COF AWT integration decisions"
+python3 02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py \
+  --proposal-id P-SWARM-V014-BATCH --agent-family claude --agent-version 4.0
 ```
 
-### Dry-run
-
-```bash
-python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py \
-  --proposal-id P-SWARM-V014-BATCH \
-  --agent-family claude \
-  --agent-version 4.0 \
-  --conversation-session-id chat-2026-02-14 \
-  --dry-run
-```
-
-## Trigger Policy
-
-1. `IMPROVEMENT_DECISIONS` 신규 이벤트가 발생하면 즉시 수동 실행
-2. 이벤트가 없더라도 일일 1회 수동 배치 실행
-
-## H1 Finalization Guard
-
-전략/고위험 워크플로우에서는 아래 산출물이 없으면 H1 finalization을 금지한다.
-
-- `relation_context_map`
-- `skill_usage_adaptation_report`
-
-권장 검증 절차:
-
-1. COWI pull bridge 실행
-2. AWT H1 gate validator 실행
-3. PASS일 때만 H1 승인 진행
-
-## Guardrail
-
-- COWI는 event pull/변환/보고서 생성까지만 수행한다.
-- COF/AWT 실행 집행은 수행하지 않는다.
-- 자동 스케줄러(cron)는 도입하지 않고 runbook 실행만 허용한다.
+## When Unsure
+- 이벤트 해석 불확실성은 낮은 확신도로 보고서에 표기하고 수동 검토로 넘긴다.

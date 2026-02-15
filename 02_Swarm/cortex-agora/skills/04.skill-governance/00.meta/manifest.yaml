@@ -1,0 +1,137 @@
+id: cortex-agora-skill-governance
+version: "1.0.0"
+domain: cortex-agora-governance
+layout_version: 4layer-v1
+
+description: >
+  cortex-agora의 instruction-nucleus 스킬, change_archive 인프라,
+  behavior feed의 메타데이터, 아카이브 무결성, 소비 계약을
+  정책+체크리스트 기반으로 점검한다.
+
+architecture: 4-layer-minimal-loader
+design_principle: >
+  SKILL.md는 120줄 이하 로더. 점검 규칙은 레이어 모듈 문서에서 실행.
+  Core + Orchestrator 항상 로딩, 모듈/참조는 온디맨드.
+
+loader_policy:
+  skill_md_max_lines: 120
+  mode: minimal_loader
+
+required_layers:
+  - 00.meta
+  - 10.core
+  - 20.modules
+  - 30.references
+  - 40.orchestrator
+  - 90.tests
+
+# --- 거버넌스 대상 ---
+
+governed_skills:
+  - id: cortex-agora-instruction-nucleus
+    dir: "cortex-agora-instruction-nucleus"
+    output_artifact: "structured_proposal"
+    note: "legacy flat structure (SKILL.md + SKILL.meta.yaml only, not yet 4-Layer)"
+
+governed_infrastructure:
+  - id: change-archive
+    type: append-only-event-store
+    paths:
+      events: "change_archive/events/CHANGE_EVENTS.jsonl"
+      feedback: "change_archive/events/PEER_FEEDBACK.jsonl"
+      decisions: "change_archive/events/IMPROVEMENT_DECISIONS.jsonl"
+      index: "change_archive/indexes/CHANGE_INDEX.md"
+      bridge: "scripts/change_archive_bridge.py"
+      templates:
+        - "change_archive/templates/CHANGE_EVENT.template.yaml"
+        - "change_archive/templates/PEER_FEEDBACK.template.yaml"
+        - "change_archive/templates/IMPROVEMENT_DECISION.template.yaml"
+  - id: behavior-feed
+    type: observable-data
+    path: "behavior/BEHAVIOR_FEED.jsonl"
+    schema_version: "v1"
+    canonical_grouping_key: "group_id"
+
+# --- 계약 결합 ---
+
+contract_coupling_map:
+  - id: CC-01
+    from_component: "instruction-nucleus"
+    from_key: "proposal.id"
+    to_component: "change_archive"
+    to_key: "CHANGE_EVENTS.proposal_id"
+    risk: HIGH
+    failure_mode: "proposals not tracked in archive"
+  - id: CC-02
+    from_component: "change_archive"
+    from_key: "PEER_FEEDBACK.linked_event_id"
+    to_component: "change_archive"
+    to_key: "CHANGE_EVENTS.event_id"
+    risk: HIGH
+    failure_mode: "feedback orphaned from events"
+  - id: CC-03
+    from_component: "change_archive"
+    from_key: "IMPROVEMENT_DECISIONS.feedback_refs[]"
+    to_component: "change_archive"
+    to_key: "PEER_FEEDBACK.feedback_id"
+    risk: MEDIUM
+    failure_mode: "decisions not traceable to feedback"
+  - id: CC-04
+    from_component: "behavior_feed"
+    from_key: "BEHAVIOR_FEED event schema"
+    to_component: "instruction-nucleus"
+    to_key: "observation trigger input"
+    risk: MEDIUM
+    failure_mode: "feed schema mismatch blocks observation"
+  - id: CC-05
+    from_component: "change_archive"
+    from_key: "IMPROVEMENT_DECISIONS.decision + status"
+    to_component: "COWI (external)"
+    to_key: "pull_agora_feedback.py consumption"
+    risk: HIGH
+    failure_mode: "downstream receives stale/missing decisions"
+
+# --- 모듈 ---
+
+modules:
+  - id: metadata-validation
+    question_axis: "cortex-agora 스킬의 메타데이터/사이드카 구조가 정책을 준수하는가?"
+  - id: archive-integrity
+    question_axis: "change_archive 3개 이벤트 로그의 스키마/일관성/불변조건이 충족되는가?"
+  - id: consumption-contract
+    question_axis: "behavior feed + COWI 소비 인터페이스 계약이 정합적인가?"
+
+# --- 리소스 ---
+
+token_budget:
+  loader: "<=120 lines"
+  core: ~800
+  orchestrator: ~800
+  core_orchestrator_combined: ~1600
+  module_max: 1200
+  reference_max: 2000
+
+related_skills:
+  - id: awt-skill-governance
+    role: "4-Layer 거버넌스 패턴 원본. cross-swarm 참조."
+  - id: cof-skill-governance
+    role: "Registry sync script 제공."
+  - id: cortex-agora-instruction-nucleus
+    role: "거버넌스 대상. 제안 생산자."
+  - id: cowi-agora-consumption-bridge
+    role: "CC-05 하류 소비자. pull interface endpoint."
+
+# --- DNA 금지사항 계승 ---
+
+hard_prohibitions_echo:
+  source: "cortex-agora DNA.md"
+  rules:
+    - "no external execution (tools/APIs/OS binding)"
+    - "no auto-reflection (rule/skill/permission changes)"
+    - "no rule modification"
+    - "no agent calling (fan-out, sub-agent orchestration)"
+    - "no direct record_archive querying"
+
+validation:
+  phase_a: warn
+  phase_b: error

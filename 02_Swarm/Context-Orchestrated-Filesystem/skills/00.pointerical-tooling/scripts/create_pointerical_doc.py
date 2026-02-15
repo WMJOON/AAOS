@@ -68,24 +68,30 @@ def template_skill(title, frontmatter):
 
 # {title}
 
-## 0. Purpose
-- 목적과 범위를 간결히 서술한다.
+## Purpose
+- 이 문서는 최소 로더다.
+- 상세 실행 규칙은 4-Layer 하위 문서를 참조한다.
 
-## 1. Capability Declaration
-- allowed_contexts:
-- forbidden_contexts:
-- consumers: immune | agora | agent
+## Trigger
+- 이 스킬이 필요한 작업 요청이 들어왔을 때
 
-## 2. Inputs / Outputs
-- inputs:
-- outputs:
+## Non-Negotiable Invariants
+- `SKILL.md`는 120줄 이하를 유지한다.
+- 상세 절차는 `20.modules/`에 문서화한다.
+- 스킬 식별 메타는 `SKILL.meta.yaml`을 SoT로 사용한다.
 
-## 3. Constraints
-- 금지된 포인터 접근 명시
-- 실행 코드 포함 금지
+## Layer Index
+- `00.meta/manifest.yaml`
+- `10.core/core.md`
+- `20.modules/modules_index.md`
+- `30.references/loading_policy.md`
+- `40.orchestrator/orchestrator.md`
 
-## 4. References
-- 관련 Rule/Workflow 링크
+## Quick Start
+- 필요한 모듈을 `20.modules/modules_index.md`에서 선택한다.
+
+## When Unsure
+- 경계가 모호하면 보수적으로 범위를 축소하고 확인 질문을 남긴다.
 """
 
 
@@ -188,6 +194,57 @@ def main():
         skill_description = args.description or "Use when this skill is needed."
         skill_frontmatter = build_skill_frontmatter(skill_name, skill_description)
         content = template_skill(args.title, skill_frontmatter)
+
+        layer_dirs = [
+            "00.meta",
+            "10.core",
+            "20.modules",
+            "30.references",
+            "40.orchestrator",
+            "90.tests",
+        ]
+        for layer in layer_dirs:
+            (out_path.parent / layer).mkdir(parents=True, exist_ok=True)
+
+        (out_path.parent / "00.meta/manifest.yaml").write_text(
+            f"id: {skill_name}\n"
+            "layout_version: 4layer-v1\n"
+            "loader_policy:\n"
+            "  skill_md_max_lines: 120\n"
+            "  mode: minimal_loader\n"
+            "validation:\n"
+            "  phase_a: warn\n"
+            "  phase_b: error\n",
+            encoding="utf-8",
+        )
+        (out_path.parent / "10.core/core.md").write_text(
+            "# Core\n\n- 공통 계약/출력 규칙을 정의한다.\n",
+            encoding="utf-8",
+        )
+        (out_path.parent / "20.modules/modules_index.md").write_text(
+            "# Modules Index\n\n| Module | File |\n|---|---|\n| module.todo | 20.modules/module.todo.md |\n",
+            encoding="utf-8",
+        )
+        (out_path.parent / "30.references/loading_policy.md").write_text(
+            "# Loading Policy\n\n- References는 필요 시 온디맨드 로딩한다.\n",
+            encoding="utf-8",
+        )
+        (out_path.parent / "40.orchestrator/orchestrator.md").write_text(
+            "# Orchestrator\n\n- 의도 감지, 모듈 라우팅, 출력 조립을 담당한다.\n",
+            encoding="utf-8",
+        )
+        (out_path.parent / "40.orchestrator/routing_rules.md").write_text(
+            "# Routing Rules\n\n- Evaluate/Critique/Simulate/Translate/Prioritize/Arbitrate 패턴을 사용한다.\n",
+            encoding="utf-8",
+        )
+        (out_path.parent / "90.tests/test_cases.yaml").write_text(
+            "- id: LOADER01\n  expected:\n    skill_md_max_lines_120: true\n",
+            encoding="utf-8",
+        )
+        (out_path.parent / "90.tests/eval_rubric.md").write_text(
+            "# Eval Rubric\n\n- 구조 정합성\n- 로더 최소성\n",
+            encoding="utf-8",
+        )
 
         meta_content = build_skill_meta(
             context_id=args.context_id,

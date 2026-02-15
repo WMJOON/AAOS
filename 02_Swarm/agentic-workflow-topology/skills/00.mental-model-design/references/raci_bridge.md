@@ -2,7 +2,7 @@
 
 ## 개요
 
-`01.mental-model-loader`로 생성된 4-Layer 스킬팩은 `raci-workflow-planner` 스킬과 자연스럽게 연동된다.
+`00.mental-model-design`로 생성된 4-Layer 스킬팩은 `raci-workflow-planner` 스킬과 자연스럽게 연동된다.
 이 문서는 두 스킬 사이의 인터페이스를 정의한다.
 
 ## RACI ↔ 4-Layer 매핑

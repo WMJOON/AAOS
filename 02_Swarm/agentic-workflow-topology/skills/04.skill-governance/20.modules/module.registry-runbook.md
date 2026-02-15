@@ -2,7 +2,7 @@
 
 ## Purpose
 
-AWT 로컬 레지스트리(`registry/SKILL_REGISTRY.md`)와 Swarm 레지스트리(`02_Swarm/registry/SWARM_SKILL_REGISTRY.md`)가
+AWT 로컬 레지스트리(`registry/SKILL_REGISTRY.md`)와 Swarm 레지스트리(`02_Swarm/cortex-agora/registry/SWARM_SKILL_REGISTRY.md`)가
 실제 디렉토리 상태와 일치하는지 점검하고, 불일치 시 재생성 절차를 안내한다.
 
 ## Scope
@@ -15,8 +15,8 @@ AWT 로컬 레지스트리(`registry/SKILL_REGISTRY.md`)와 Swarm 레지스트�
 ## Inputs
 
 - `02_Swarm/agentic-workflow-topology/registry/SKILL_REGISTRY.md`
-- `02_Swarm/registry/SWARM_SKILL_REGISTRY.md`
-- `02_Swarm/registry/GLOBAL_SKILL_REGISTRY.json`
+- `02_Swarm/cortex-agora/registry/SWARM_SKILL_REGISTRY.md`
+- `02_Swarm/cortex-agora/registry/GLOBAL_SKILL_REGISTRY.json`
 - 실제 `skills/` 디렉토리 구조
 
 ---

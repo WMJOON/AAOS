@@ -75,8 +75,24 @@ class SkillRecord:
     has_scripts: bool
     has_templates: bool
     has_references: bool
+    layout_version: str
     metadata_source: str
     consumers: List[str] = field(default_factory=list)
+
+
+def read_plain_yaml(yaml_path: Path) -> Dict[str, Any]:
+    if not yaml_path.exists():
+        return {}
+    try:
+        raw = yaml_path.read_text(encoding="utf-8").strip()
+    except OSError:
+        return {}
+    wrapped = f"---\n{raw}\n---\n"
+    try:
+        fm, _ = split_frontmatter_and_body(wrapped)
+    except FrontmatterParseError:
+        return {}
+    return fm if isinstance(fm, dict) else {}
 
 
 def discover_skills(swarm_root: Path) -> List[SkillRecord]:
@@ -117,6 +133,8 @@ def discover_skills(swarm_root: Path) -> List[SkillRecord]:
             trigger = safe_str(meta.get("trigger"), safe_str(fm.get("trigger"), ""))
             role = safe_str(meta.get("role"), safe_str(fm.get("role"), ""))
             created = safe_str(meta.get("created"), safe_str(fm.get("created"), ""))
+            manifest = read_plain_yaml(sub / "00.meta/manifest.yaml")
+            layout_version = safe_str(manifest.get("layout_version"), "-")
             skills.append(
                 SkillRecord(
                     directory=sub,
@@ -129,6 +147,7 @@ def discover_skills(swarm_root: Path) -> List[SkillRecord]:
                     has_scripts=(sub / "scripts").is_dir(),
                     has_templates=(sub / "templates").is_dir(),
                     has_references=(sub / "references").is_dir(),
+                    layout_version=layout_version,
                     metadata_source=metadata_source,
                 )
             )
@@ -195,8 +214,8 @@ def render_skill_table(records: List[SkillRecord]) -> str:
         return "- 등록된 스킬이 없습니다.\n"
 
     lines = [
-        "| Skill Folder | Name | Source | Context ID | Description | Trigger | Role | Scripts | Templates | References | Consumers |",
-        "|---|---|---|---|---|---|---|---|---|---|"
+        "| Skill Folder | Name | Source | Context ID | Layout | Description | Trigger | Role | Scripts | Templates | References | Consumers |",
+        "|---|---|---|---|---|---|---|---|---|---|---|---|"
     ]
     for record in records:
         source = record.context_id or record.name
@@ -204,11 +223,12 @@ def render_skill_table(records: List[SkillRecord]) -> str:
             "| "
             f"{record.directory.name} | "
             f"{record.name or '-'} | "
-            f"{source} | "
-            f"{record.context_id or '-'} | "
-            f"{record.description[:80] if record.description else '-'} | "
-            f"{record.trigger or '-'} | "
-            f"{record.role or '-'} | "
+                f"{source} | "
+                f"{record.context_id or '-'} | "
+                f"{record.layout_version or '-'} | "
+                f"{record.description[:80] if record.description else '-'} | "
+                f"{record.trigger or '-'} | "
+                f"{record.role or '-'} | "
             f"{'Y' if record.has_scripts else 'N'} | "
             f"{'Y' if record.has_templates else 'N'} | "
             f"{'Y' if record.has_references else 'N'} | "
@@ -304,6 +324,7 @@ def build_swarm_report(
                 "has_scripts": record.has_scripts,
                 "has_templates": record.has_templates,
                 "has_references": record.has_references,
+                "layout_version": record.layout_version,
                 "consumers": record.consumers,
             }
         )
@@ -364,14 +385,20 @@ def render_root_registry(
         "# Swarm Skill Registry Index\n",
         f"- Generated at: `{now}`\n",
         f"- Scanned swarms: `{len(summaries)}`\n\n",
-        "| Swarm | Skill Count | Overloaded | Warnings | Errors |\n",
-        "|---|---:|---:|---:|---:|\n",
+        "| Swarm | Skill Count | 4Layer v1 | Overloaded | Warnings | Errors |\n",
+        "|---|---:|---:|---:|---:|---:|\n",
     ]
     for summary in summaries:
+        layout_count = sum(
+            1
+            for skill in summary.get("skills", [])
+            if safe_str(skill.get("layout_version")) == "4layer-v1"
+        )
         lines.append(
             "| "
             f"{summary['name']} | "
             f"{summary['skill_count']} | "
+            f"{layout_count}/{summary['skill_count']} | "
             f"{'Y' if summary['overloaded'] else 'N'} | "
             f"{len(summary['warnings'])} | "
             f"{len(summary['errors'])} |\n"
@@ -462,6 +489,17 @@ def parse_args() -> argparse.Namespace:
         default=False,
         help="Hard-fail when SKILL.md uses forbidden keys (recommended).",
     )
+    parser.add_argument(
+        "--four-layer-phase",
+        choices=["phase_a", "phase_b"],
+        default="phase_a",
+        help="phase_a: warning only, phase_b: enforce as error.",
+    )
+    parser.add_argument(
+        "--include-swarms",
+        default="",
+        help="Comma-separated swarm directory names to include (default: all discovered).",
+    )
     return parser.parse_args()
 
 
@@ -475,25 +513,41 @@ def main() -> int:
         print(f"ERROR: swarm-root not found -> {swarm_root}")
         return 1
 
-    strict_enabled = args.strict_skill_frontmatter or (not args.allow_legacy_frontmatter)
-    fm_errors, fm_warnings = validate_skill_contracts(
-        swarm_root,
-        strict=strict_enabled,
-        allow_legacy_frontmatter=args.allow_legacy_frontmatter,
-    )
-    if fm_warnings:
-        print("FRONTMATTER WARNINGS:")
-        for warning in fm_warnings:
-            print(f"- {warning}")
-    if fm_errors:
-        print("FRONTMATTER ERRORS:")
-        for error in fm_errors:
-            print(f"- {error}")
-        return 1
-
     swarms = discover_swarms(swarm_root)
+    include_swarms = {
+        item.strip()
+        for item in args.include_swarms.split(",")
+        if item.strip()
+    }
+    if include_swarms:
+        swarms = [swarm for swarm in swarms if swarm.name in include_swarms]
+
     if not swarms:
         print(f"WARNING: no swarms found under {swarm_root}")
+        return 0
+
+    strict_enabled = args.strict_skill_frontmatter or (not args.allow_legacy_frontmatter)
+    fm_warnings_all: List[str] = []
+    fm_errors_all: List[str] = []
+    for swarm in swarms:
+        fm_errors, fm_warnings = validate_skill_contracts(
+            swarm,
+            strict=strict_enabled,
+            allow_legacy_frontmatter=args.allow_legacy_frontmatter,
+            four_layer_phase=args.four_layer_phase,
+        )
+        fm_warnings_all.extend([f"{swarm.name}: {warning}" for warning in fm_warnings])
+        fm_errors_all.extend([f"{swarm.name}: {error}" for error in fm_errors])
+
+    if fm_warnings_all:
+        print("FRONTMATTER WARNINGS:")
+        for warning in fm_warnings_all:
+            print(f"- {warning}")
+    if fm_errors_all:
+        print("FRONTMATTER ERRORS:")
+        for error in fm_errors_all:
+            print(f"- {error}")
+        return 1
 
     summaries: List[Dict[str, Any]] = []
     total_warnings: List[str] = []

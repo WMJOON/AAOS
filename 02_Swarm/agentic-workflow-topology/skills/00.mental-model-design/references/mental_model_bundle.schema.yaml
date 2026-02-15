@@ -18,41 +18,56 @@ properties:
     type: object
     required: [id, version, generated_at]
     properties:
-      id: { type: string }
-      version: { type: string }
-      generated_at: { type: string }
+      id:
+        type: string
+      version:
+        type: string
+      generated_at:
+        type: string
+        format: date-time
+        description: "ISO-8601 date-time 권장 (예: 2026-02-15T12:00:00Z)."
   core_axioms:
     type: array
-    items: { type: string }
+    items:
+      type: string
   local_charts:
     type: array
     items:
       type: object
       required: [id, purpose, selection_rule]
       properties:
-        id: { type: string }
-        purpose: { type: string }
-        selection_rule: { type: string }
+        id:
+          type: string
+        purpose:
+          type: string
+        selection_rule:
+          type: string
   module_index:
     type: array
     items:
       type: object
       required: [module_id, question_axis]
       properties:
-        module_id: { type: string }
-        question_axis: { type: string }
+        module_id:
+          type: string
+        question_axis:
+          type: string
   node_chart_map:
     type: array
+    description: "각 node_id는 설계상 유일해야 한다(중복 금지 지침)."
     items:
       type: object
       required: [node_id, chart_ids, checkpoint_id]
       properties:
-        node_id: { type: string }
+        node_id:
+          type: string
         chart_ids:
           type: array
           minItems: 1
-          items: { type: string }
-        checkpoint_id: { type: string }
+          items:
+            type: string
+        checkpoint_id:
+          type: string
   execution_checkpoints:
     type: array
     minItems: 1
@@ -60,17 +75,230 @@ properties:
       type: object
       required: [checkpoint_id, stage, required_inputs, required_artifacts]
       properties:
-        checkpoint_id: { type: string }
+        checkpoint_id:
+          type: string
         stage:
           type: string
           enum: [preflight, pre_h1, pre_h2]
         required_inputs:
           type: array
-          items: { type: string }
+          items:
+            type: string
         required_artifacts:
           type: array
-          items: { type: string }
+          items:
+            type: string
   loading_policy:
     type: object
+    description: "deltaQ 기반 최소 로딩 정책. 예: <2 no-pack, >=2 one-pack, >=4 cross-check."
   output_contract:
     type: object
+
+  # Optional extensions (backward-compatible)
+  quality_gate:
+    type: object
+    properties:
+      checkpoint_consistency:
+        type: string
+      mapping_completeness:
+        type: string
+      loading_minimality:
+        type: string
+  chart_selection_trace:
+    type: array
+    items:
+      type: object
+      properties:
+        node_id:
+          type: string
+        selected:
+          type: array
+          items:
+            type: string
+        rejected:
+          type: array
+          items:
+            type: string
+        reason:
+          type: string
+  risk_register:
+    type: array
+    items:
+      type: object
+      properties:
+        risk:
+          type: string
+        severity:
+          type: string
+          enum: [low, medium, high]
+        mitigation:
+          type: string
+  compat:
+    type: object
+    properties:
+      consumers:
+        type: array
+        items:
+          type: string
+      notes:
+        type: string
+
+  # Optional architecture extensions (Four-Layer; backward-compatible)
+  layer_contract:
+    type: object
+    description: "L3/L0/L1/L2 역할, 로딩 조건, 예산 메타. required 9키에는 영향 없음."
+    properties:
+      orchestrator:
+        type: object
+        properties:
+          load:
+            type: string
+            enum: [always]
+          role:
+            type: string
+          budget_tokens:
+            type: number
+            minimum: 0
+      core:
+        type: object
+        properties:
+          load:
+            type: string
+            enum: [always]
+          role:
+            type: string
+          budget_tokens:
+            type: number
+            minimum: 0
+      modules:
+        type: object
+        properties:
+          load:
+            type: string
+            enum: [selective]
+          role:
+            type: string
+          budget_tokens_per_module:
+            type: number
+            minimum: 0
+      references:
+        type: object
+        properties:
+          load:
+            type: string
+            enum: [on_demand]
+          role:
+            type: string
+          budget_tokens_per_ref:
+            type: number
+            minimum: 0
+
+  routing_policy:
+    type: object
+    description: "Orchestrator 패턴 라우팅 규칙."
+    properties:
+      patterns:
+        type: array
+        minItems: 1
+        uniqueItems: true
+        items:
+          type: string
+          enum: [Evaluate, Critique, Simulate, Translate, Prioritize, Arbitrate]
+      default_pattern:
+        type: string
+        enum: [Evaluate, Critique, Simulate, Translate, Prioritize, Arbitrate]
+      pattern_confidence:
+        type: number
+        minimum: 0
+        maximum: 1
+      combination_rules:
+        type: array
+        items:
+          type: object
+          properties:
+            pattern:
+              type: string
+              enum: [Evaluate, Critique, Simulate, Translate, Prioritize, Arbitrate]
+            module_combo:
+              type: array
+              items:
+                type: string
+            execution_mode:
+              type: string
+
+  cost_model:
+    type: object
+    description: "변수(Omega/L0/L1/L2/D_i/m_i/P/O/r/delta)와 비용식(C_i/T_total/K*) 메타."
+    properties:
+      variables:
+        type: array
+        items:
+          type: string
+      formulas:
+        type: object
+        properties:
+          step_cost:
+            type: string
+          total_cost:
+            type: string
+          optimal_window:
+            type: string
+
+  utility_model:
+    type: object
+    description: "효용 모델 U = alpha * Q1 * Q2 / T 관련 값."
+    properties:
+      alpha:
+        type: number
+        minimum: 0
+        maximum: 1
+      q1:
+        type: number
+        minimum: 0
+        maximum: 1
+      q2:
+        type: number
+        minimum: 0
+        maximum: 1
+      token_cost:
+        type: number
+        minimum: 0
+      utility_score:
+        type: number
+        minimum: 0
+
+  kpi_targets:
+    type: object
+    description: "운영 KPI 목표값."
+    properties:
+      token_reduction_rate:
+        type: number
+        minimum: 0
+        maximum: 1
+      alpha_min:
+        type: number
+        minimum: 0
+        maximum: 1
+      routing_accuracy_min:
+        type: number
+        minimum: 0
+        maximum: 1
+      utility_gain_min:
+        type: number
+        minimum: 0
+
+  reference_loading_rule:
+    type: object
+    description: "deltaQ 임계값과 L2 로딩 부등식 규칙."
+    properties:
+      delta_q_thresholds:
+        type: object
+        properties:
+          no_pack_lt:
+            type: number
+          one_pack_gte:
+            type: number
+          cross_check_gte:
+            type: number
+      l2_loading_inequality:
+        type: string

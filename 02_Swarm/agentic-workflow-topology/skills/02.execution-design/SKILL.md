@@ -1,40 +1,48 @@
 ---
-name: workflow-mental-model-execution-designer
-description: Design how each workflow task node should apply mental models/charts at execution time. Produces `workflow_mental_model_execution_plan` from topology and mental model bundle.
+name: awt-execution-design
+description: Design how each workflow task node should apply mental models/charts at execution time. Produces `workflow_mental_model_execution_plan` with `bundle_ref` and `node_chart_map` from topology and mental model bundle.
 ---
 
-# Workflow Mental Model Execution Designer
+# awt-execution-design
 
-`02.workflow-topology-scaffolder` 산출물의 각 노드에 `01.mental-model-loader`의 멘탈모델/차트를 어떻게 적용할지 설계한다.
+## Purpose
+- `workflow_topology_spec` + `mental_model_bundle` → `workflow_mental_model_execution_plan` 매핑.
+- `SKILL.md`는 로더이며 상세 규칙은 모듈 문서로 위임한다.
 
-## Inputs
+## Trigger
+- 노드별 chart 적용 방식이 필요할 때
+- θ_GT 기반 mode/model 배정이 필요할 때
+- handoff 계약과 fallback 정책을 실행 단계로 연결해야 할 때
 
-- `workflow_topology_spec`
-- `mental_model_bundle`
+## Non-Negotiable Invariants
+- 입력은 `workflow_topology_spec` + `mental_model_bundle`만 허용.
+- 출력은 7개 required 키를 모두 포함: `bundle_ref`, `node_chart_map`, `task_to_chart_map`, `node_mode_policy`, `model_selection_policy`, `handoff_contract`, `fallback_rules`.
+- checkpoint(`preflight`, `pre_h1`, `pre_h2`)와 node_chart_map 정합성 유지.
+- chart_ids 빈 배열 금지, bundle에 없는 chart_id 참조 금지.
+- optional 확장 필드가 없어도 기본 소비 계약은 깨지지 않아야 함.
 
-## Output: `workflow_mental_model_execution_plan`
+## Module → Output Key Mapping
+| Module | Output Keys |
+|---|---|
+| `module.node-mapping` | `bundle_ref`, `node_chart_map`, `task_to_chart_map` |
+| `module.mode-policy` | `node_mode_policy`, `model_selection_policy` |
+| `module.fallback-handoff` | `handoff_contract`, `fallback_rules` |
 
-필수 키:
-- `bundle_ref`
-- `node_chart_map`
-- `task_to_chart_map`
-- `node_mode_policy`
-- `model_selection_policy`
-- `handoff_contract`
-- `fallback_rules`
+## Layer Index
+| Layer | File | Role |
+|---|---|---|
+| 00.meta | `00.meta/manifest.yaml` | 계획 계약 메타 |
+| 10.core | `10.core/core.md` | 공통 매핑 원칙 · 용어 · 스키마 키 소유권 |
+| 20.modules | `20.modules/modules_index.md` | node-mapping · mode-policy · fallback-handoff |
+| 30.references | `30.references/loading_policy.md` | reference 로딩 규칙 |
+| 40.orchestrator | `40.orchestrator/orchestrator.md` | 실행 조합 라우팅 |
 
-스키마: `references/workflow_mental_model_execution_plan.schema.json`
+## Quick Start
+- 입력 스키마: `references/workflow_mental_model_execution_plan.schema.json`
+- chart 할당: `20.modules/module.node-mapping.md`
+- θ_GT → mode: `20.modules/module.mode-policy.md` (참조: `reference/workflow-cone-analyzer/CONE_PROFILES.md`)
 
-## Method
-
-1. 노드별 판단 목적과 필요한 chart를 매핑한다.
-2. `bundle_ref`를 execution plan 루트에 고정하여 추적 가능하게 만든다.
-3. `node_chart_map`를 checkpoint(`preflight`, `pre_h1`, `pre_h2`) 기준으로 연결한다.
-4. node mode(`converge`, `diverge`, `validate`)를 실행 정책으로 연결한다.
-5. handoff 시 필요한 최소 구조를 정의한다.
-6. 과설명/과압축 리스크를 fallback 규칙으로 명시한다.
-
-## Scope Boundary
-
-- 실행 런너/자동 디스패치 구현은 포함하지 않는다.
-- 설계 계약과 실행 방법론 문서화에 집중한다.
+## When Unsure
+- 모드 충돌은 `module.mode-policy.md` Override 규칙 우선.
+- handoff 불확실성은 `module.fallback-handoff.md` 기준으로 보수 처리.
+- θ_GT 추정 불확실 시 `reference/workflow-cone-analyzer/CONE_PROFILES.md` 로딩.

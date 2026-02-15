@@ -1,0 +1,38 @@
+formulas:
+  swarm_name: if(file.folder.contains("cortex-agora"), "cortex-agora", if(file.folder.contains("context-orchestrated-filesystem"), "COF", if(file.folder.contains("agentic-workflow-topology"), "AWT", "unknown")))
+views:
+  - type: table
+    name: Behavior Feed (All Swarms)
+    filters:
+      and:
+        - file.hasTag("aaos/record/behavior-event")
+    order:
+      - file.name
+      - formula.swarm_name
+      - scope
+      - outcome_status
+      - outcome_human_intervention
+      - kind
+      - actor
+      - ts
+    sort:
+      - property: ts
+        direction: DESC
+    group_by: formula.swarm_name
+    columnSize:
+      file.name: 107
+  - type: table
+    name: By Kind
+    filters:
+      and:
+        - file.hasTag("aaos/record/behavior-event")
+    order:
+      - ts
+      - formula.swarm_name
+      - kind
+      - actor
+      - outcome_status
+    sort:
+      - property: ts
+        direction: DESC
+    group_by: kind

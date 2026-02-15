@@ -1,0 +1,8 @@
+context_id: cortex-agora-skill-governance
+role: SKILL
+state: const
+scope: swarm
+lifetime: persistent
+version: "1.0.0"
+created: "2026-02-15"
+updated: "2026-02-15"

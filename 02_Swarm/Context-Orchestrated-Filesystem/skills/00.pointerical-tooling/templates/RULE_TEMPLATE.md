@@ -1,11 +1,8 @@
 ---
-context_id: cof-xxxx
-role: RULE
-state: const
-scope: immune
-lifetime: persistent
-created: "YYYY-MM-DD"
+name: "[rule-name]"
+description: "[3rd person description. Use when...]"
 ---
+<!-- COF 식별 메타는 사이드카 파일 또는 상위 manifest에 저장 -->
 
 # [Rule Title]
 

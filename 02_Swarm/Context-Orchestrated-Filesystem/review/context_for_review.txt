@@ -109,7 +109,7 @@ META Doctrine(DNA.md) 및 **COF Doctrine**에 의거하여 작성되었다.
 
 - **Source**: `skills/`
 - **Active Skills**:
-  - `cof-task-manager-node`: Task Manager, Ticket 생성/관리, **Auto-Archiving** 지원 (v0.1.3 updated)
+  - `cof-task-context-management`: Task Manager, Ticket 생성/관리, **Auto-Archiving** 지원 (v0.1.3 updated)
 
 ## 3. Lifecycle Genome (생명주기 유전체)
 
@@ -137,9 +137,9 @@ COF 독트린의 "Skill-Mediated Creation Only" 원칙에 따라, 다음 작업�
 
 | 목적 (Intent) | 대상 Node | 필수 Skill | 비고 |
 |---|---|---|---|
-| **작업 맥락 생성/초기화** | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-manager-node` | `create_node.py` 실행 |
-| **작업 티켓 발행** | `tickets/` | `cof-task-manager-node` | `create_ticket.py` 실행 |
-| **완료 작업 정리** | `archive/` | `cof-task-manager-node` | `archive_tasks.py` 실행 |
+| **작업 맥락 생성/초기화** | `NN.agents-task-context/` (legacy: `task-manager/`) | `cof-task-context-management` | `create_node.py` 실행 |
+| **작업 티켓 발행** | `tickets/` | `cof-task-context-management` | `create_ticket.py` 실행 |
+| **완료 작업 정리** | `archive/` | `cof-task-context-management` | `archive_tasks.py` 실행 |
 
 > **Warning**: `mkdir`나 `touch` 명령어로 위 구조를 직접 생성하는 것은 **금지**된다.
 
@@ -157,13 +157,13 @@ COF 독트린의 "Skill-Mediated Creation Only" 원칙에 따라, 다음 작업�
 모든 에이전트는 작업 시작 전 다음 순서를 따른다:
 
 1. **Check**: 현재 디렉토리에 `NN.agents-task-context/`가 있는가?
-2. **If Missing**: `cof-task-manager-node` 스킬을 사용하여 노드를 생성한다. (사용자 승인 필요)
+2. **If Missing**: `cof-task-context-management` 스킬을 사용하여 노드를 생성한다. (사용자 승인 필요)
 3. **If Present**: `tickets/`에서 할당된 티켓을 확인하거나, 새로운 티켓을 발행한다.
 
 ---
 **Reference**:
 - Doctrine: `core-docs/COF_DOCTRINE.md`
-- Skill Manual: `skills/cof-task-manager-node/SKILL.md`
+- Skill Manual: `skills/cof-task-context-management/SKILL.md`
 #!/usr/bin/env python3
 """
 Archive completed tasks.

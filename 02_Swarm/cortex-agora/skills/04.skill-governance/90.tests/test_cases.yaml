@@ -1,0 +1,148 @@
+# Test Cases for cortex-agora-skill-governance
+
+# --- 구조 검증 ---
+
+- id: LAYER01
+  name: "거버넌스 스킬 자체 4-Layer 구조 존재"
+  expected:
+    required_layers_present: true
+
+- id: LOADER01
+  name: "SKILL.md 최소 로더 규격"
+  expected:
+    skill_md_max_lines_120: true
+
+- id: ROUTE01
+  name: "라우팅 규칙 적용"
+  expected:
+    routing_policy_applied: true
+
+# --- Metadata Validation 테스트 ---
+
+- id: MV01
+  name: "instruction-nucleus frontmatter 점검"
+  input:
+    target: "cortex-agora-instruction-nucleus"
+    check_type: "metadata-validation"
+  expected:
+    all_fm_checks_pass: true
+    no_fail_items: true
+
+- id: MV02
+  name: "context_id 누락 감지 (v0.1.4 피드백 반영)"
+  input:
+    simulated_condition: "SKILL.md frontmatter에 context_id 없음"
+  expected:
+    check_id: "FM-06"
+    severity: warn
+    note: "COF Hard Constraint #1 echo"
+
+- id: MV03
+  name: "sidecar 파일 부재 감지"
+  input:
+    simulated_condition: "SKILL.meta.yaml 삭제됨"
+  expected:
+    check_id: "SC-01"
+    severity: fail
+
+# --- Archive Integrity 테스트 ---
+
+- id: AI01
+  name: "CHANGE_EVENTS.jsonl 스키마 준수"
+  input:
+    check_type: "archive-integrity"
+    target: "CHANGE_EVENTS.jsonl"
+  expected:
+    all_ae_checks_pass: true
+
+- id: AI02
+  name: "PEER_FEEDBACK -> CHANGE_EVENTS 참조 무결성 (CC-02)"
+  input:
+    coupling_point: "CC-02"
+  expected:
+    af04_pass: true
+    note: "linked_event_id -> event_id 역참조"
+
+- id: AI03
+  name: "IMPROVEMENT_DECISIONS -> PEER_FEEDBACK 참조 (CC-03)"
+  input:
+    coupling_point: "CC-03"
+  expected:
+    ad04_pass: true
+
+- id: AI04
+  name: "append-only 불변조건 위반 감지"
+  input:
+    check_type: "archive-integrity"
+    simulated_condition: "JSONL line 삭제 후 line_count < previous"
+  expected:
+    check_id: "AM-01"
+    severity: fail
+
+- id: AI05
+  name: "bridge script 5개 명령 coverage"
+  input:
+    check_type: "archive-integrity"
+  expected:
+    ab01_through_ab05_pass: true
+
+- id: AI06
+  name: "CHANGE_INDEX 피드백 카운트 불일치 감지"
+  input:
+    simulated_condition: "CHANGE_INDEX feedback_count != actual PEER_FEEDBACK count"
+  expected:
+    check_id: "AI-03"
+    severity: warn
+
+# --- Consumption Contract 테스트 ---
+
+- id: CC01
+  name: "BEHAVIOR_FEED 스키마 준수"
+  input:
+    check_type: "consumption-contract"
+  expected:
+    all_bf_checks_pass: true
+
+- id: CC02
+  name: "group_id vs trace_id 정렬 (v0.1.4)"
+  input:
+    check_type: "consumption-contract"
+  expected:
+    bf03_group_id_present: true
+    bf04_trace_id_optional: true
+
+- id: CC03
+  name: "COWI pull interface 계약 (CC-05)"
+  input:
+    coupling_point: "CC-05"
+  expected:
+    cp01_script_exists: true
+    cp06_agora_ref_consumable: true
+
+- id: CC04
+  name: "cross-swarm recording readiness"
+  input:
+    check_type: "consumption-contract"
+  expected:
+    xr01_primary_consumer: "context-orchestrated-workflow-intelligence"
+    xr03_bootstrap_present: true
+
+# --- 통합 테스트 ---
+
+- id: INT01
+  name: "전체 파이프라인 (Phase 1->2->3)"
+  input:
+    check_type: "full-pipeline"
+  expected:
+    phase_1_completed: true
+    phase_2_completed: true
+    phase_3_completed: true
+    governance_check_report_generated: true
+
+- id: INT02
+  name: "CC-01 end-to-end: proposal.id -> CHANGE_EVENTS.proposal_id"
+  input:
+    check_type: "full-pipeline"
+    coupling_point: "CC-01"
+  expected:
+    proposal_ids_tracked: true

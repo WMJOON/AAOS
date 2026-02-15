@@ -1,28 +1,26 @@
 # Token Budget
 
-## v2.0 아키텍처: SKILL.md 중심 실행
+## v2.2 아키텍처: SKILL.md 최소 로더 + 레이어 온디맨드
 
 | Layer | 대상 | Soft Limit | 로딩 조건 |
-|-------|------|-----------|----------|
-| **SKILL.md** | 5-Phase 전체 runbook | **~3,500** | **항상 (단독 실행 가능)** |
-| module | module.*.md 1개 | 1,200 | 상세 분석 필요 시에만 |
-| reference | pack.*.md 1개 | 2,000 | ΔQ ≥ 2 |
+|---|---|---:|---|
+| SKILL.md | 초경량 로더 | <= 120 lines | 항상 |
+| 10.core | 핵심 정의, 입력 인터페이스, when_unsure | ~1,500 tok | 항상 |
+| 40.orchestrator | 5-Phase 프로세스, 라우팅, strategy gate | ~1,300 tok | 항상 |
+| 20.modules | 상세 모듈 1개 | ~1,200 tok | 필요 시 |
+| 30.references | 참조 1개 | ~2,000 tok | 필요 시 |
 
 ## 예상 시나리오별 토큰 사용
 
 | 시나리오 | 로딩 구성 | 예상 토큰 | 추가 view 호출 |
-|----------|----------|----------|---------------|
-| 단순 linear 설계 | **SKILL.md만** | ~3,500 | **0회** |
-| 표준 parallel/composite | **SKILL.md만** | ~3,500 | **0회** |
-| 동점 Topology 비교 | SKILL.md + topology_selection | ~4,700 | 1회 |
-| 복합 + 스키마 강화 | SKILL.md + node_design + loop_risk | ~5,900 | 2회 |
-| 풀 분석 + estimator | SKILL.md + handoff + output_contract + estimator | ~9,500 | 3회 |
+|---|---|---:|---:|
+| 단순 linear 설계 | loader + core + orchestrator | ~2,800 | 0~1 |
+| 표준 parallel/composite | 위 + modules 1~2개 | ~4,000~5,200 | 1~2 |
+| 동점 Topology 비교 | 위 + topology_selection | ~4,000 | 1 |
+| 복합 + 루프 강화 | 위 + node/loop 모듈 | ~5,200 | 2 |
+| 풀 분석 + estimator | 위 + handoff + estimator 참조 | ~8,800 | 3+
 
-## v1.0 대비 개선
-
-| 지표 | v1.0 | v2.0 |
-|------|------|------|
-| 최소 view 호출 | 2~3회 (core + orch + module) | **0회** (SKILL.md 1회 읽기로 충분) |
-| 단순 설계 토큰 | ~2,700 (core+orch+topo) | ~3,500 (SKILL.md, 약간 증가) |
-| 단순 설계 총 비용 | tool call 3회 + 2,700 tok | **tool call 0회 + 3,500 tok** |
-| 복합 설계 토큰 | ~5,100 | ~5,900 (비슷하지만 tool call 감소) |
+## 운영 원칙
+- `SKILL.md`는 단독 runbook가 아니라 라우팅 엔트리포인트다.
+- 상세 규칙은 레이어 문서로 분해해 필요할 때만 읽는다.
+- self-contained 정책은 폐기한다.

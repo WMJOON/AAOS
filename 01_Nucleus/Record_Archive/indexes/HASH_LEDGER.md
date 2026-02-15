@@ -167,3 +167,12 @@ prev_hash: "37c4669ea79de8c5c6dda68d8492e5ebe7ba22aae9a72db98bc573cd712c4712"
 hash: "a36592d0a6ed0932f15015cfd8d8e3423d62d7e898682b4718761c55a3a022ab"
 notes: "seal issue-issue: ISSUE-NUC-20260214-0002"
 ---
+
+---
+timestamp: "2026-02-15T08:04:40Z"
+package_path: "_archive/operations/20260215T080440Z__swarm-observability__cortex-agora-change-review/"
+artifact: "MANIFEST.sha256"
+prev_hash: "a36592d0a6ed0932f15015cfd8d8e3423d62d7e898682b4718761c55a3a022ab"
+hash: "9bc497270aeeabd972d5979395e13012e7129b0e6031e902b1e9b1cbd28bd619"
+notes: "Full governance 3-phase passed; proposal closed"
+---

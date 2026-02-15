@@ -1,5 +1,26 @@
 # Changelog
 
+## v2.2.0 (2026-02-15)
+
+### Changed
+- 정책 전환: `SKILL.md` self-contained runbook 폐기.
+- `SKILL.md`를 4-Layer 최소 로더로 전환 (67줄).
+- 상세 실행 규칙은 `10.core/`, `20.modules/`, `30.references/`, `40.orchestrator/`로 분리.
+
+### Added (layer content population)
+- `10.core/core.md`: 핵심 정의 테이블, 입력 인터페이스 JSON, 책임 범위, when_unsure 4규칙, cone-analyzer 관계.
+- `20.modules/module.topology_selection.md`: 8 Topology 유형, 3-Signal 선택 규칙, 유형별 주의사항, 판단 루브릭.
+- `20.modules/module.node_design.md`: 노드 분리 3-규칙, θ_GT band 설정, 스키마 강화, 9개 Output 타입, RSV 분배 패턴.
+- `20.modules/module.loop_risk.md`: 정상 루프, 병리적 루프 5종(신호/위험/mitigation).
+- `20.modules/module.handoff.md`: 허용/금지 포맷, 최소화 패턴, 판단 루브릭.
+- `40.orchestrator/orchestrator.md`: 5-Phase 프로세스, 패턴 감지 6종, strategy gate, estimator 연동.
+- `40.orchestrator/routing_rules.md`: Phase→Module 매핑, ΔQ 규칙, handoff 트리거.
+- `30.references/loading_policy.md`: ΔQ 수치 조건, Pack 목록, 로딩 순서.
+- `90.tests/test_cases.yaml`: 구조 검증 3건 + Topology 설계 테스트 10건.
+- `90.tests/eval_rubric.md`: 6축 5점 척도, pass 기준, strategy 검증.
+- `00.meta/manifest.yaml`: version, domain, modules, scripts, token_budget, related_skills 메타 보강.
+- 토큰 예산 모델을 실제 내용 기준으로 재산정.
+
 ## v2.1.0 (2026-02-14)
 
 ### Added
@@ -16,46 +37,10 @@
 
 ## v2.0.0 (2026-02-10)
 
-### Breaking Change: SKILL.md → Self-Contained Runbook
-
-v1.0의 SKILL.md는 "목차+로딩 안내"로, 실행에 3~5회 추가 파일 로딩이 필요했다.
-v2.0에서는 **SKILL.md 단독으로 5-Phase 전체를 실행 가능**하도록 재설계했다.
-
-### 변경 요약
-
-| 항목 | v1.0 | v2.0 |
-|------|------|------|
-| SKILL.md 역할 | 목차 + 로딩 가이드 | **Self-contained runbook** |
-| 실행에 필요한 최소 파일 수 | 3~5개 (core + orch + modules) | **1개** (SKILL.md) |
-| 핵심 로직 위치 | 모듈 파일에 분산 | **SKILL.md에 인라인** |
-| 모듈 파일 역할 | 필수 로딩 | **상세 참조용** (필요 시만) |
-| 트리거 키워드 | cone-analyzer와 충돌 | **"Topology" 키워드로 분리** |
-| Quick Example | 없음 | **추가** |
-| description에 cone-analyzer 차이 | 없음 | **명시** |
-
-### 인라인된 핵심 로직
-
-- Phase 2: 8가지 Topology 유형 + 3-Signal 선택 규칙
-- Phase 3: 노드 분리 3-규칙 + θ_GT band + Output 타입
-- Phase 4: 병리적 루프 5종 + Hand-off 허용/금지 포맷
-- Phase 5: Workflow Spec JSON 구조 (축약)
-
-### 모듈 파일은 그대로 유지
-
-모듈/참조팩 파일은 변경 없이 유지. SKILL.md 인라인은 "요약"이 아니라
-실행에 필요한 핵심 규칙만 추출한 것. 상세 트레이드오프 비교, 시뮬레이션,
-스키마 강화 상세 등은 여전히 모듈 파일을 참조한다.
-
----
+### Added
+- 5-Phase 구조화와 토폴로지 모듈 세분화.
+- 모듈/참조팩 중심 운영 기반 확립.
 
 ## v1.0.0 (2026-02-09)
-- 2-Layer → 4-Layer 마이그레이션 완료
+- 2-Layer -> 4-Layer 마이그레이션 시작
 - estimator.py 통합 (Runtime Feedback Loop)
-- 모듈 4개 분리: topology_selection, node_design, loop_risk, handoff
-- 참조팩 2개: output_contract, estimator
-- 테스트 케이스 10개 작성
-
-### 2-Layer 원본 대비 변경
-- Core에 공유 어휘(θ_GT, RSV, DQ, Explicit Output) 집중
-- Orchestrator에 5-Phase 프로세스 + 라우팅 규칙 분리
-- 모듈별 고유 질문 축만 delta로 유지

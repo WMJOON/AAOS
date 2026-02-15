@@ -1,14 +1,6 @@
 # Orchestrator — Workflow Topology Designer
 
-## 6-Phase 프로세스
-
-### Phase 0: Mandatory Preflight
-
-1. `preflight.questions[0]`로 PF1을 반드시 배치한다.
-2. 고정 질문: `멘탈모델 먼저 세팅할까요?`
-3. PF1 응답이 yes이면 `mental_model_bundle` 준비를 선행한다.
-
-**산출물**: `preflight.questions[]` + `workflow_profile`
+## 5-Phase 프로세스
 
 ### Phase 1: Goal → DQ 분해 → RSV_total
 
@@ -38,9 +30,7 @@
 2. 각 노드에 Explicit Output 정의
 3. θ_GT band, rsv_target 설정
 4. assigned_dqs 연결
-5. 전략/고위험이면 `H1`, `H2` 노드 강제 삽입
-6. 전략/고위험이면 `T4 -> C1 -> H1` 엣지 강제 삽입
-7. 엣지(의존관계) 정의
+5. 엣지(의존관계) 정의
 
 **산출물**: `task_graph.nodes[]` + `task_graph.edges[]`
 
@@ -54,66 +44,38 @@
 
 **산출물**: `loop_risk_assessment[]` + `handoff_strategy`
 
-### Phase 5: H1 Finalization Gate
+### Phase 5: Workflow Spec 산출
 
-전략/고위험 워크플로우에서 `H1` finalization 전에 아래를 검증한다.
-
-1. `web_evidence_YYYY-MM-DD.md` 존재
-2. COWI 산출물 존재:
-  - `relation_context_map`
-  - `skill_usage_adaptation_report`
-3. `validate_strategy_h1_gate.py` 결과가 PASS
-
-**산출물**: `strategy_gate`
-
-### Phase 6: Workflow Spec 산출
-
-1. Phase 0~5 결과를 통합하여 Workflow Spec JSON 생성
+1. Phase 1~4 결과를 통합하여 Workflow Spec JSON 생성
 2. execution_policy 작성 (Continue/Reframe/Stop 규칙)
 3. (선택) Mermaid 시각화
 
-**산출물**: 완전한 Workflow Spec JSON
+**산출물 골격**:
 
----
-
-## 라우팅 규칙
-
-### Phase별 모듈 선택
-
-```
-Phase 1 → (모듈 불필요, Core만으로 처리)
-Phase 2 → topology_selection (필수)
-Phase 3 → node_design (필수)
-Phase 4 → loop_risk (필수) + handoff (조건부)
-Phase 5 → strategy_gate 검증 (필수, strategy/high_risk 한정)
-Phase 6 → (모듈 불필요, 통합만)
-```
-
-### handoff 모듈 로딩 조건
-
-```
-if task_graph에 다음 중 하나 이상:
-  - parallel 노드 존재
-  - human_gate 노드 존재
-  - strategy_gate.enabled == true
-  - 다른 Agent/모델 위임 노드 존재
-  - 컨텍스트 윈도우 초과 예상
-then:
-  load handoff
+```json
+{
+  "goal": "...",
+  "workflow_topology": {"type": "...", "rationale": ["..."]},
+  "decision_questions": [{"id": "DQ1", "question": "...", "weight": 1.5}],
+  "rsv": {"rsv_total": 6.5},
+  "task_graph": {
+    "nodes": [{"node_id": "T1", "explicit_output": {"type": "memo"}, "theta_gt_band": {"min": 0.4, "max": 0.8}, "rsv_target": 1.5, "assigned_dqs": ["DQ1"]}],
+    "edges": [{"from": "T1", "to": "T2"}]
+  },
+  "loop_risk_assessment": [{"loop_type": "...", "risk": "high", "mitigation": ["..."]}],
+  "handoff_strategy": {"handoff_points": []},
+  "execution_policy": {
+    "continue_reframe_stop_rules": [
+      "Continue: theta_gt_actual ∈ [band.min, band.max] AND rsv < rsv_target",
+      "Reframe: theta_gt_actual < band.min",
+      "Stop: redundancy == true OR rsv >= rsv_target"
+    ]
+  }
+}
 ```
 
-### Reference Pack 로딩 (ΔQ 규칙)
-
-```
-ΔQ < 2  → Reference Pack 로딩 금지
-ΔQ ≥ 2  → 관련 pack 1개 로딩 고려
-ΔQ ≥ 4  → pack 1~2개 로딩
-
-트리거 예:
-- "출력 JSON 스키마 전체 보여줘" → pack.output_contract (ΔQ ≥ 2)
-- "estimator 사용법 알려줘" → pack.estimator (ΔQ ≥ 2)
-- Phase 5 최종 산출 시 → pack.output_contract (ΔQ = 2, 스키마 검증용)
-```
+전체 스키마 상세 → `30.references/packs/pack.output_contract.md`
+완성 예시 → `90.tests/golden_outputs/examples.md`
 
 ---
 
@@ -127,6 +89,19 @@ then:
 | **Prioritize** | Phase 3 | DQ → 노드 할당 우선순위 |
 | **Arbitrate** | Phase 2 | Topology 동점 시 중재 |
 | **Simulate** | Phase 4 | 루프 시나리오 시뮬레이션 |
+
+---
+
+## Strategy/High-Risk 게이트 (v2.1+)
+
+strategy 또는 high_risk 워크플로우 감지 시:
+
+1. **PF1 preflight**: 첫 질문을 `멘탈모델 먼저 세팅할까요?`로 고정
+2. **필수 노드**: `H1`(HITL finalization), `H2`(HITL review) 포함
+3. **필수 엣지**: `T4 → C1 → H1` 경로 보장
+4. **H1 finalization 전제**: web evidence + COWI artifacts 검증 필수
+
+검증 스크립트: `scripts/validate_strategy_h1_gate.py`
 
 ---
 

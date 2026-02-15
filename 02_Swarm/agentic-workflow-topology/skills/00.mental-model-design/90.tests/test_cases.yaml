@@ -1,0 +1,127 @@
+# Test Cases for awt-mental-model-design
+# 최소 10개 케이스 포함.
+
+# --- 구조/계약 검증 ---
+- id: LAYER01
+  name: "레이어 구조 존재"
+  type: structural
+  expected:
+    required_layers_present: true
+    required_files:
+      - 00.meta/manifest.yaml
+      - 10.core/core.md
+      - 20.modules/modules_index.md
+      - 30.references/loading_policy.md
+      - 40.orchestrator/orchestrator.md
+      - 40.orchestrator/routing_rules.md
+
+- id: LOADER01
+  name: "SKILL.md 최소 로더 규격"
+  type: structural
+  expected:
+    skill_md_max_lines_120: true
+    required_sections:
+      - Trigger
+      - Non-Negotiable Invariants
+      - Layer Index
+      - Quick Start
+      - When Unsure
+
+- id: SCHEMA01
+  name: "번들 출력이 schema valid"
+  type: contract
+  input:
+    domain: fintech
+    intent: "규제 대응 전략 멘탈모델 설계"
+    workflow_profile: { class: strategy }
+  expected:
+    output_validates_against: "references/mental_model_bundle.schema.yaml"
+    required_9keys_present: true
+
+# --- 패턴 라우팅 ---
+- id: ROUTE01
+  name: "Evaluate 패턴 감지"
+  type: routing
+  input: "이 도메인의 멘탈모델 번들을 평가해줘"
+  expected_pattern: Evaluate
+  expected_modules: [module.bundle-contract]
+  must_include_fields: [판단, 근거, 트레이드오프, 확신도]
+
+- id: ROUTE02
+  name: "Critique 패턴 감지"
+  type: routing
+  input: "이 번들 설계의 허점을 찾아줘"
+  expected_pattern: Critique
+  expected_modules: [module.bundle-contract, module.routing-kpi]
+  must_include_fields: [판단, 근거, 트레이드오프, 확신도]
+
+- id: ROUTE03
+  name: "Prioritize 패턴 감지"
+  type: routing
+  input: "번들 설계에서 먼저 확정해야 할 요소를 우선순위화해줘"
+  expected_pattern: Prioritize
+  expected_modules: [module.bundle-contract]
+  must_include_fields: [판단, 근거]
+
+- id: ROUTE04
+  name: "Arbitrate 패턴 감지"
+  type: routing
+  input: "로딩 비용 vs 판단 품질 트레이드오프를 분석해줘"
+  expected_pattern: Arbitrate
+  expected_modules: [module.loading-policy, module.routing-kpi]
+  must_include_fields: [판단, 근거, 트레이드오프]
+
+# --- Reference 로딩 ---
+- id: REF01
+  name: "deltaQ >= 2 시 reference 로딩"
+  type: reference_loading
+  input: "required 9키 스키마를 검증해줘"
+  expected_pattern: Evaluate
+  expected_modules: [module.bundle-contract]
+  expected_reference: "references/mental_model_bundle.schema.yaml"
+  delta_q: 3
+
+- id: REF02
+  name: "deltaQ < 2 시 reference 미로딩"
+  type: reference_loading
+  input: "general 도메인 번들을 설계해줘"
+  expected_pattern: Evaluate
+  expected_modules: [module.bundle-contract]
+  expected_reference: null
+  delta_q: 0
+
+# --- workflow_profile.class별 ---
+- id: CLASS01
+  name: "strategy class 전체 모듈 활성"
+  type: workflow_class
+  input:
+    domain: biotech
+    intent: "임상 데이터 기반 전략 번들 설계"
+    workflow_profile: { class: strategy }
+  expected:
+    active_modules: [module.bundle-contract, module.loading-policy, module.routing-kpi]
+    checkpoints: [preflight, pre_h1, pre_h2]
+    optional_extensions_recommended: true
+
+- id: CLASS02
+  name: "minimal class 단독 모듈"
+  type: workflow_class
+  input:
+    domain: infra-ops
+    intent: "on-call runbook 개선"
+    workflow_profile: { class: minimal }
+  expected:
+    active_modules: [module.bundle-contract]
+    checkpoints: [preflight]
+    optional_extensions_recommended: false
+
+# --- 직교성 ---
+- id: ORTHO01
+  name: "모듈 간 직교성 검증"
+  type: orthogonality
+  expected:
+    module_pairs:
+      - [module.bundle-contract, module.loading-policy, "겹침 없음"]
+      - [module.bundle-contract, module.routing-kpi, "겹침 없음"]
+      - [module.loading-policy, module.routing-kpi, "겹침 없음"]
+    alpha_min: 0.85

@@ -1,4 +1,4 @@
-context_id: workflow-mental-model-execution-designer
+context_id: awt-execution-design
 role: SKILL
 state: const
 scope: swarm

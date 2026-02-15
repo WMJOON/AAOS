@@ -1,0 +1,35 @@
+formulas:
+  swarm_name: if(file.folder.contains("cortex-agora"), "cortex-agora", if(file.folder.contains("context-orchestrated-filesystem"), "COF", if(file.folder.contains("agentic-workflow-topology"), "AWT", if(file.folder.contains("context-orchestrated-workflow-intelligence"), "COWI", "unknown"))))
+views:
+  - type: table
+    name: All Swarm Records
+    filters:
+      and:
+        - file.hasTag("aaos/record")
+    order:
+      - file.name
+      - formula.swarm_name
+      - actor
+      - ts
+      - record_type
+      - sealed
+    sort:
+      - property: file.name
+        direction: ASC
+      - property: ts
+        direction: DESC
+    group_by: record_type
+  - type: table
+    name: Unsealed
+    filters:
+      and:
+        - file.hasTag("aaos/record")
+        - sealed == false
+    order:
+      - ts
+      - record_type
+      - formula.swarm_name
+      - actor
+    sort:
+      - property: ts
+        direction: DESC

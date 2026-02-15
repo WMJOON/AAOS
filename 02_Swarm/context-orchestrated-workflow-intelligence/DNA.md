@@ -1,6 +1,6 @@
 ---
 name: "AAOS-COWI"
-version: "0.3.0"
+version: "0.3.1"
 scope: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence"
 owner: "AAOS Swarm"
 created: "2026-02-14"
@@ -35,12 +35,14 @@ intelligence_contracts:
     template: "references/skill_usage_adaptation_report.template.md"
 
 consumption_bridge:
-  source: "02_Swarm/cortex-agora/change_archive/events"
+  source: "02_Swarm/cortex-agora/records"
+  source_format: "md_with_frontmatter"
+  legacy_source: "02_Swarm/cortex-agora/change_archive/events"
   source_of_truth_key: "source_snapshot.agora_ref"
   trigger_policy:
     on_new_improvement_decision: "manual_pull_required"
     daily_manual_batch: true
-  script: "02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py"
+  script: "02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py"
   cursor_state: "02_Swarm/context-orchestrated-workflow-intelligence/registry/AGORA_PULL_STATE.json"
   outputs:
     relation_context_map: "02_Swarm/context-orchestrated-workflow-intelligence/agents/<agent-family>/<version>/artifacts/relation_context_map/*.yaml"
@@ -51,6 +53,47 @@ consumption_bridge:
       - relation_context_map
       - skill_usage_adaptation_report
     enforcement: "block_if_missing"
+
+proposal_operations:
+  enabled: true
+  proposal_root: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/proposals"
+  proposal_template: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/proposals/_TEMPLATE.md"
+  owner_swarm: "context-orchestrated-workflow-intelligence"
+  required_frontmatter:
+    - proposal_id
+    - parent_proposal_id
+    - proposal_status
+    - hitl_required
+    - hitl_stage
+    - checked
+    - user_action_required
+    - visibility_tier
+    - owner_swarm
+    - linked_reports
+    - linked_artifacts
+  status_enum:
+    - draft
+    - review_pending
+    - approval_required
+    - in_progress
+    - done
+    - closed
+  visibility_enum:
+    - must_show
+    - optional
+    - internal
+  dashboard_contract:
+    build_script: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/scripts/build_production_dashboards.py"
+    production_proposals_json: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/dashboard/production-proposals.json"
+    production_proposals_csv: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/dashboard/production-proposals.csv"
+    user_inbox_json: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/dashboard/user-inbox.json"
+    user_inbox_csv: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/dashboard/user-inbox.csv"
+    archived_proposals_json: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/dashboard/archived-proposals.json"
+    archived_proposals_csv: "04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/dashboard/archived-proposals.csv"
+    default_filters:
+      - "proposal_status != closed"
+      - "visibility_tier == must_show"
+      - "approval_required queue: hitl_stage == approval_required && checked == true"
 
 natural_dissolution:
   purpose: "COF↔AWT 관계 맥락과 스킬 사용 패턴 개선 제안을 연결하는 COWI intelligence mediator 제공"
@@ -87,6 +130,14 @@ COWI는 COF 운영 맥락과 AWT 설계 맥락을 연결하고, `cortex-agora` �
 - 대화 메모리는 Hybrid 정책(외부 메모리 읽기 + 로컬 snapshot ref 저장)으로 연결한다.
 - 전략/고위험 topology에서는 `T4 -> C1 -> H1` 구간의 C1 consumption step을 필수로 둔다.
 
+## Proposal Hub Contract
+
+- COWI는 Production 기관 proposal의 parent rollup 허브를 담당한다.
+- 기본 사용자 뷰는 `proposal_status != closed` + `visibility_tier == must_show`만 표시한다.
+- 승인 대기 큐는 `hitl_stage=approval_required && checked=true` 조건으로만 노출한다.
+- 사용자 inbox에는 `must_show && user_action_required=true` 항목만 노출한다.
+- 출력 포맷은 Obsidian 의존 없이 JSON/CSV를 기본으로 제공한다.
+
 ## Core Constraints
 
 1. `cortex-agora` 원천 출력이 없는 임의의 전역 관찰 해석을 금지한다.
@@ -107,7 +158,7 @@ COWI는 COF 운영 맥락과 AWT 설계 맥락을 연결하고, `cortex-agora` �
 ## Consumption Runbook
 
 ```bash
-python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py \
+python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py \
   --proposal-id P-SWARM-V014-BATCH \
   --agent-family claude \
   --agent-version 4.0 \
@@ -115,7 +166,7 @@ python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/ski
 ```
 
 ```bash
-python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py \
+python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py \
   --proposal-id P-SWARM-V014-BATCH \
   --agent-family claude \
   --agent-version 4.0 \
@@ -136,3 +187,4 @@ python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/ski
 - v0.2.2 : COWI pull bridge(`IMPROVEMENT_DECISIONS` trigger + 일일 수동 배치 + cursor state) 운영 계약 추가
 - v0.2.3 : `agents/<agent-family>/<version>/` 네임스페이스 출력 강제 및 conversation snapshot(Hybrid) 계약 추가
 - v0.3.0 : 전략/고위험 `T4 -> C1 -> H1` 구간의 consumption step 강제 및 H1 finalization artifact gate 추가
+- v0.3.1 : Production proposal parent/child 운영 계약 및 사용자 액션 대시보드 필터 계약 추가

@@ -1,6 +1,6 @@
 ---
 name: "AAOS-Cortex-Agora"
-version: "0.1.4"
+version: "0.1.5"
 scope: "04_Agentic_AI_OS/02_Swarm/cortex-agora"
 owner: "AAOS Swarm"
 created: "2026-01-30"
@@ -41,15 +41,34 @@ downstream_consumption:
 change_archive:
   enabled: true
   append_only: true
+  format: "md_with_frontmatter"
+  format_version: "v2"
   optional_critique_gate: true
   bridge_mode: "stage_then_seal"
   paths:
+    root: "02_Swarm/cortex-agora/records"
+    change_events: "02_Swarm/cortex-agora/records/change_events/"
+    peer_feedback: "02_Swarm/cortex-agora/records/peer_feedback/"
+    improvement_decisions: "02_Swarm/cortex-agora/records/improvement_decisions/"
+  legacy_paths:
     root: "02_Swarm/cortex-agora/change_archive"
     change_events: "02_Swarm/cortex-agora/change_archive/events/CHANGE_EVENTS.jsonl"
     peer_feedback: "02_Swarm/cortex-agora/change_archive/events/PEER_FEEDBACK.jsonl"
     improvement_decisions: "02_Swarm/cortex-agora/change_archive/events/IMPROVEMENT_DECISIONS.jsonl"
     change_index: "02_Swarm/cortex-agora/change_archive/indexes/CHANGE_INDEX.md"
+  legacy_frozen: true
   bridge_script: "02_Swarm/cortex-agora/scripts/change_archive_bridge.py"
+  record_writer: "02_Swarm/cortex-agora/scripts/record_writer.py"
+  bases_views:
+    default: "02_Swarm/cortex-agora/dashboard/cortex-agora-records.base"
+    proposal_tracker: "02_Swarm/cortex-agora/dashboard/all-proposals.base"
+    proposal_hitl_tracker: "02_Swarm/cortex-agora/dashboard/proposals.base"
+    report_tracker: "02_Swarm/cortex-agora/dashboard/reports.base"
+  proposal_hitl_policy:
+    checked_field: "checked"
+    hide_closed_in_dashboard: true
+    auto_progress_condition: "hitl_stage=approval_required AND checked=true AND auto_flow_enabled=true"
+    auto_progress_script: "02_Swarm/cortex-agora/scripts/proposal_hitl_auto_flow.py"
   record_archive_target: "01_Nucleus/record_archive/_archive/operations/<timestamp>__swarm-observability__cortex-agora-change-review/"
 
 natural_dissolution:
@@ -73,7 +92,13 @@ observability:
     enabled: true
     required: true
     source: "swarm_runtime"
-    path: "02_Swarm/cortex-agora/behavior/BEHAVIOR_FEED.jsonl"
+    format: "md_with_frontmatter"
+    format_version: "v2"
+    path: "02_Swarm/cortex-agora/records/behavior/"
+    legacy_path: "02_Swarm/cortex-agora/behavior/BEHAVIOR_FEED.jsonl"
+    legacy_frozen: true
+    record_writer: "02_Swarm/cortex-agora/scripts/record_writer.py"
+    bases_view: "02_Swarm/cortex-agora/dashboard/cortex-agora-records.base"
     recommended_fields:
       - event_id
       - ts
@@ -81,12 +106,12 @@ observability:
       - group_id
       - actor
       - kind
-      - context
-      - outcome
+      - context_task_id
+      - outcome_status
       - trace_id   # optional; backward compatibility
     retention_days: 365
-    schema_version: "v1"
-    sink: "02_Swarm/cortex-agora/change_archive (stage_then_seal -> 01_Nucleus/record_archive)"
+    schema_version: "v2"
+    sink: "02_Swarm/cortex-agora/records (stage_then_seal -> 01_Nucleus/record_archive)"
 
 inquisitor:
   required: true
@@ -176,3 +201,4 @@ Deliberation Chamber로 승격 입력을 제출한다.
 
 - v0.1.3 : Agora-First 입력/봉인 정책 명문화 및 observability sink를 `change_archive -> record_archive seal` 경로로 정렬
 - v0.1.4 : Behavior Feed canonical 필드를 `group_id`로 정렬하고 `trace_id`를 호환 필드로 격하
+- v0.1.5 : Record Format v2(Obsidian Bases) — JSONL → 개별 .md + YAML frontmatter 전환, `.base` 뷰 도입, CHANGE_INDEX.md 제거

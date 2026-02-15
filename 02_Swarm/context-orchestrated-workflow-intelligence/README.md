@@ -14,6 +14,11 @@ Context-Orchestrated Workflow Intelligence(COWI)는
 - 대화 맥락 기억은 Hybrid 방식(외부 메모리 읽기 + 로컬 snapshot ref 저장)으로 연결한다.
 - 전략/고위험 워크플로우에서 `T4 -> C1 -> H1` 구간의 consumption step을 강제한다.
 
+## 4-Layer Loader Policy
+
+- COWI active skill의 `SKILL.md`는 초경량 로더(<=120 lines)로 유지한다.
+- 상세 실행 규칙은 `00.meta/10.core/20.modules/30.references/40.orchestrator` 하위 문서로 분리한다.
+
 ## Boundary
 
 ### 포함 영역
@@ -61,7 +66,7 @@ Context-Orchestrated Workflow Intelligence(COWI)는
 ### Runbook
 
 ```bash
-python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py \
+python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py \
   --proposal-id P-SWARM-V014-BATCH \
   --agent-family claude \
   --agent-version 4.0 \
@@ -69,7 +74,7 @@ python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/ski
 ```
 
 ```bash
-python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.cowi-agora-consumption-bridge/scripts/pull_agora_feedback.py \
+python3 04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge/scripts/pull_agora_feedback.py \
   --proposal-id P-SWARM-V014-BATCH \
   --agent-family claude \
   --agent-version 4.0 \

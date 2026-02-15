@@ -1,0 +1,82 @@
+formulas:
+  proposal_status_norm: if(!proposal_status.isEmpty(), proposal_status, if(!status.isEmpty(), status, "unknown"))
+  hitl_stage_norm: if(!hitl_stage.isEmpty(), hitl_stage, if(hitl_required == true, "review_pending", "not_required"))
+views:
+  - type: table
+    name: Proposal Overview
+    filters:
+      and:
+        - file.folder.contains("cortex-agora/proposals")
+        - "!proposal_id.isEmpty()"
+    order:
+      - file.name
+      - proposal_id
+      - formula.proposal_status_norm
+      - formula.hitl_stage_norm
+      - checked
+      - user_action_required
+      - visibility_tier
+      - hitl_owner
+      - hitl_last_action_at
+    sort:
+      - property: formula.proposal_status_norm
+        direction: ASC
+      - property: proposal_id
+        direction: ASC
+    group_by: formula.proposal_status_norm
+    columnSize:
+      file.name: 220
+      proposal_id: 220
+      formula.proposal_status_norm: 170
+  - type: table
+    name: Open Proposals
+    filters:
+      and:
+        - file.folder.contains("cortex-agora/proposals")
+        - "!proposal_id.isEmpty()"
+        - proposal_status != "closed"
+    order:
+      - proposal_id
+      - proposal_status
+      - formula.hitl_stage_norm
+      - checked
+      - user_action_required
+      - visibility_tier
+      - hitl_owner
+      - hitl_last_action_at
+    sort:
+      - property: proposal_id
+        direction: ASC
+  - type: table
+    name: Decisions
+    filters:
+      and:
+        - file.folder.contains("cortex-agora/records/improvement_decisions")
+        - record_type == "improvement_decision"
+        - "!proposal_id.isEmpty()"
+    order:
+      - ts
+      - proposal_id
+      - decision
+      - rationale
+      - next_action
+    sort:
+      - property: ts
+        direction: DESC
+  - type: table
+    name: Feedback by Stance
+    filters:
+      and:
+        - file.folder.contains("cortex-agora/records/peer_feedback")
+        - record_type == "peer_feedback"
+        - "!proposal_id.isEmpty()"
+    order:
+      - ts
+      - proposal_id
+      - reviewer
+      - stance
+      - summary
+    sort:
+      - property: ts
+        direction: DESC
+    group_by: stance

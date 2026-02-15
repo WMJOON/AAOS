@@ -1,7 +1,8 @@
-context_id: workflow-observability-and-evolution
+context_id: awt-observability-evolution
 role: SKILL
 state: const
 scope: swarm
 lifetime: persistent
+version: "2.0.0"
 created: "2026-02-14"
-
+updated: "2026-02-15"

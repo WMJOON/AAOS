@@ -1,0 +1,96 @@
+{
+  "generated_at": "2026-02-15T08:45:09Z",
+  "source_proposal_dirs": [
+    "02_Swarm/agentic-workflow-topology/proposals",
+    "02_Swarm/context-orchestrated-filesystem/proposals",
+    "02_Swarm/context-orchestrated-workflow-intelligence/proposals"
+  ],
+  "count": 4,
+  "items": [
+    {
+      "proposal_id": "P-AWT-V101-WORKFLOW-GENERATION",
+      "parent_proposal_id": "P-PROD-V100-ROLLUP",
+      "proposal_title": "Workflow generation and management standardization",
+      "owner_swarm": "agentic-workflow-topology",
+      "proposal_status": "closed",
+      "hitl_required": true,
+      "hitl_stage": "completed",
+      "checked": true,
+      "user_action_required": false,
+      "visibility_tier": "must_show",
+      "linked_reports": [
+        "02_Swarm/agentic-workflow-topology/reports/20260215__p-awt-v101__closure-summary.md"
+      ],
+      "linked_artifacts": [
+        "02_Swarm/agentic-workflow-topology/skills/01.topology-design/50.cone-analyzer/scripts/scaffold_workflow.py",
+        "02_Swarm/agentic-workflow-topology/DNA.md"
+      ],
+      "file_path": "02_Swarm/agentic-workflow-topology/proposals/P-AWT-V101-WORKFLOW-GENERATION.md"
+    },
+    {
+      "proposal_id": "P-COF-V102-CONTEXT-GOVERNANCE",
+      "parent_proposal_id": "P-PROD-V100-ROLLUP",
+      "proposal_title": "Context governance and user-facing selection policy",
+      "owner_swarm": "context-orchestrated-filesystem",
+      "proposal_status": "closed",
+      "hitl_required": true,
+      "hitl_stage": "completed",
+      "checked": true,
+      "user_action_required": false,
+      "visibility_tier": "must_show",
+      "linked_reports": [
+        "02_Swarm/context-orchestrated-filesystem/reports/20260215__p-cof-v102__closure-summary.md"
+      ],
+      "linked_artifacts": [
+        "02_Swarm/context-orchestrated-filesystem/skills/02.task-context-management/scripts/create_ticket.py",
+        "02_Swarm/context-orchestrated-filesystem/DNA.md"
+      ],
+      "file_path": "02_Swarm/context-orchestrated-filesystem/proposals/P-COF-V102-CONTEXT-GOVERNANCE.md"
+    },
+    {
+      "proposal_id": "P-COWI-V103-PRODUCTION-HUB",
+      "parent_proposal_id": "P-PROD-V100-ROLLUP",
+      "proposal_title": "Production hub integration and user-action queue",
+      "owner_swarm": "context-orchestrated-workflow-intelligence",
+      "proposal_status": "closed",
+      "hitl_required": true,
+      "hitl_stage": "completed",
+      "checked": true,
+      "user_action_required": false,
+      "visibility_tier": "must_show",
+      "linked_reports": [
+        "02_Swarm/context-orchestrated-workflow-intelligence/reports/20260215__p-cowi-v103__closure-summary.md"
+      ],
+      "linked_artifacts": [
+        "02_Swarm/context-orchestrated-workflow-intelligence/scripts/build_production_dashboards.py",
+        "02_Swarm/context-orchestrated-workflow-intelligence/dashboard/production-proposals.json",
+        "02_Swarm/context-orchestrated-workflow-intelligence/dashboard/user-inbox.json",
+        "02_Swarm/context-orchestrated-workflow-intelligence/DNA.md"
+      ],
+      "file_path": "02_Swarm/context-orchestrated-workflow-intelligence/proposals/P-COWI-V103-PRODUCTION-HUB.md"
+    },
+    {
+      "proposal_id": "P-PROD-V100-ROLLUP",
+      "parent_proposal_id": "",
+      "proposal_title": "Production-only parent rollup for AWT/COF/COWI",
+      "owner_swarm": "context-orchestrated-workflow-intelligence",
+      "proposal_status": "closed",
+      "hitl_required": true,
+      "hitl_stage": "completed",
+      "checked": true,
+      "user_action_required": false,
+      "visibility_tier": "must_show",
+      "linked_reports": [
+        "02_Swarm/context-orchestrated-workflow-intelligence/reports/20260215__p-prod-v100__closure-summary.md"
+      ],
+      "linked_artifacts": [
+        "02_Swarm/agentic-workflow-topology/proposals/P-AWT-V101-WORKFLOW-GENERATION.md",
+        "02_Swarm/context-orchestrated-filesystem/proposals/P-COF-V102-CONTEXT-GOVERNANCE.md",
+        "02_Swarm/context-orchestrated-workflow-intelligence/proposals/P-COWI-V103-PRODUCTION-HUB.md",
+        "02_Swarm/context-orchestrated-workflow-intelligence/dashboard/production-proposals.json",
+        "02_Swarm/context-orchestrated-workflow-intelligence/dashboard/user-inbox.json"
+      ],
+      "file_path": "02_Swarm/context-orchestrated-workflow-intelligence/proposals/P-PROD-V100-ROLLUP.md"
+    }
+  ]
+}

@@ -1,4 +1,4 @@
-context_id: mental-model-loader
+context_id: awt-mental-model-design
 role: SKILL
 state: const
 scope: swarm

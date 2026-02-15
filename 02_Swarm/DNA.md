@@ -1,6 +1,6 @@
 ---
 name: "AAOS-Swarm"
-version: "0.1.4"
+version: "0.1.5"
 scope: "04_Agentic_AI_OS/02_Swarm"
 owner: "AAOS Canon"
 created: "2026-01-21"
@@ -99,10 +99,21 @@ Swarm의 “행동(Behavior Trace)”은 cortex-agora 관찰 입력으로 남긴
 이는 record_archive(증빙)와 분리된 Swarm 표준이다.
 직접 `record_archive` sink로 유입하는 방식은 허용하지 않는다.
 
+### Record Format (v2 — Obsidian Bases)
+
+- 포맷: 개별 `.md` 파일 + YAML frontmatter (Obsidian Bases 쿼리 최적화)
+- 권장 경로: `<swarm_root>/records/<record_type_plural>/`
+- 파일명 규약: `{PREFIX}-{YYYYMMDDTHHMMSSZ}-{slug}.md`
+- 작성 도구: `02_Swarm/cortex-agora/scripts/record_writer.py`
+- 뷰: `.base` 파일로 테이블/필터/집계 제공
+- 크로스-Swarm 뷰: `02_Swarm/cortex-agora/dashboard/all-records.base`, `02_Swarm/cortex-agora/dashboard/all-behavior.base`, `02_Swarm/cortex-agora/dashboard/all-proposals.base`
+- 레거시 JSONL(`<swarm_root>/behavior/BEHAVIOR_FEED.jsonl`)은 동결(frozen) 상태이며 신규 기록에 사용하지 않는다.
+
 ### Recommended (권장)
 
 - 각 Swarm은 자신의 스코프 하위에 Behavior Feed를 둔다.
-  - 권장 경로: `<swarm_root>/behavior/BEHAVIOR_FEED.jsonl`
+  - 경로: `<swarm_root>/records/behavior/` (.md 파일)
+  - 레거시: `<swarm_root>/behavior/BEHAVIOR_FEED.jsonl` (동결)
 - 각 Swarm의 `DNA.md` frontmatter에 `observability.behavior_feed`를 기록한다.
 
 ### Required (필수)
@@ -122,3 +133,4 @@ Swarm의 “행동(Behavior Trace)”은 cortex-agora 관찰 입력으로 남긴
 - v0.1.2 : record_archive(사실/증빙) vs cortex-agora(행동 관찰/제안) 책임 경계 및 입력/출력 규약 명문화
 - v0.1.3 : Swarm Observability Standard(Behavior Feed) 권장/필수 표준 추가
 - v0.1.4 : Agora-First 봉인 정책(`change_archive -> record_archive seal`) 및 direct record_archive sink 금지 규칙 추가
+- v0.1.5 : Record Format v2(Obsidian Bases) 도입 — JSONL → 개별 .md + YAML frontmatter 전환, 크로스-Swarm `.base` 뷰 추가

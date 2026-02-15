@@ -1,7 +1,7 @@
 ---
+
 name: "AAOS-Manifestation-Call-CLI-Agents"
 version: "0.1.0"
-scope: "04_Agentic_AI_OS/03_Manifestation/summon-agents/skill/sa-call-cli-agents"
 owner: "AAOS Swarm"
 created: "2026-01-31"
 status: draft

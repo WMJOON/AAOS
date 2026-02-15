@@ -1,12 +1,8 @@
 ---
-context_id: cof-xxxx
-role: SKILL
-agent_kind: sub-agent
-state: const
-scope: swarm
-lifetime: persistent
-created: "YYYY-MM-DD"
+name: "[sub-agent-name]"
+description: "[3rd person description. Use when...]"
 ---
+<!-- COF 식별 메타는 SKILL.meta.yaml 또는 상위 manifest에 저장 -->
 
 # [Sub-Agent Title]
 

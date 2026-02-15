@@ -7,25 +7,14 @@ Sub-Agent는 "작업을 위임받는 실행 주체"이지만, 문서 자체는 C
 
 ---
 
-## 2. Document Identity (Pointer Model)
+## 2. Document Identity
 
 Sub-Agent 문서는 다음 규칙에 의해 식별/해석해야 한다.
 
-1. Sub-Agent 문서는 YAML Frontmatter에 최소한 다음 필드를 포함해야 한다.
-
-   ```yaml
-   ---
-   context_id: cof-xxxx
-   role: SKILL
-   agent_kind: sub-agent
-   state: const | mutable | active | frozen | archived
-   scope: immune | agora | nucleus | swarm
-   lifetime: ticket | persistent | archived
-   ---
-   ```
-
-2. `context_id`는 전역 유일이며 변경 불가로 해석해야 한다.
-3. `agent_kind: sub-agent`가 없는 문서는 Sub-Agent로 해석해서는 안 된다.
+1. Sub-Agent의 식별 메타데이터(`context_id`, `role`, `agent_kind`, `state` 등)는 사이드카 파일(`SKILL.meta.yaml` 또는 상위 manifest)에 저장한다.
+2. 문서 본문의 YAML Frontmatter는 런타임 인터페이스 필드(`name`, `description` 등)만 포함한다.
+3. `context_id`는 전역 유일이며 변경 불가로 해석해야 한다.
+4. `agent_kind: sub-agent`가 없는 문서는 Sub-Agent로 해석해서는 안 된다.
 
 ---
 
@@ -67,8 +56,8 @@ Glob 해석 규범은 아래 문서를 우선한다.
 
 ```
 Sub-Agent Doc Validation:
-- [ ] YAML Frontmatter에 context_id/role/agent_kind/state/scope/lifetime가 있다
-- [ ] role이 SKILL이고 agent_kind가 sub-agent다
+- [ ] 식별 메타(context_id/role/agent_kind/state)가 사이드카 또는 상위 manifest에 있다
+- [ ] 문서 Frontmatter에는 런타임 필드(name/description)만 있다
 - [ ] Mission, Inputs/Outputs, Allowed/Forbidden Contexts, Escalation & Handoff가 있다
 - [ ] 정책 강제/위반 처리 로직을 포함하지 않는다
 - [ ] Glob은 Read Scope로만 해석되며 루트 무제한 패턴을 기본값으로 사용하지 않는다

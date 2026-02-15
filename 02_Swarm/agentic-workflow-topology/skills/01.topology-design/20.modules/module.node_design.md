@@ -11,11 +11,12 @@
 "생각 단위"가 아니라 "명시적 산출물 단위"로 분리한다.
 
 **판단 테스트:**
+
 - Output을 외부에서 독립 검증 가능? → Yes면 노드 존재 정당
 - 두 Output이 항상 함께 생성? → Yes면 합치기
 - Output이 다른 노드의 Input으로 명확히 사용? → Yes면 분리 유지
 
-### 규칙 2: θ_GT 설정
+### 규칙 2: θ_GT band 설정
 
 | SE 예상 | θ_GT band | 비고 |
 |---------|-----------|------|
@@ -24,6 +25,7 @@
 | 중복 증산 위험 | band 넓히지 말고 **Output 스키마 강화** | 구조로 통제 |
 
 **스키마 강화 전략** — 중복 증산 위험 노드:
+
 ```json
 {
   "required_sections": ["trade_off_matrix", "boundary_conditions", "confidence_level", "dissenting_view"],
@@ -43,15 +45,15 @@
 
 | type | 용도 | θ_GT 경향 |
 |------|------|----------|
-| memo | 의사결정 배경 문서 | 중~넓음 |
-| table | 구조화된 비교/정리 | 좁음~중간 |
-| checklist | 항목별 확인 목록 | 좁음 |
-| spec | 기술/요구사항 명세 | 좁음~중간 |
-| risk_register | 위험+영향/확률/대응 | 중간 |
-| policy | 정책/규칙 정의 | 중간~넓음 |
-| decision | 최종 판단+근거 | 넓음 |
-| summary | 요약 (hand-off 시에만) | 중간 |
-| state | 상태 객체 | 좁음 |
+| `memo` | 의사결정 배경 문서 | 중~넓음 |
+| `table` | 구조화된 비교/정리 | 좁음~중간 |
+| `checklist` | 항목별 확인 목록 | 좁음 |
+| `spec` | 기술/요구사항 명세 | 좁음~중간 |
+| `risk_register` | 위험+영향/확률/대응 | 중간 |
+| `policy` | 정책/규칙 정의 | 중간~넓음 |
+| `decision` | 최종 판단+근거 | 넓음 |
+| `summary` | 요약 (hand-off 시에만) | 중간 |
+| `state` | 상태 객체 | 좁음 |
 
 ---
 
@@ -59,11 +61,11 @@
 
 | Topology | RSV 분배 |
 |----------|---------|
-| linear | 균등 또는 점진적 증가 |
-| parallel | 각 병렬 노드에 독립 DQ 할당 |
-| fanout_fanin | fanout에 탐색 RSV, fanin에 합성 RSV |
-| hierarchical | 계층별 RSV 예산, 하위로 세분화 |
-| synthesis_centric | 수집 노드 RSV 낮음, 합성 노드 높음 |
+| `linear` | 균등 또는 점진적 증가 |
+| `parallel` | 각 병렬 노드에 독립 DQ 할당 |
+| `fanout_fanin` | fanout에 탐색 RSV, fanin에 합성 RSV |
+| `hierarchical` | 계층별 RSV 예산, 하위로 세분화 |
+| `synthesis_centric` | 수집 노드 RSV 낮음, 합성 노드 높음 |
 
 ---
 

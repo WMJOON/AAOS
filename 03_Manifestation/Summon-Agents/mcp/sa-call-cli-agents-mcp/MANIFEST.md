@@ -1,9 +1,5 @@
 ---
-context_id: mcp-manifest-sa-call-cli-agents
-role: MANIFEST
-state: active
-scope: swarm
-lifetime: persistent
+
 manifestation:
   binding_type: tool
   target_system: "sa-call-cli-agents-mcp"
@@ -22,7 +18,6 @@ manifestation:
       COF_ROOT: "${AAOS_ROOT}/02_Swarm/context-orchestrated-filesystem"
       AAOS_ROOT: "${AAOS_ROOT}"
 ---
-
 # MANIFEST: Call-CLI-Agents MCP Server
 
 CLI 에이전트 디스패처 MCP 서버를 Manifestation 레이어에 바인딩하는 설정 문서이다.

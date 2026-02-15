@@ -1,7 +1,7 @@
 ---
+
 name: "aaos-manifestation-summon-agents"
 version: "0.1.0"
-scope: "04_Agentic_AI_OS/03_Manifestation/summon-agents"
 owner: "AAOS Manifestation"
 created: "2026-02-14"
 status: canonical

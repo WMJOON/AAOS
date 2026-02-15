@@ -1,0 +1,31 @@
+{
+  "normalized_output": {
+    "decision_questions": [
+      {"id": "DQ1", "question": "자사 서비스 중 규제 적용 대상은?", "status": "closed", "closure_strength": "strong"},
+      {"id": "DQ2", "question": "운영 프로세스 변경 범위는?", "status": "partial", "closure_strength": "partial"},
+      {"id": "DQ3", "question": "고객 커뮤니케이션 시 법적 리스크는?", "status": "open"}
+    ],
+    "claims": [
+      {"id": "C1", "text": "가상자산이용자보호법 2024년 7월 시행", "type": "fact", "source": "금융위원회"},
+      {"id": "C2", "text": "이용자 예치금 분리보관 의무화", "type": "fact", "source": "법률 제1조"},
+      {"id": "C3", "text": "자사 지갑 서비스와 스테이킹 서비스가 규제 대상", "type": "interpretation", "source": "법무팀 검토"},
+      {"id": "C4", "text": "콜드월렛 보관 비율 80% 이상 필요", "type": "fact", "source": "시행령 제5조"},
+      {"id": "C5", "text": "고객 고지 의무 위반 시 과태료 1억원 이하", "type": "fact", "source": "법률 제28조"}
+    ],
+    "assumptions": [
+      {"id": "A1", "text": "자사 서비스가 가상자산 거래업에 해당함"},
+      {"id": "A2", "text": "기존 수탁 시스템 변경 비용이 예산 범위 내"}
+    ],
+    "constraints": [
+      {"id": "K1", "text": "시행일까지 3개월 이내 대응 필요"},
+      {"id": "K2", "text": "콜드월렛 인프라 구축에 최소 6주 소요"}
+    ],
+    "risks": [
+      {"id": "R1", "text": "미준수 시 영업정지 가능", "severity": "high"},
+      {"id": "R2", "text": "콜드월렛 전환 시 서비스 일시 중단 리스크", "severity": "med"}
+    ],
+    "tradeoffs": [
+      {"id": "T1", "text": "빠른 준수 vs 서비스 안정성: 급격한 전환은 고객 이탈 위험"}
+    ]
+  }
+}

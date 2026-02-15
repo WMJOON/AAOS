@@ -1,0 +1,14 @@
+- id: LAYER01
+  name: "레이어 구조 존재"
+  expected:
+    required_layers_present: true
+
+- id: LOADER01
+  name: "SKILL.md 최소 로더 규격"
+  expected:
+    skill_md_max_lines_120: true
+
+- id: ROUTE01
+  name: "라우팅 규칙 적용"
+  expected:
+    routing_policy_applied: true

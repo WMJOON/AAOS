@@ -1,50 +1,41 @@
 ---
-name: mental-model-loader
-description: Design domain mental models and loading policy based on Semantic Atlas local charts. Produces a `mental_model_bundle` contract for downstream workflow execution design.
+name: awt-mental-model-design
+description: Design domain mental models using Four-Layer Orchestrator architecture. Produces backward-compatible `mental_model_bundle` with layer/routing/cost/utility/KPI optional extensions.
 ---
 
-# Mental Model Loader
+# awt-mental-model-design
 
-도메인에 맞는 멘탈 모델을 정의하고, Local Chart 선택/로딩 규칙을 설계한다.
+## Purpose
+- 도메인별 `mental_model_bundle` 설계 계약을 만든다.
+- `SKILL.md`는 최소 로더이며, 상세 규칙은 4-Layer 문서에서 읽는다.
 
-## Input
+## Trigger
+- PF1 답변이 yes여서 멘탈모델 선행 설계가 필요할 때
+- topology/execution 설계 전에 chart-map/checkpoint 계약을 정해야 할 때
+- high_risk/strategy에서 routing/kpi를 명시해야 할 때
 
-- `domain`
-- `intent`
-- `constraints`
-- `required_chart_types`
+## Non-Negotiable Invariants
+- required 9 keys(`domain`~`output_contract`)는 유지한다.
+- `execution_checkpoints.stage`는 `preflight|pre_h1|pre_h2`만 허용한다.
+- `node_chart_map.chart_ids`는 빈 배열 금지.
+- optional 확장(`layer_contract`, `routing_policy`, `cost_model`, `utility_model`, `kpi_targets`, `reference_loading_rule`)은 하위호환만 허용한다.
 
-## Output: `mental_model_bundle`
+## Layer Index
+| Layer | File | Role |
+|---|---|---|
+| 00.meta | `00.meta/manifest.yaml` | 레이아웃/검증 정책 |
+| 10.core | `10.core/core.md` | 공통 계약/출력 규칙 |
+| 20.modules | `20.modules/modules_index.md` | 모듈 실행 인덱스 |
+| 30.references | `30.references/loading_policy.md` | deltaQ 로딩 규칙 |
+| 40.orchestrator | `40.orchestrator/orchestrator.md` | 패턴 라우팅 제어 |
 
-필수 키:
-- `domain`
-- `bundle_ref`
-- `core_axioms`
-- `local_charts`
-- `module_index`
-- `node_chart_map`
-- `execution_checkpoints`
-- `loading_policy`
-- `output_contract`
+## Quick Start
+```bash
+python3 02_Swarm/agentic-workflow-topology/skills/00.mental-model-design/scripts/scaffold.py \
+  --domain fintech --output /tmp/mental-pack --modules regulation,risk --packs evidence
+```
 
-스키마: `references/mental_model_bundle.schema.yaml`
-
-## Workflow
-
-1. 도메인 목적을 `judgability` 기준으로 해석한다.
-2. 4-Layer 구조(Core/Modules/References/Orchestrator)로 모델을 정렬한다.
-3. Local Chart 후보를 정의하고 선택 조건을 명시한다.
-4. 노드별 차트 연결(`node_chart_map`)과 checkpoint(`execution_checkpoints`)를 정의한다.
-5. 정보 과부하를 피하도록 로딩 정책(when/why/how much)을 고정한다.
-6. 표준 산출물(`mental_model_bundle`)로 반환한다.
-
-## Standard Checkpoints
-
-- `preflight`: PF1 응답 직후 `bundle_ref`와 기본 chart load 검증
-- `pre_h1`: H1 전 `node_chart_map` 적용 상태 검증
-- `pre_h2`: H2 전 최종 chart consistency 검증
-
-## Notes
-
-- 상세 scaffolding 생성은 기존 `scripts/scaffold.py`를 활용할 수 있다.
-- 이 스킬은 실행 런너가 아니라 설계 계약을 제공한다.
+## When Unsure
+- 부족한 입력을 명시하고 가정/확신도를 분리한다.
+- 경로/계약 충돌 시 `00.meta/manifest.yaml`을 SoT로 삼아 정합화한다.
+- 상세 계산식/예시는 `20.modules/`와 `30.references/` 문서에서만 확장한다.

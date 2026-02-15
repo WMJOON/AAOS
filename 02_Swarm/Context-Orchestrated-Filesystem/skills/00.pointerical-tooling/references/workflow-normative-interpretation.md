@@ -7,23 +7,13 @@ Workflow는 "절차"가 아니라, **포인터 상태 전이(transition)의 선�
 
 ---
 
-## 2. Document Identity (Pointer Model)
+## 2. Document Identity
 
 Workflow 문서는 다음 규칙에 의해 식별/해석해야 한다.
 
-1. Workflow 문서는 YAML Frontmatter에 최소한 다음 필드를 포함해야 한다.
-
-   ```yaml
-   ---
-   context_id: cof-xxxx
-   role: WORKFLOW
-   state: const | mutable | active | frozen | archived
-   scope: immune | agora | nucleus | swarm
-   lifetime: ticket | persistent | archived
-   ---
-   ```
-
-2. `context_id`는 전역 유일이며 변경 불가로 해석해야 한다.
+1. Workflow의 식별 메타데이터(`context_id`, `role`, `state` 등)는 사이드카 파일 또는 상위 manifest에 저장한다.
+2. 문서 본문의 YAML Frontmatter는 런타임 인터페이스 필드(`name`, `description` 등)만 포함한다.
+3. `context_id`는 전역 유일이며 변경 불가로 해석해야 한다.
 
 ---
 
@@ -74,8 +64,8 @@ Glob 해석 규범은 아래 문서를 우선한다.
 
 ```
 Workflow Doc Validation:
-- [ ] YAML Frontmatter에 context_id/role/state/scope/lifetime가 있다
-- [ ] role이 WORKFLOW다
+- [ ] 식별 메타(context_id/role/state)가 사이드카 또는 상위 manifest에 있다
+- [ ] 문서 Frontmatter에는 런타임 필드(name/description)만 있다
 - [ ] Entry Context / Transition Steps / Exit Rule / Lifetime Transition 섹션이 있다
 - [ ] 각 Step이 포인터 상태 전이 선언으로 서술되어 있다 (inputs/outputs/from->to)
 - [ ] 정책 강제/위반 처리 로직을 포함하지 않는다

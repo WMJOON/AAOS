@@ -1,0 +1,240 @@
+{
+  "generated_at": "2026-02-15T08:54:28+00:00",
+  "swarms": [
+    {
+      "name": "agentic-workflow-topology",
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology",
+      "skill_count": 5,
+      "skills": [
+        {
+          "name": "awt-mental-model-design",
+          "context_id": "awt-mental-model-design",
+          "source": "awt-mental-model-design",
+          "description": "Design domain mental models using Four-Layer Orchestrator architecture. Produces backward-compatible `mental_model_bundle` with layer/routing/cost/utility/KPI optional extensions.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/00.mental-model-design",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": false,
+          "has_references": true,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "awt-topology-design",
+          "context_id": "awt-topology-design",
+          "source": "awt-topology-design",
+          "description": "Goal → DQ → RSV → Topology → Task Graph 설계. θ_GT × RSV 기반으로 비용/루프/hand-off를 최소화하는 Workflow Topology를 산출한다. strategy/high-risk 워크플로우는 PF1 preflight + H1/H2 HITL gate를 강제한다.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/01.topology-design",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": false,
+          "has_references": true,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "awt-execution-design",
+          "context_id": "awt-execution-design",
+          "source": "awt-execution-design",
+          "description": "Design how each workflow task node should apply mental models/charts at execution time. Produces `workflow_mental_model_execution_plan` with `bundle_ref` and `node_chart_map` from topology and mental model bundle.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/02.execution-design",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": false,
+          "has_templates": false,
+          "has_references": true,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "awt-observability-evolution",
+          "context_id": "awt-observability-evolution",
+          "source": "awt-observability-evolution",
+          "description": "워크플로우 실행 로그를 관찰(Observe)하고, HITL 체크포인트와 이벤트 트리거로 사용자와 상호작용(Interact)하며, 구조화된 개선 제안을 형제 스킬로 환류(Evolve)한다.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/03.observability-evolution",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": false,
+          "has_references": true,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "awt-skill-governance",
+          "context_id": "awt-skill-governance",
+          "source": "awt-skill-governance",
+          "description": "Govern the AWT pipeline skills (00~03) by validating metadata/sidecar contracts, inter-skill schema coupling (CC-01~CC-05), and registry consistency. Policy + checklist based; no auto-enforcement. Use when skill structure changes or contract drift is suspected.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/agentic-workflow-topology/skills/04.skill-governance",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": false,
+          "has_templates": false,
+          "has_references": true,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        }
+      ],
+      "warnings": [],
+      "errors": [],
+      "overloaded": false
+    },
+    {
+      "name": "context-orchestrated-filesystem",
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem",
+      "skill_count": 5,
+      "skills": [
+        {
+          "name": "cof-pointerical-tooling",
+          "context_id": "cof-pointerical-tooling",
+          "source": "cof-pointerical-tooling",
+          "description": "Creates pointer-safe COF Skill/Rule/Workflow/Sub-Agent documents. Use when creating or updating COF docs.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem/skills/00.pointerical-tooling",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": true,
+          "has_references": true,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "cof-glob-indexing",
+          "context_id": "cof-glob-indexing",
+          "source": "cof-glob-indexing",
+          "description": "Resolves the nearest COF /[n].index/ from a target directory, scans within that node boundary, and writes NODE_INDEX.md and ROLE_EVIDENCE.md under the resolved index. Use when the user needs COF context boundary detection, role directory inference, or anchor discovery.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem/skills/01.glob-indexing",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": false,
+          "has_references": false,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "cof-task-context-management",
+          "context_id": "cof-task-context-management",
+          "source": "cof-task-context-management",
+          "description": "Creates and manages `NN.agents-task-context/` nodes (tickets, verification, validation, archiving) for persistent agent context tracking in COF. (legacy: `task-manager/`)",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem/skills/02.task-context-management",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": true,
+          "has_references": false,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "cof-ticket-solving",
+          "context_id": "cof-ticket-solving",
+          "source": "cof-ticket-solving",
+          "description": "Dispatch tickets to AI CLI agents based on tag heuristics. Use when automating ticket-based agent workflows or coordinating multi-agent collaboration.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem/skills/03.ticket-solving",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": false,
+          "has_references": false,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "cof-skill-governance",
+          "context_id": "cof-skill-governance",
+          "source": "cof-skill-governance",
+          "description": "Manage skills across each Swarm by scanning skill directories, generating per-swarm registries, detecting duplicate context IDs, and warning when a Swarm has overloaded skill sets. Use when you need to reduce skill sprawl and keep skill inventories reliable.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-filesystem/skills/04.skill-governance",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": false,
+          "has_references": false,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        }
+      ],
+      "warnings": [],
+      "errors": [],
+      "overloaded": false
+    },
+    {
+      "name": "context-orchestrated-workflow-intelligence",
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence",
+      "skill_count": 1,
+      "skills": [
+        {
+          "name": "cowi-agora-consumption-bridge",
+          "context_id": "cowi-agora-consumption-bridge",
+          "source": "cowi-agora-consumption-bridge",
+          "description": "Pulls cortex-agora change_archive decisions by agora_ref and materializes relation_context_map plus skill_usage_adaptation_report artifacts for COWI manual mediation, including strategy/high-risk H1 gate support.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/context-orchestrated-workflow-intelligence/skills/00.agora-consumption-bridge",
+          "trigger": "model_decision",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": true,
+          "has_templates": false,
+          "has_references": false,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        }
+      ],
+      "warnings": [],
+      "errors": [],
+      "overloaded": false
+    },
+    {
+      "name": "cortex-agora",
+      "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/cortex-agora",
+      "skill_count": 2,
+      "skills": [
+        {
+          "name": "cortex-agora-skill-governance",
+          "context_id": "cortex-agora-skill-governance",
+          "source": "cortex-agora-skill-governance",
+          "description": "Govern cortex-agora's instruction-nucleus skill, change_archive infrastructure, and behavior feed by validating metadata, archive integrity, and consumption contracts. Policy + checklist based; no auto-enforcement. Use when skill structure changes, archive drift is suspected, or COWI interface needs verification.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/cortex-agora/skills/04.skill-governance",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-15",
+          "has_scripts": false,
+          "has_templates": false,
+          "has_references": false,
+          "layout_version": "4layer-v1",
+          "consumers": []
+        },
+        {
+          "name": "structuring-cortex-agora-proposals",
+          "context_id": "cortex-agora-instruction-nucleus",
+          "source": "cortex-agora-instruction-nucleus",
+          "description": "Structures cortex-agora observation proposals into reusable semantic contract format for COWI/Nucleus downstream consumers (5 types/fields/modes/contract). Use when formalizing behavior patterns as instruction candidates.",
+          "path": "/Users/wmjoon/Library/Mobile Documents/iCloud~md~obsidian/Documents/wmjoon/04_Agentic_AI_OS/02_Swarm/cortex-agora/skills/cortex-agora-instruction-nucleus",
+          "trigger": "",
+          "role": "SKILL",
+          "created": "2026-02-14",
+          "has_scripts": false,
+          "has_templates": false,
+          "has_references": false,
+          "layout_version": "-",
+          "consumers": []
+        }
+      ],
+      "warnings": [],
+      "errors": [],
+      "overloaded": false
+    }
+  ]
+}

@@ -2,9 +2,11 @@
 """
 Cortex Agora change archive bridge.
 
-This tool records append-only change/feedback/decision events in
-02_Swarm/cortex-agora/change_archive and can build/seal a package to
-01_Nucleus/record_archive.
+Records append-only change/feedback/decision events as individual .md
+files with YAML frontmatter under 02_Swarm/cortex-agora/records/,
+using the shared record_writer module for Obsidian Bases compatibility.
+
+Can build/seal a package to 01_Nucleus/record_archive.
 """
 
 from __future__ import annotations
@@ -20,16 +22,20 @@ import sys
 from pathlib import Path
 from typing import Any
 
-
 SCRIPT_DIR = Path(__file__).resolve().parent
 CORTEX_ROOT = SCRIPT_DIR.parent
+SCRIPTS_ROOT = CORTEX_ROOT / "scripts"
+sys.path.insert(0, str(SCRIPTS_ROOT))
+import record_writer as rw  # noqa: E402
+
+RECORDS_ROOT = CORTEX_ROOT / "records"
+
+# Legacy JSONL paths (kept for build-package backward compat reading)
 CHANGE_ARCHIVE_ROOT = CORTEX_ROOT / "change_archive"
 EVENTS_DIR = CHANGE_ARCHIVE_ROOT / "events"
-INDEX_PATH = CHANGE_ARCHIVE_ROOT / "indexes" / "CHANGE_INDEX.md"
-
-CHANGE_EVENTS_PATH = EVENTS_DIR / "CHANGE_EVENTS.jsonl"
-PEER_FEEDBACK_PATH = EVENTS_DIR / "PEER_FEEDBACK.jsonl"
-IMPROVEMENT_DECISIONS_PATH = EVENTS_DIR / "IMPROVEMENT_DECISIONS.jsonl"
+LEGACY_CHANGE_EVENTS_PATH = EVENTS_DIR / "CHANGE_EVENTS.jsonl"
+LEGACY_PEER_FEEDBACK_PATH = EVENTS_DIR / "PEER_FEEDBACK.jsonl"
+LEGACY_IMPROVEMENT_DECISIONS_PATH = EVENTS_DIR / "IMPROVEMENT_DECISIONS.jsonl"
 
 CHANGE_TYPES = {"created", "updated", "superseded", "withdrawn", "sealed"}
 STATUSES = {"open", "improving", "closed", "sealed"}
@@ -69,209 +75,14 @@ def sanitize_token(value: str) -> str:
 
 
 def ensure_layout() -> None:
-    (CHANGE_ARCHIVE_ROOT / "events").mkdir(parents=True, exist_ok=True)
-    (CHANGE_ARCHIVE_ROOT / "indexes").mkdir(parents=True, exist_ok=True)
-    for p in [CHANGE_EVENTS_PATH, PEER_FEEDBACK_PATH, IMPROVEMENT_DECISIONS_PATH]:
-        p.touch(exist_ok=True)
-    if not INDEX_PATH.exists():
-        INDEX_PATH.write_text(
-            "# Cortex Agora Change Index\n\n"
-            "---\n"
-            "timestamp: \"GENESIS\"\n"
-            "proposal_id: \"GENESIS\"\n"
-            "latest_status: \"open\"\n"
-            "latest_change_event_id: \"GENESIS\"\n"
-            "feedback_count: 0\n"
-            "last_decision: \"none\"\n"
-            "record_archive_package_ref: \"\"\n"
-            "---\n",
-            encoding="utf-8",
-        )
-
-
-def load_jsonl(path: Path) -> list[dict[str, Any]]:
-    rows: list[dict[str, Any]] = []
-    if not path.exists():
-        return rows
-    with path.open("r", encoding="utf-8") as f:
-        for lineno, raw in enumerate(f, start=1):
-            line = raw.strip()
-            if not line:
-                continue
-            try:
-                item = json.loads(line)
-            except json.JSONDecodeError as exc:
-                raise ValueError(f"{path}:{lineno} invalid JSONL") from exc
-            if not isinstance(item, dict):
-                raise ValueError(f"{path}:{lineno} expected JSON object")
-            rows.append(item)
-    return rows
-
-
-def append_jsonl(path: Path, item: dict[str, Any]) -> None:
-    with path.open("a", encoding="utf-8") as f:
-        f.write(json.dumps(item, ensure_ascii=False) + "\n")
+    for subdir in ["behavior", "change_events", "peer_feedback", "improvement_decisions"]:
+        (RECORDS_ROOT / subdir).mkdir(parents=True, exist_ok=True)
 
 
 def write_jsonl(path: Path, rows: list[dict[str, Any]]) -> None:
     with path.open("w", encoding="utf-8") as f:
         for row in rows:
             f.write(json.dumps(row, ensure_ascii=False) + "\n")
-
-
-def assert_unique_id(path: Path, id_field: str, identifier: str) -> None:
-    for row in load_jsonl(path):
-        if str(row.get(id_field, "")) == identifier:
-            raise RuntimeError(f"duplicate {id_field}: {identifier}")
-
-
-def assert_monotonic_ts(path: Path, new_ts: str) -> None:
-    rows = load_jsonl(path)
-    if not rows:
-        return
-    last_ts = parse_iso8601(str(rows[-1].get("ts", "")))
-    now_ts = parse_iso8601(new_ts)
-    if now_ts <= last_ts:
-        raise RuntimeError(
-            f"non-monotonic ts: {new_ts} <= {rows[-1].get('ts')}"
-        )
-
-
-def parse_index_entries() -> list[dict[str, Any]]:
-    if not INDEX_PATH.exists():
-        return []
-
-    text = INDEX_PATH.read_text(encoding="utf-8")
-    in_code_fence = False
-    in_block = False
-    buf: list[str] = []
-    parsed: list[dict[str, Any]] = []
-
-    def parse_block(lines: list[str]) -> dict[str, Any] | None:
-        obj: dict[str, Any] = {}
-        for line in lines:
-            s = line.strip()
-            if not s or ":" not in s:
-                continue
-            key, value = s.split(":", 1)
-            key = key.strip()
-            value = value.strip().strip('"')
-            if key == "feedback_count":
-                try:
-                    obj[key] = int(value)
-                except ValueError:
-                    obj[key] = 0
-            else:
-                obj[key] = value
-        return obj if "proposal_id" in obj else None
-
-    for raw in text.splitlines():
-        line = raw.rstrip("\n")
-        if line.strip().startswith("```"):
-            in_code_fence = not in_code_fence
-            continue
-        if in_code_fence:
-            continue
-        if line.strip() == "---":
-            if not in_block:
-                in_block = True
-                buf = []
-            else:
-                in_block = False
-                entry = parse_block(buf)
-                if entry is not None:
-                    parsed.append(entry)
-            continue
-        if in_block:
-            buf.append(line)
-
-    return parsed
-
-
-def latest_index_by_proposal() -> dict[str, dict[str, Any]]:
-    state: dict[str, dict[str, Any]] = {}
-    for entry in parse_index_entries():
-        proposal_id = str(entry.get("proposal_id", ""))
-        if proposal_id:
-            state[proposal_id] = entry
-    return state
-
-
-def append_index_entry(
-    *,
-    timestamp: str,
-    proposal_id: str,
-    latest_status: str,
-    latest_change_event_id: str,
-    feedback_count: int,
-    last_decision: str,
-    record_archive_package_ref: str,
-) -> None:
-    block = (
-        "\n---\n"
-        f"timestamp: \"{timestamp}\"\n"
-        f"proposal_id: \"{proposal_id}\"\n"
-        f"latest_status: \"{latest_status}\"\n"
-        f"latest_change_event_id: \"{latest_change_event_id}\"\n"
-        f"feedback_count: {feedback_count}\n"
-        f"last_decision: \"{last_decision}\"\n"
-        f"record_archive_package_ref: \"{record_archive_package_ref}\"\n"
-        "---\n"
-    )
-    with INDEX_PATH.open("a", encoding="utf-8") as f:
-        f.write(block)
-
-
-def summarize_proposal_state(proposal_id: str) -> dict[str, Any]:
-    change_rows = [r for r in load_jsonl(CHANGE_EVENTS_PATH) if r.get("proposal_id") == proposal_id]
-    if not change_rows:
-        raise RuntimeError(f"proposal not found in CHANGE_EVENTS: {proposal_id}")
-
-    feedback_rows = [
-        r for r in load_jsonl(PEER_FEEDBACK_PATH) if r.get("proposal_id") == proposal_id
-    ]
-    decision_rows = [
-        r
-        for r in load_jsonl(IMPROVEMENT_DECISIONS_PATH)
-        if r.get("proposal_id") == proposal_id
-    ]
-
-    last_change = change_rows[-1]
-    last_decision = "none"
-    if decision_rows:
-        last_decision = str(decision_rows[-1].get("decision", "none"))
-
-    return {
-        "latest_status": str(last_change.get("status", "open")),
-        "latest_change_event_id": str(last_change.get("event_id", "")),
-        "feedback_count": len(feedback_rows),
-        "last_decision": last_decision,
-    }
-
-
-def refresh_index_for_proposal(
-    proposal_id: str,
-    *,
-    timestamp: str,
-    record_archive_package_ref: str | None = None,
-) -> None:
-    latest_state = summarize_proposal_state(proposal_id)
-    last_entries = latest_index_by_proposal()
-    prior_ref = ""
-    if proposal_id in last_entries:
-        prior_ref = str(last_entries[proposal_id].get("record_archive_package_ref", ""))
-
-    append_index_entry(
-        timestamp=timestamp,
-        proposal_id=proposal_id,
-        latest_status=latest_state["latest_status"],
-        latest_change_event_id=latest_state["latest_change_event_id"],
-        feedback_count=latest_state["feedback_count"],
-        last_decision=latest_state["last_decision"],
-        record_archive_package_ref=record_archive_package_ref
-        if record_archive_package_ref is not None
-        else prior_ref,
-    )
 
 
 def sha256_file(path: Path) -> str:
@@ -286,14 +97,14 @@ def sha256_file(path: Path) -> str:
 
 
 def ensure_event_exists(event_id: str) -> None:
-    for row in load_jsonl(CHANGE_EVENTS_PATH):
+    for row in rw.load_records_from_md(RECORDS_ROOT / "change_events", "change_event"):
         if str(row.get("event_id", "")) == event_id:
             return
     raise RuntimeError(f"linked change event not found: {event_id}")
 
 
 def ensure_feedback_exists(feedback_id: str) -> None:
-    for row in load_jsonl(PEER_FEEDBACK_PATH):
+    for row in rw.load_records_from_md(RECORDS_ROOT / "peer_feedback", "peer_feedback"):
         if str(row.get("feedback_id", "")) == feedback_id:
             return
     raise RuntimeError(f"feedback ref not found: {feedback_id}")
@@ -320,26 +131,20 @@ def cmd_record_change(args: argparse.Namespace) -> int:
         f"ce_{stamp_now()}_{sanitize_token(args.proposal_id)}_{sanitize_token(args.change_type)}"
     )
 
-    assert_unique_id(CHANGE_EVENTS_PATH, "event_id", event_id)
-    assert_monotonic_ts(CHANGE_EVENTS_PATH, args.ts)
-
-    event = {
+    record = {
         "event_id": event_id,
         "ts": args.ts,
         "proposal_id": args.proposal_id,
         "change_type": args.change_type,
         "actor": args.actor,
-        "source_snapshot": {
-            "agora_ref": args.agora_ref,
-            "captured_at": args.captured_at,
-        },
+        "source_agora_ref": args.agora_ref,
+        "source_captured_at": args.captured_at,
         "artifact_ref": args.artifact_ref,
         "status": args.status,
     }
 
-    append_jsonl(CHANGE_EVENTS_PATH, event)
-    refresh_index_for_proposal(args.proposal_id, timestamp=args.ts)
-    print(f"recorded change event: {event_id}")
+    path = rw.write_record(RECORDS_ROOT, "change_event", record, "cortex-agora")
+    print(f"recorded change event: {event_id} -> {path.name}")
     return 0
 
 
@@ -351,16 +156,12 @@ def cmd_record_feedback(args: argparse.Namespace) -> int:
 
     parse_iso8601(args.ts)
     ensure_event_exists(args.linked_event_id)
-    summarize_proposal_state(args.proposal_id)
 
     feedback_id = args.feedback_id or (
         f"fb_{stamp_now()}_{sanitize_token(args.proposal_id)}_{sanitize_token(args.reviewer)}"
     )
 
-    assert_unique_id(PEER_FEEDBACK_PATH, "feedback_id", feedback_id)
-    assert_monotonic_ts(PEER_FEEDBACK_PATH, args.ts)
-
-    event = {
+    record = {
         "feedback_id": feedback_id,
         "ts": args.ts,
         "proposal_id": args.proposal_id,
@@ -372,9 +173,8 @@ def cmd_record_feedback(args: argparse.Namespace) -> int:
         "linked_event_id": args.linked_event_id,
     }
 
-    append_jsonl(PEER_FEEDBACK_PATH, event)
-    refresh_index_for_proposal(args.proposal_id, timestamp=args.ts)
-    print(f"recorded feedback event: {feedback_id}")
+    path = rw.write_record(RECORDS_ROOT, "peer_feedback", record, "cortex-agora")
+    print(f"recorded feedback event: {feedback_id} -> {path.name}")
     return 0
 
 
@@ -384,7 +184,6 @@ def cmd_record_decision(args: argparse.Namespace) -> int:
     if args.decision not in DECISIONS:
         raise RuntimeError(f"invalid decision: {args.decision}")
     parse_iso8601(args.ts)
-    summarize_proposal_state(args.proposal_id)
 
     applied_ids = parse_csv_list(args.applied_event_ids)
     feedback_refs = parse_csv_list(args.feedback_refs)
@@ -398,10 +197,7 @@ def cmd_record_decision(args: argparse.Namespace) -> int:
         f"id_{stamp_now()}_{sanitize_token(args.proposal_id)}_{sanitize_token(args.decision)}"
     )
 
-    assert_unique_id(IMPROVEMENT_DECISIONS_PATH, "decision_id", decision_id)
-    assert_monotonic_ts(IMPROVEMENT_DECISIONS_PATH, args.ts)
-
-    event = {
+    record = {
         "decision_id": decision_id,
         "ts": args.ts,
         "proposal_id": args.proposal_id,
@@ -412,9 +208,8 @@ def cmd_record_decision(args: argparse.Namespace) -> int:
         "next_action": args.next_action,
     }
 
-    append_jsonl(IMPROVEMENT_DECISIONS_PATH, event)
-    refresh_index_for_proposal(args.proposal_id, timestamp=args.ts)
-    print(f"recorded improvement decision: {decision_id}")
+    path = rw.write_record(RECORDS_ROOT, "improvement_decision", record, "cortex-agora")
+    print(f"recorded improvement decision: {decision_id} -> {path.name}")
     return 0
 
 
@@ -439,18 +234,21 @@ def cmd_build_package(args: argparse.Namespace) -> int:
     payload_dir = out_dir / "payload"
     payload_dir.mkdir(parents=True, exist_ok=True)
 
+    # Read from .md record files
     change_rows = [
-        r for r in load_jsonl(CHANGE_EVENTS_PATH) if in_range(str(r.get("ts", "")), start_ts, end_ts)
+        r for r in rw.load_records_from_md(RECORDS_ROOT / "change_events", "change_event")
+        if in_range(str(r.get("ts", "")), start_ts, end_ts)
     ]
     feedback_rows = [
-        r for r in load_jsonl(PEER_FEEDBACK_PATH) if in_range(str(r.get("ts", "")), start_ts, end_ts)
+        r for r in rw.load_records_from_md(RECORDS_ROOT / "peer_feedback", "peer_feedback")
+        if in_range(str(r.get("ts", "")), start_ts, end_ts)
     ]
     decision_rows = [
-        r
-        for r in load_jsonl(IMPROVEMENT_DECISIONS_PATH)
+        r for r in rw.load_records_from_md(RECORDS_ROOT / "improvement_decisions", "improvement_decision")
         if in_range(str(r.get("ts", "")), start_ts, end_ts)
     ]
 
+    # Output still uses JSONL in the package payload (seal format unchanged)
     write_jsonl(payload_dir / "CHANGE_EVENTS.jsonl", change_rows)
     write_jsonl(payload_dir / "PEER_FEEDBACK.jsonl", feedback_rows)
     write_jsonl(payload_dir / "IMPROVEMENT_DECISIONS.jsonl", decision_rows)
@@ -464,7 +262,7 @@ def cmd_build_package(args: argparse.Namespace) -> int:
         f"- change_events: `{len(change_rows)}`\n"
         f"- peer_feedback: `{len(feedback_rows)}`\n"
         f"- improvement_decisions: `{len(decision_rows)}`\n"
-        f"- proposals: `{', '.join(proposal_ids) if proposal_ids else '-'}'\n"
+        f"- proposals: `{', '.join(proposal_ids) if proposal_ids else '-'}`\n"
     )
     (payload_dir / "SUMMARY.md").write_text(summary_md, encoding="utf-8")
 
@@ -475,9 +273,9 @@ package_id: "{package_id}"
 type: "swarm-observability"
 status: "staged"
 source_refs:
-  - "04_Agentic_AI_OS/02_Swarm/cortex-agora/change_archive/events/CHANGE_EVENTS.jsonl"
-  - "04_Agentic_AI_OS/02_Swarm/cortex-agora/change_archive/events/PEER_FEEDBACK.jsonl"
-  - "04_Agentic_AI_OS/02_Swarm/cortex-agora/change_archive/events/IMPROVEMENT_DECISIONS.jsonl"
+  - "04_Agentic_AI_OS/02_Swarm/cortex-agora/records/change_events/"
+  - "04_Agentic_AI_OS/02_Swarm/cortex-agora/records/peer_feedback/"
+  - "04_Agentic_AI_OS/02_Swarm/cortex-agora/records/improvement_decisions/"
 targets:
   - "04_Agentic_AI_OS/02_Swarm/cortex-agora"
 integrity:
@@ -550,7 +348,7 @@ def cmd_seal_to_record_archive(args: argparse.Namespace) -> int:
             "[DRY-RUN] would run ledger seal command with --summary/--targets/--notes "
             "against staged package under record_archive/_archive/operations/"
         )
-        print("[DRY-RUN] index update skipped")
+        print("[DRY-RUN] seal of .md records skipped")
         return 0
     else:
         destination.parent.mkdir(parents=True, exist_ok=True)
@@ -575,14 +373,23 @@ def cmd_seal_to_record_archive(args: argparse.Namespace) -> int:
         raise RuntimeError("ledger seal failed")
 
     rel_pkg = destination.relative_to(record_archive_root).as_posix() + "/"
-    packaged_changes = load_jsonl(destination / "payload" / "CHANGE_EVENTS.jsonl")
-    proposal_ids = sorted({str(r.get("proposal_id", "")) for r in packaged_changes if r.get("proposal_id")})
-    for proposal_id in proposal_ids:
-        refresh_index_for_proposal(
-            proposal_id,
-            timestamp=iso_now(),
-            record_archive_package_ref=rel_pkg,
-        )
+
+    # Read the sealed JSONL to identify time range, then seal source .md records
+    packaged_changes = rw.load_jsonl(destination / "payload" / "CHANGE_EVENTS.jsonl")
+    if packaged_changes:
+        start_ts = parse_iso8601(str(packaged_changes[0].get("ts", "")))
+        end_ts = parse_iso8601(str(packaged_changes[-1].get("ts", "")))
+
+        for subdir in ["change_events", "peer_feedback", "improvement_decisions"]:
+            records_dir = RECORDS_ROOT / subdir
+            if not records_dir.exists():
+                continue
+            for md_file in sorted(records_dir.glob("*.md")):
+                ts_val = rw._read_frontmatter_field(md_file, "ts")
+                if ts_val and in_range(ts_val, start_ts, end_ts):
+                    sealed = rw._read_frontmatter_field(md_file, "sealed")
+                    if sealed != "true":
+                        rw.seal_record(md_file, rel_pkg)
 
     print(f"sealed package: {rel_pkg}")
     return 0

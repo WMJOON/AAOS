@@ -1,22 +1,30 @@
 # Modules Index
 
-## 등록 모듈
+## 모듈 레지스트리
 
-| id | 파일 | 질문 축 | 트리거 패턴 | θ_GT 경향 |
-|----|------|---------|------------|----------|
-| topology_selection | module.topology_selection.md | "어떤 구조를 선택할 것인가?" | Phase 2 진입 시 항상 | — |
-| node_design | module.node_design.md | "노드를 어떻게 분리하고 설정할 것인가?" | Phase 3 진입 시 항상 | 좁~넓 |
-| loop_risk | module.loop_risk.md | "어떤 루프 위험이 있는가?" | Phase 4 진입 시 항상 | — |
-| handoff | module.handoff.md | "Hand-off 시 컨텍스트 손실을 어떻게 최소화할 것인가?" | Phase 4, hand-off 포인트 존재 시 | — |
+| Module | 질문 축 | File |
+|--------|---------|------|
+| topology_selection | 어떤 Topology 구조를 선택할 것인가? | `module.topology_selection.md` |
+| node_design | 노드를 어떻게 분리하고 θ_GT/RSV를 설정할 것인가? | `module.node_design.md` |
+| loop_risk | 어떤 루프 위험이 있고 어떻게 방지할 것인가? | `module.loop_risk.md` |
+| handoff | Hand-off 시 컨텍스트 손실을 어떻게 최소화할 것인가? | `module.handoff.md` |
 
 ## 직교성 매트릭스
 
-| | topology | node_design | loop_risk | handoff |
-|---|---------|------------|-----------|--------|
-| **topology** | — | 구조↔노드분리 약결합 | 구조→루프유형 선행 | 구조→handoff유무 선행 |
-| **node_design** | | — | 노드설정→루프조건 | 노드Output→handoff포맷 |
-| **loop_risk** | | | — | 독립 |
-| **handoff** | | | | — |
+각 모듈은 고유 질문 축만 소유하고 다른 모듈의 정의를 재정의하지 않는다.
 
-겹침 점검: 공유 어휘(θ_GT, RSV, DQ, Explicit Output)는 모두 `10.core/core.md`에만 정의.
-각 모듈은 고유 질문 축의 delta만 담는다.
+| 개념 | topology_selection | node_design | loop_risk | handoff |
+|------|--------------------|-------------|-----------|--------|
+| Topology 유형 | **소유** | 참조 | 참조 | 참조 |
+| 노드 분리/θ_GT | — | **소유** | 참조 | — |
+| 루프 위험/mitigation | — | — | **소유** | — |
+| Hand-off 포맷/최소화 | — | — | — | **소유** |
+| DQ/RSV | Core 소유 | 할당 규칙 | RSV 검증 | DQ Status |
+
+## 로딩 순서 (Phase별)
+
+```
+Phase 2 → topology_selection
+Phase 3 → node_design
+Phase 4 → loop_risk + (조건부) handoff
+```

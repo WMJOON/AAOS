@@ -1,6 +1,7 @@
-# Core — Agentic Workflow Topology Designer
+# Core — Workflow Topology Designer
 
 ## 고정 문장
+
 이 스킬은 리포트를 생성하지 않는다.
 리포트를 생성할 "그래프 구조(Topology) + 노드 명세"를 설계해 반환한다.
 
@@ -35,15 +36,6 @@ Workflow Spec 전체 JSON 스키마 → `30.references/packs/pack.output_contrac
 ```json
 {
   "goal": "string",
-  "workflow_profile": {
-    "class": "strategy | high_risk | general",
-    "risk_tolerance": "low | medium | high"
-  },
-  "preflight": {
-    "questions": [
-      {"id": "PF1", "question": "멘탈모델 먼저 세팅할까요?", "required": true}
-    ]
-  },
   "constraints": {
     "time_budget": "optional string",
     "token_budget": "optional number",
@@ -60,24 +52,17 @@ Workflow Spec 전체 JSON 스키마 → `30.references/packs/pack.output_contrac
     "llm": true,
     "retrieval": true,
     "embedding": "optional",
-    "human_in_the_loop": "required_when_strategy_or_high_risk"
+    "human_in_the_loop": "optional"
   }
 }
 ```
 
 ---
 
-## 전략/고위험 강제 게이트
-
-- `workflow_profile.class in {strategy, high_risk}` 또는 `risk_tolerance=high`인 경우:
-  - `H1`, `H2` 노드를 기본 포함한다.
-  - `T4 -> C1 -> H1` 엣지를 강제한다.
-  - `web_evidence_YYYY-MM-DD.md`가 없으면 `H1` 승인 불가.
-  - COWI 산출물(`relation_context_map`, `skill_usage_adaptation_report`)이 없으면 `H1` finalization 불가.
-
 ## 책임 범위
 
 ### In-Scope
+
 - Goal → DQ 분해 → RSV_total 추정
 - Topology 선택 + 근거
 - Task Node 설계: Explicit Output, θ_GT, RSV 기여 목표
@@ -86,9 +71,18 @@ Workflow Spec 전체 JSON 스키마 → `30.references/packs/pack.output_contrac
 - 실행 가능한 Workflow Spec 산출
 
 ### Out-of-Scope
+
 - 도메인 결론 생성
 - 실제 검색/도구 실행
 - 모델 선택/배포/인프라
+
+---
+
+## Global Invariants
+
+- 증거 없는 단정 금지
+- 경로/계약 불일치 시 fail-fast
+- 불확실성은 `when_unsure` 규칙으로 명시
 
 ---
 

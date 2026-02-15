@@ -16,3 +16,10 @@
 - 6개 축 평균 ≥ 3.5
 - Topology 적합성 ≥ 3
 - RSV 일관성 ≥ 3
+
+## 추가 검증 (strategy/high-risk)
+
+- PF1 preflight 포함 여부
+- H1/H2 노드 존재
+- T4→C1→H1 엣지 존재
+- validate_strategy_h1_gate.py PASS

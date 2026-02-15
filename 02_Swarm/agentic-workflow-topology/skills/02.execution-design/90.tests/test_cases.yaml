@@ -1,0 +1,125 @@
+# === Structural Tests ===
+
+- id: LAYER01
+  name: "레이어 구조 존재"
+  expected:
+    required_layers_present: true
+
+- id: LOADER01
+  name: "SKILL.md 최소 로더 규격 (≤120 lines)"
+  expected:
+    skill_md_max_lines_120: true
+
+# === Schema Completeness Tests ===
+
+- id: SCHEMA01
+  name: "출력에 7개 required 키 모두 포함"
+  input: valid_topology_spec + valid_mental_model_bundle
+  expected:
+    output_keys_present:
+      - bundle_ref
+      - node_chart_map
+      - task_to_chart_map
+      - node_mode_policy
+      - model_selection_policy
+      - handoff_contract
+      - fallback_rules
+
+- id: SCHEMA02
+  name: "bundle_ref에 id, version, generated_at 포함"
+  expected:
+    bundle_ref_keys: [id, version, generated_at]
+
+# === Node-Mapping Tests ===
+
+- id: MAP01
+  name: "모든 topology 노드가 node_chart_map에 등장"
+  input:
+    topology_nodes: [N1, N2, N3]
+  expected:
+    node_chart_map_node_ids: [N1, N2, N3]
+
+- id: MAP02
+  name: "chart_ids가 빈 배열이면 fail-fast"
+  input:
+    node_chart_map_entry:
+      node_id: N1
+      chart_ids: []
+  expected:
+    result: error
+    message: "chart_ids must have minItems 1"
+
+- id: MAP03
+  name: "chart_ids가 bundle에 존재하지 않으면 fail-fast"
+  input:
+    chart_ids: ["nonexistent-chart"]
+    bundle_charts: ["chart-a", "chart-b"]
+  expected:
+    result: error
+    message: "chart_id not found in bundle"
+
+# === Mode-Policy Tests ===
+
+- id: MODE01
+  name: "strategy 노드는 mode=plan, H1+H2 필수"
+  input:
+    node:
+      risk_level: strategy
+      theta_gt: L4
+  expected:
+    mode: plan
+    hitl_gates: [H1, H2]
+
+- id: MODE02
+  name: "L0 노드는 bypassPermissions 가능"
+  input:
+    node:
+      theta_gt: L0
+      risk_level: low
+  expected:
+    mode: bypassPermissions
+
+- id: MODE03
+  name: "bypassPermissions 노드에 H1 gate 시 모순 → fail-fast"
+  input:
+    node:
+      mode: bypassPermissions
+      hitl_gates: [H1]
+  expected:
+    result: error
+    message: "mode-gate contradiction"
+
+# === Fallback-Handoff Tests ===
+
+- id: HAND01
+  name: "handoff edges와 topology edges 1:1 대응"
+  input:
+    topology_edges: [{source: N1, target: N2}, {source: N2, target: N3}]
+  expected:
+    handoff_edge_count: 2
+
+- id: HAND02
+  name: "모든 fallback_rules에 escalation 존재"
+  expected:
+    all_fallback_rules_have_escalation: true
+
+- id: HAND03
+  name: "loop topology에서 max_iterations 필수"
+  input:
+    topology_type: loop
+  expected:
+    max_iterations_defined: true
+
+# === Routing Tests ===
+
+- id: ROUTE01
+  name: "라우팅 규칙 적용"
+  expected:
+    routing_policy_applied: true
+
+- id: ROUTE02
+  name: "모호한 입력은 design_full로 기본 라우팅"
+  input:
+    intent: ambiguous
+  expected:
+    routed_to: design_full
