@@ -1,0 +1,104 @@
+id: awt-skill-governance
+version: "1.0.0"
+domain: awt-pipeline-governance
+layout_version: 4layer-v1
+
+description: >
+  AWT 4개 설계 스킬(00~03)의 메타데이터, 스킬 간 계약 결합,
+  레지스트리 정합성을 정책+체크리스트 기반으로 점검한다.
+
+architecture: 4-layer-minimal-loader
+design_principle: >
+  SKILL.md는 120줄 이하 로더. 점검 규칙은 레이어 모듈 문서에서 실행.
+  Core + Orchestrator 항상 로딩, 모듈/참조는 온디맨드.
+
+loader_policy:
+  skill_md_max_lines: 120
+  mode: minimal_loader
+
+required_layers:
+  - 00.meta
+  - 10.core
+  - 20.modules
+  - 30.references
+  - 40.orchestrator
+
+governed_skills:
+  - id: awt-mental-model-design
+    dir: "00.mental-model-design"
+    schema_ref: "references/mental_model_bundle.schema.yaml"
+    output_artifact: "mental_model_bundle"
+  - id: awt-topology-design
+    dir: "01.topology-design"
+    schema_ref: "references/workflow_topology_spec.schema.json"
+    output_artifact: "workflow_topology_spec"
+  - id: awt-execution-design
+    dir: "02.execution-design"
+    schema_ref: "references/workflow_mental_model_execution_plan.schema.json"
+    output_artifact: "workflow_mental_model_execution_plan"
+  - id: awt-observability-evolution
+    dir: "03.observability-evolution"
+    output_artifact: "improvement_proposal"
+
+contract_coupling_map:
+  - id: CC-01
+    from_skill: "00.mental-model-design"
+    from_key: "local_charts[].id"
+    to_skill: "02.execution-design"
+    to_key: "node_chart_map[].chart_ids"
+    risk: HIGH
+    failure_mode: "orphan chart reference"
+  - id: CC-02
+    from_skill: "01.topology-design"
+    from_key: "task_graph.nodes[].theta_gt_band"
+    to_skill: "02.execution-design"
+    to_key: "node_mode_policy (mode selection)"
+    risk: HIGH
+    failure_mode: "missing theta_GT for mode selection"
+  - id: CC-03
+    from_skill: "01.topology-design"
+    from_key: "task_graph.nodes[].explicit_output.type"
+    to_skill: "02.execution-design"
+    to_key: "mode selection input"
+    risk: MEDIUM
+    failure_mode: "explicit_output type mismatch"
+  - id: CC-04
+    from_skill: "02.execution-design"
+    from_key: "node_chart_map"
+    to_skill: "03.observability-evolution"
+    to_key: "observability baseline"
+    risk: MEDIUM
+    failure_mode: "observability has no chart baseline"
+  - id: CC-05
+    from_skill: "03.observability-evolution"
+    from_key: "improvement_proposal.target_skill"
+    to_skill: "01.topology-design / 02.execution-design"
+    to_key: "feedback loop receiver"
+    risk: HIGH
+    failure_mode: "feedback loop not closed"
+
+modules:
+  - id: metadata-validation
+    question_axis: "각 AWT 스킬의 메타데이터/사이드카/4-Layer 구조가 정책을 준수하는가?"
+  - id: contract-sync
+    question_axis: "AWT 스킬 간 계약 결합점(CC-01~CC-05)이 정합적인가?"
+  - id: registry-runbook
+    question_axis: "AWT 레지스트리가 실제 디렉토리 상태와 일치하는가?"
+
+token_budget:
+  loader: "<=120 lines"
+  core: ~800
+  orchestrator: ~800
+  core_orchestrator_combined: ~1600
+  module_max: 1200
+  reference_max: 2000
+
+related_skills:
+  - id: cof-skill-governance
+    role: "Registry sync script 제공. COF 관점의 cross-swarm 거버넌스."
+  - id: awt-observability-evolution
+    role: "정책 수준 개선 제안의 발신자. feedback loop closure 검증 대상."
+
+validation:
+  phase_a: warn
+  phase_b: error

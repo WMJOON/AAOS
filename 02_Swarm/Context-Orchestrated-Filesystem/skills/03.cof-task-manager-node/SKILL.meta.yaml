@@ -1,7 +1,0 @@
-context_id: cof-task-manager-node
-role: SKILL
-state: const
-scope: swarm
-lifetime: persistent
-created: "2026-02-14"
-

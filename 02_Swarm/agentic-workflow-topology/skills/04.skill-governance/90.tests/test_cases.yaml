@@ -1,0 +1,119 @@
+# Test Cases for awt-skill-governance
+
+# --- 구조 검증 ---
+
+- id: LAYER01
+  name: "거버넌스 스킬 자체 4-Layer 구조 존재"
+  expected:
+    required_layers_present: true
+
+- id: LOADER01
+  name: "SKILL.md 최소 로더 규격"
+  expected:
+    skill_md_max_lines_120: true
+
+- id: ROUTE01
+  name: "라우팅 규칙 적용"
+  expected:
+    routing_policy_applied: true
+
+# --- Metadata Validation 테스트 ---
+
+- id: MV01
+  name: "전체 AWT 스킬 frontmatter 점검"
+  input:
+    target: "all governed skills (00~03)"
+    check_type: "metadata-validation"
+  expected:
+    all_fm_checks_pass: true
+    no_fail_items: true
+
+- id: MV02
+  name: "4-Layer 누락 감지 (Phase A)"
+  input:
+    simulated_condition: "00.meta/manifest.yaml 누락"
+    phase: A
+  expected:
+    severity: warn
+    check_id: "4L-01"
+
+- id: MV03
+  name: "SKILL.md 120줄 초과 감지"
+  input:
+    simulated_condition: "SKILL.md가 150줄"
+  expected:
+    check_id: "FM-04"
+    severity: warn
+    remediation: "줄 수 축소 권고"
+
+- id: MV04
+  name: "context_id vs frontmatter name 불일치 감지"
+  input:
+    simulated_condition: "SKILL.meta.yaml context_id != SKILL.md name"
+  expected:
+    check_id: "SC-03"
+    severity: fail
+
+# --- Contract Sync 테스트 ---
+
+- id: CS01
+  name: "CC-01 정합성 (local_charts -> node_chart_map)"
+  input:
+    check_type: "contract-sync"
+    coupling_point: "CC-01"
+  expected:
+    all_cc01_checks_pass: true
+
+- id: CS02
+  name: "CC-02 정합성 (theta_gt_band -> mode-policy)"
+  input:
+    coupling_point: "CC-02"
+  expected:
+    all_cc02_checks_pass: true
+
+- id: CS03
+  name: "CC-05 feedback loop closure"
+  input:
+    coupling_point: "CC-05"
+  expected:
+    target_skill_routing_exists: true
+    evolution_lifecycle_tracked: true
+
+- id: CS04
+  name: "orphan chart_id 감지"
+  input:
+    simulated_condition: "execution_plan의 chart_id가 mental_model_bundle에 없음"
+  expected:
+    check_id: "CC01-04"
+    severity: fail
+    failure_mode: "orphan chart reference"
+
+# --- Registry Runbook 테스트 ---
+
+- id: RR01
+  name: "레지스트리 vs 디렉토리 일치"
+  input:
+    check_type: "registry-runbook"
+  expected:
+    all_rg_checks_pass: true
+
+- id: RR02
+  name: "cross-swarm context_id 중복 없음"
+  input:
+    check_type: "registry-runbook"
+    scope: "cross-swarm"
+  expected:
+    check_id: "XS-03"
+    no_duplicates: true
+
+# --- 통합 테스트 ---
+
+- id: INT01
+  name: "전체 파이프라인 (Phase 1->2->3)"
+  input:
+    check_type: "full-pipeline"
+  expected:
+    phase_1_completed: true
+    phase_2_completed: true
+    phase_3_completed: true
+    governance_check_report_generated: true
